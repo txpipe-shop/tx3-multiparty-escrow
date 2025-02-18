@@ -11,4 +11,6 @@ jobs:
         with:
           version: v1.1.11
       - run: aiken check -D
+        working-directory: onchain/src
       - run: aiken build
+        working-directory: onchain/src
