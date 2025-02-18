@@ -1,0 +1,68 @@
+{
+  "preamble": {
+    "title": "txpipe/multiparty-escrow",
+    "description": "Aiken contracts for project 'txpipe/multiparty-escrow'",
+    "version": "0.0.0",
+    "plutusVersion": "v3",
+    "compiler": {
+      "name": "Aiken",
+      "version": "v1.1.12+0da4f70"
+    },
+    "license": "Apache-2.0"
+  },
+  "validators": [
+    {
+      "title": "multiparty_escrow.multiparty_escrow.mint",
+      "redeemer": {
+        "title": "_redeemer",
+        "schema": {
+          "$ref": "#/definitions/Data"
+        }
+      },
+      "compiledCode": "588901010029800aba2aba1aab9eaab9dab9a48888966002646465300130053754003300700398038012444b30013370e9000001c4c98dd7180518049baa0048acc004cdc3a400400713233226300b001300b300c0013009375400915980099b874801000e264c601460126ea80122c8039007200e18031803800980300098019baa0068a4d13656400401",
+      "hash": "b7e4230c8e690d32ce651f853d7573a6869442dcb343adb806000c34"
+    },
+    {
+      "title": "multiparty_escrow.multiparty_escrow.spend",
+      "datum": {
+        "title": "_datum",
+        "schema": {
+          "$ref": "#/definitions/Data"
+        }
+      },
+      "redeemer": {
+        "title": "_redeemer",
+        "schema": {
+          "$ref": "#/definitions/Data"
+        }
+      },
+      "compiledCode": "588901010029800aba2aba1aab9eaab9dab9a48888966002646465300130053754003300700398038012444b30013370e9000001c4c98dd7180518049baa0048acc004cdc3a400400713233226300b001300b300c0013009375400915980099b874801000e264c601460126ea80122c8039007200e18031803800980300098019baa0068a4d13656400401",
+      "hash": "b7e4230c8e690d32ce651f853d7573a6869442dcb343adb806000c34"
+    },
+    {
+      "title": "multiparty_escrow.multiparty_escrow.withdraw",
+      "redeemer": {
+        "title": "_redeemer",
+        "schema": {
+          "$ref": "#/definitions/Data"
+        }
+      },
+      "compiledCode": "588901010029800aba2aba1aab9eaab9dab9a48888966002646465300130053754003300700398038012444b30013370e9000001c4c98dd7180518049baa0048acc004cdc3a400400713233226300b001300b300c0013009375400915980099b874801000e264c601460126ea80122c8039007200e18031803800980300098019baa0068a4d13656400401",
+      "hash": "b7e4230c8e690d32ce651f853d7573a6869442dcb343adb806000c34"
+    },
+    {
+      "title": "multiparty_escrow.multiparty_escrow.else",
+      "redeemer": {
+        "schema": {}
+      },
+      "compiledCode": "588901010029800aba2aba1aab9eaab9dab9a48888966002646465300130053754003300700398038012444b30013370e9000001c4c98dd7180518049baa0048acc004cdc3a400400713233226300b001300b300c0013009375400915980099b874801000e264c601460126ea80122c8039007200e18031803800980300098019baa0068a4d13656400401",
+      "hash": "b7e4230c8e690d32ce651f853d7573a6869442dcb343adb806000c34"
+    }
+  ],
+  "definitions": {
+    "Data": {
+      "title": "Data",
+      "description": "Any Plutus data."
+    }
+  }
+}
