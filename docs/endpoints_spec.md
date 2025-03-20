@@ -6,7 +6,7 @@
 PARAMETERS:
 
 > 1. senderAddress: `string`
-> 2. signerAddress: `string`
+> 2. signerPubKey: `string`
 > 3. receiverAddress: `string`
 > 4. initialDeposit: `bigint`
 > 5. expirationDate: `bigint`
@@ -46,7 +46,7 @@ RESPONSE:
 **url:** /multi-claim
 PARAMETERS:
 
-> 1. MappedOutrefsMsgs: `list of (OutRef, string)`
+> 1. mappedOutrefsMsgs: `list of (OutRef, string)`
 
 RESPONSE:
 > tx: `channelClaimsTx`
@@ -59,6 +59,17 @@ PARAMETERS:
 
 RESPONSE:
 > tx: `closedChannelTx`
+
+## Build Message
+**url:** /build-message
+PARAMETERS:
+
+> 1. nonce: `bigint`
+> 2. txOutRef: `OutRef`
+> 3. amount: `bigint`
+
+RESPONSE:
+> nonce: `bigint`
 
 # Contract Queries
 
@@ -77,10 +88,11 @@ Where
 >> 1. channelId: `bigint`
 >> 2. nonce: `bigint`
 >> 3. active: `boolean`
->> 4. balance: `bigint`
->> 5. senderAddress: `string`
->> 6. signerAddress: `string`
->> 7. receiverAddress: `string`
+>> 4. expirationDate: `bigint`
+>> 5. balance: `bigint`
+>> 6. senderAddress: `string`
+>> 7. signerAddress: `string`
+>> 8. receiverAddress: `string`
 
 ## Channels from a particular sender
 **url:** /channels-from-sender
