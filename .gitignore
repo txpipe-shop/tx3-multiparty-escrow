@@ -10,3 +10,5 @@ target
 
 .env
 *.lock
+*.vscode
+**/node_modules
