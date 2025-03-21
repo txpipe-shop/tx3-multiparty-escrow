@@ -1,0 +1,278 @@
+openapi: 3.0.0
+info:
+  title: Singularity Channels API
+  description: API for interacting with Singularity channels
+  version: 1.0.0
+paths:
+  /open:
+    post:
+      summary: Open a new channel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenChannelParams'
+      responses:
+        '200':
+          description: Transaction for opening channel
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tx:
+                    type: string
+
+  /update:
+    post:
+      summary: Update an existing channel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateChannelParams'
+      responses:
+        '200':
+          description: Transaction for updating channel
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tx:
+                    type: string
+
+  /claim:
+    post:
+      summary: Claim an existing channel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClaimChannelParams'
+      responses:
+        '200':
+          description: Transaction for claiming channel
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tx:
+                    type: string
+
+  /multi-claim:
+    post:
+      summary: Multi-claim multiple channels
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MultiClaimChannelParams'
+      responses:
+        '200':
+          description: Transaction for multi-claiming channels
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tx:
+                    type: string
+
+  /close:
+    post:
+      summary: Close an existing channel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CloseChannelParams'
+      responses:
+        '200':
+          description: Transaction for closing channel
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tx:
+                    type: string
+
+  /build-message:
+    post:
+      summary: Build a message for a channel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BuildMessageParams'
+      responses:
+        '200':
+          description: Built message nonce
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nonce:
+                    type: string  # bigint
+
+  /channels-with-id:
+    get:
+      summary: Get channels by ID
+      parameters:
+        - name: channelId
+          in: query
+          schema:
+            type: string  # bigint
+      responses:
+        '200':
+          description: List of channels
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  channels:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Channel'
+
+  /channels-from-sender:
+    get:
+      summary: Get channels from a sender
+      parameters:
+        - name: senderAddress
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of channels
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  channels:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Channel'
+
+  /channels-from-receiver:
+    get:
+      summary: Get channels from a receiver
+      parameters:
+        - name: receiverAddress
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of channels
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  channels:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Channel'
+
+components:
+  schemas:
+    OpenChannelParams:
+      type: object
+      properties:
+        senderAddress:
+          type: string
+        signerPubKey:
+          type: string
+        receiverAddress:
+          type: string
+        initialDeposit:
+          type: string  # bigint
+        expirationDate:
+          type: string  # bigint
+        groupId:
+          type: string
+
+    UpdateChannelParams:
+      type: object
+      properties:
+        txOutRef:
+          $ref: '#/components/schemas/OutRef'
+        addDeposit:
+          type: string  # bigint
+        expirationDate:
+          type: string  # bigint
+
+    ClaimChannelParams:
+      type: object
+      properties:
+        txOutRef:
+          $ref: '#/components/schemas/OutRef'
+        msg:
+          type: string
+
+    MultiClaimChannelParams:
+      type: array
+      items:
+        type: object
+        properties:
+          txOutRef:
+            $ref: '#/components/schemas/OutRef'
+          msg:
+            type: string
+
+    CloseChannelParams:
+      type: object
+      properties:
+        txOutRef:
+          $ref: '#/components/schemas/OutRef'
+
+    BuildMessageParams:
+      type: object
+      properties:
+        nonce:
+          type: string  # bigint
+        txOutRef:
+          $ref: '#/components/schemas/OutRef'
+        amount:
+          type: string  # bigint
+
+    OutRef:
+      type: object
+      properties:
+        txHash:
+          type: string
+        outputIndex:
+          type: integer
+
+    Channel:
+      type: object
+      properties:
+        channelId:
+          type: string  # bigint
+        nonce:
+          type: string  # bigint
+        active:
+          type: boolean
+        expirationDate:
+          type: string  # bigint
+        balance:
+          type: string  # bigint
+        senderAddress:
+          type: string
+        signerAddress:
+          type: string
+        receiverAddress:
+          type: string
