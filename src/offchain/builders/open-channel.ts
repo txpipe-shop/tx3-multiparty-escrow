@@ -1,5 +1,5 @@
 import { Addresses, Data, fromText, Lucid, toUnit } from "@spacebudz/lucid";
-import { SinguarityDatum, SinguarityMpeSpend } from "../../onchain/plutus.ts";
+import { TypesDatum, SingularityChannelMint, SingularityChannelSpend } from "../types/plutus.ts";
 import { AGIX, label } from "../lib/utils.ts";
 
 export const openChannel = async (
@@ -18,7 +18,7 @@ export const openChannel = async (
   const receiverPubKeyHash =
     Addresses.addressToCredential(receiverAddress).hash;
 
-  const datum: SinguarityDatum = {
+  const datum: TypesDatum = {
     channelId,
     nonce: 0n,
     signer: signerPubKey,
@@ -27,7 +27,7 @@ export const openChannel = async (
     expirationDate,
   };
 
-  const validator = new SinguarityMpeSpend();
+  const validator = new SingularityChannelMint();
   const scriptAddress = Addresses.scriptToAddress(lucid.network, validator);
   const mintingPolicyId = Addresses.scriptToCredential(validator).hash;
 
@@ -42,7 +42,7 @@ export const openChannel = async (
     .mint({ [channelToken]: 1n }, Data.void())
     .payToContract(
       scriptAddress,
-      { Inline: Data.to(datum, SinguarityMpeSpend.datum) },
+      { Inline: Data.to(datum, SingularityChannelSpend.datum) },
       { [AGIX]: initialDeposit }
     )
     .attachMetadata(label, { msg: ["Open Channel"] })

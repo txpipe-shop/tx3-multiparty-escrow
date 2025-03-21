@@ -12,9 +12,9 @@
   },
   "validators": [
     {
-      "title": "singuarity.mpe.mint",
+      "title": "singularity.channel.mint",
       "redeemer": {
-        "title": "_redeemer",
+        "title": "redeemer",
         "schema": {
           "$ref": "#/definitions/Data"
         }
@@ -23,24 +23,24 @@
       "hash": "42708af329d5dafb0ec362aaa149a48a410ea4564260230f121e9d7f"
     },
     {
-      "title": "singuarity.mpe.spend",
+      "title": "singularity.channel.spend",
       "datum": {
         "title": "datum",
         "schema": {
-          "$ref": "#/definitions/singuarity~1Datum"
+          "$ref": "#/definitions/types~1Datum"
         }
       },
       "redeemer": {
         "title": "redeemer",
         "schema": {
-          "$ref": "#/definitions/singuarity~1Action"
+          "$ref": "#/definitions/types~1Action"
         }
       },
       "compiledCode": "58cb01010029800aba2aba1aab9faab9eaab9dab9a488888966002646465300130053754003300800398040012444b30013370e9000001c4c9289bae300b3009375400915980099b874800800e2653001300c00198061806800cc024dd50014528a4444b30013370e90000014566002601c6ea801a00316403d15980099b874800800a2b3001300e375400d0018b201e8acc004cdc3a400800515980098071baa006800c5900f45900c201840303009375400916401c8038600e6010002600e00260066ea801e29344d9590011",
       "hash": "42708af329d5dafb0ec362aaa149a48a410ea4564260230f121e9d7f"
     },
     {
-      "title": "singuarity.mpe.else",
+      "title": "singularity.channel.else",
       "redeemer": {
         "schema": {}
       },
@@ -63,7 +63,7 @@
       "title": "VerificationKey",
       "dataType": "bytes"
     },
-    "singuarity/Action": {
+    "types/Action": {
       "title": "Action",
       "anyOf": [
         {
@@ -86,7 +86,7 @@
         }
       ]
     },
-    "singuarity/Datum": {
+    "types/Datum": {
       "title": "Datum",
       "anyOf": [
         {
