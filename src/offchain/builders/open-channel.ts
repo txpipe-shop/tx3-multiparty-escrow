@@ -1,16 +1,21 @@
 import { Addresses, Data, fromText, Lucid, toUnit } from "@spacebudz/lucid";
-import { TypesDatum, SingularityChannelMint, SingularityChannelSpend } from "../types/plutus.ts";
+import {
+  TypesDatum,
+  SingularityChannelMint,
+  SingularityChannelSpend,
+} from "../types/plutus.ts";
 import { AGIX, label } from "../lib/utils.ts";
+import { OpenChannelParams } from "../../shared/api-types.ts";
 
-export const openChannel = async (
-  lucid: Lucid,
-  senderAddress: string,
-  signerPubKey: string,
-  receiverAddress: string,
-  initialDeposit: bigint,
-  expirationDate: bigint,
-  groupId: bigint
-) => {
+export const openChannel = async (lucid: Lucid, params: OpenChannelParams) => {
+  const {
+    senderAddress,
+    receiverAddress,
+    signerPubKey,
+    groupId,
+    expirationDate,
+    initialDeposit,
+  } = params;
   const utxos = await lucid.wallet.getUtxos();
   const utxo = utxos[0];
   const channelId: string = utxo.txHash + fromText(String(utxo.outputIndex)); // Check index
