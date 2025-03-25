@@ -1,20 +1,19 @@
 # MultiParty Escrow Requirements
 
 ## Summary
-The MultiParty Escrow (MPE) smart contract, manages payment channels in [SingularityNET](https://singularitynet.io/) (AI marketplace) between **clients** (senders, consumers or service customers) and AI **service providers** (receivers, recipients). The MPE must:
-- Enable clients to create and deposit tokens into payment channels.
+The MultiParty Escrow (MPE) smart contract, manages payment channels between **clients** (senders, consumers or service customers) and **service providers** (receivers, recipients). The MPE must:
+- Enable clients to create and deposit the only permited token into payment channels.
 - Permit service providers to claim these funds.
 
-The contract allows **clients** to fund channels that associate them with a **service provider**. When using an AI service, clients generate a message that must be signed by the **signer**, indicating the amount owed to the service provider up to that moment. With this message, the provider can claim the amount specified in the message from the channel (at most).
+The contract allows **clients** to fund channels that associate them with a **service provider**. When using a service, clients generate a message that must be signed by the **signer**, indicating the amount owed to the service provider up to that moment. With this message, the provider can claim the amount specified in the message from the channel (at most).
 
-## Identified use cases
-
+## Use cases
 ### Minimal case
 **Context:** Basic usage of the channel.
-- A user creates a channel with a specific service provider, initial deposit and initial expiration date indicating who the client and the signer will be.
-- The client consumes one or more services provided by the service provider, creating a signed message (or payment claim) that indicates the current claimable amount for the service provider.
+- A user creates a channel with a specific service provider, initial deposit and initial expiration date indicating who the signer will be.
+- The user consumes one or more services provided by the service provider, creating a signed message (or payment claim) that indicates the current claimable amount for the service provider.
 - The service provider claims funds providing the generated payment claim.
-- The provider can close the channel, in which case the remaining funds return to the client.
+- The provider can close the channel, in which case the remaining funds return to the user.
 
 ### Client withdrawal
 **Context**: A channel expires (and there are funds remaining in the channel)
