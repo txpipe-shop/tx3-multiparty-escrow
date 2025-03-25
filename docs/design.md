@@ -2,7 +2,7 @@
 
 ## Overview
 A **channel** represents a “payment relationship” between a sender and a service-provider. There can be many channels between the two. The only token involved is always `AGIX`.
-Each channel linking a client to a service provider is represented by a UTxO containing a `channel token`, which is minted upon every channel creation. This UTxO's datum stores information specific to the channel.
+Each channel linking a client to a service provider is represented by a UTxO containing a `channel token`, which is minted upon every channel creation. This `channel token` has a fixed minting policy and its name is the sender's public key hash. The UTxO's datum stores information specific to the channel.
 When a channel closes, the `channel token` is burned.
 Every transaction interacting with the script will be transparently identified by the action that takes place there.
 
@@ -24,7 +24,7 @@ Every transaction interacting with the script will be transparently identified b
 ### Transactions
 
 #### Open
-In this transaction, a user creates and deposits AGIX on a payemnt channel. The channel Token is then minted, which is the concatenation of the channel script addres with the sender's public key hash.
+In this transaction, a user creates and deposits AGIX on a payemnt channel. The channel Token is then minted which, as mentioned, is fixed.
 
 ![openChannel](imgs/open.png)
 
@@ -39,7 +39,7 @@ Service providers can claim their funds providing the corresponding signed messa
 ![claimChannel](imgs/claim.png)
 
 #### Close
-A channel can be closed either by the service provider after making a claim or automatically when it expires. In both cases, the sender can reclaim the remaining AGIX in the channel, effectively withdrawing the funds.
+A channel can be closed either by the service provider after making a claim or automatically when it expires. After a channel has closed, the sender can reclaim the remaining AGIX in the channel, withdrawing the funds to their wallets.
 
 ![closeChannel](imgs/close.png)
 
