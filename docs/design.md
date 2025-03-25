@@ -8,6 +8,10 @@ Every transaction interacting with the script will be transparently identified b
 
 ### Channel UTxO
 
+#### Address
+- payment part: [channel script](#validator-script)
+- staking part: _
+
 #### Datum
 - ChannelId, represented by some UTxO-Ref from the inputs of the sender
 - Nonce, used to distinguish claim transactions
@@ -43,4 +47,4 @@ A channel can be closed either by the service provider after making a claim or a
 
 ![closeChannel](imgs/close.png)
 
-### Validator Scripts
+### Validator Script
