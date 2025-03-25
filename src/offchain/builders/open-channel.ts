@@ -4,8 +4,8 @@ import {
   SingularityChannelMint,
   SingularityChannelSpend,
 } from "../types/plutus.ts";
-import { AGIX, label } from "../lib/utils.ts";
 import { OpenChannelParams } from "../../shared/api-types.ts";
+import { config } from "../../config.ts";
 
 export const openChannel = async (lucid: Lucid, params: OpenChannelParams) => {
   const {
@@ -48,9 +48,9 @@ export const openChannel = async (lucid: Lucid, params: OpenChannelParams) => {
     .payToContract(
       scriptAddress,
       { Inline: Data.to(datum, SingularityChannelSpend.datum) },
-      { [AGIX]: initialDeposit }
+      { [config.token]: initialDeposit }
     )
-    .attachMetadata(label, { msg: ["Open Channel"] })
+    .attachMetadata(674, { msg: ["Open Channel"] })
     .commit();
 
   return { cbor: tx.toString(), channelId };

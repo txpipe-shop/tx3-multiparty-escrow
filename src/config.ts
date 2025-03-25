@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import fs from 'fs';
 import { z } from "zod";
 dotenv.config();
 
@@ -11,18 +12,22 @@ const envSchema = z
           Number.isFinite(Number.parseInt(val)) && Number.parseInt(val) > 0,
         {
           message: `Port must be a positive integer`,
-        },
+        }
       )
       .transform((val) => Number.parseInt(val)),
     PROVIDER_PROJECT_ID: z.string(),
     PROVIDER_URL: z.string(),
     NETWORK: z.string(),
-    SEED: z.string(),
-    WALLET_ADDRESS: z.string(),
+    CONFIG_FILE: z.string(),
   })
   .readonly();
 
 type EnvSchema = z.infer<typeof envSchema>;
 const env = envSchema.parse(process.env);
 
-export { env, EnvSchema };
+const configFile = JSON.parse(fs.readFileSync(env.CONFIG_FILE, "utf-8"));
+const configFileSchema = z.object({
+  token: z.string(),
+});
+const config = configFileSchema.parse(configFile);
+export { config, env, EnvSchema };

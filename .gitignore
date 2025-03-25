@@ -10,3 +10,4 @@ target
 *.lock
 *.vscode
 **/node_modules
+**/config.json
