@@ -14,6 +14,7 @@ PARAMETERS:
 
 RESPONSE:
 > tx: `openChannelTx`
+> channelId: `string`
 
 ## Update Channel
 **url:** /update
