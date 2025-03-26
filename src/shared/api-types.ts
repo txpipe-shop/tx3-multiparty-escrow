@@ -97,10 +97,7 @@ const addressSchema = z
   .refine(validateAddressNetwork, invalidAddressNetwork)
   .transform(addressToBech32);
 
-export const OutRef = z.object({
-  txHash: z.string(),
-  outputIndex: z.number(),
-});
+export const OutRef = z.string(); // txHash + outputIndex
 
 export const OpenChannelSchema = z.object({
   senderAddress: addressSchema,
@@ -112,33 +109,33 @@ export const OpenChannelSchema = z.object({
 });
 
 export const UpdateChannelSchema = z.object({
-  txOutRef: OutRef,
+  channelId: OutRef,
   addDeposit: z.bigint().optional(),
   expirationDate: z.bigint().optional(),
 });
 
 export const ClaimChannelSchema = z.object({
-  txOutRef: OutRef,
+  channelId: OutRef,
   msg: z.string(),
 });
 
 export const MultiClaimChannelSchema = z.array(
   z.object({
-    txOutRef: OutRef,
+    channelId: OutRef,
     msg: z.string(),
   })
 );
 
 export const CloseChannelSchema = z.object({
-  txOutRef: OutRef,
+  channelId: OutRef,
 });
 
 export const BuildMessageSchema = z.object({
-  txOutRef: OutRef,
+  channelId: OutRef,
   amount: z.bigint(),
 });
 
-export type OutRefType = z.infer<typeof OutRef>;
+export type channelIdType = z.infer<typeof OutRef>;
 export type OpenChannelParams = z.infer<typeof OpenChannelSchema>;
 export type UpdateChannelParams = z.infer<typeof UpdateChannelSchema>;
 export type ClaimChannelParams = z.infer<typeof ClaimChannelSchema>;
