@@ -1,75 +1,74 @@
 # Contract Endpoints
 
+## Notation
+The *senderAddress* and *receiverAddress* parameters will be `string`s in `bech32` format, e.g. addr_test1vzwlx094fypzcfsz53n5gufc6h84tawp9pdyklm05pr385gl956ej.
+
+The `channelId` type is a string that represents a transaction Utxo-Ref, which has concatenated its txHash with the output index.
+
 ## Open Channel
 
 **url:** /open
 PARAMETERS:
 
-> 1. senderAddress: `string`
-> 2. signerPubKey: `string`
-> 3. receiverAddress: `string`
-> 4. initialDeposit: `bigint`
-> 5. expirationDate: `bigint`
-> 6. groupId: `string`
+> 1. *senderAddress*: `string`
+> 2. *signerPubKey*: `string`
+> 3. *receiverAddress*: `string`
+> 4. *initialDeposit*: `bigint`
+> 5. *expirationDate*: `bigint`
+> 6. *groupId*: `string`
 
 RESPONSE:
-> 1. openChannelCbor: `string`
-> 2. channelId: `string`
+> 1. *openChannelCbor*: `string`
+> 2. *channelId*: `channelId`
 
 ## Update Channel
 **url:** /update
 PARAMETERS:
 
-> 1. txOutRef: `ChannelId`
-> 2. addDeposit?: `bigint`
-> 3. expirationDate?: `bigint`
-
-Where
-> ChannelId:
->> 1. txHash: `string`
->> 2. outputIndex: `number`
-
+> 1. *channelId*: `channelId`
+> 2. *addDeposit*?: `bigint`
+> 3. *expirationDate*?: `bigint`
 
 RESPONSE:
-> updatedChannelCbor: `string`
+> 1. *updatedChannelCbor*: `string`
 
 ## Claim Channel
 **url:** /claim
 PARAMETERS:
 
-> txOutRef: `ChannelId`
+> 1. *channelId*: `channelId`
 
 RESPONSE:
-> channelClaimCbor: `string`
+> 1. *channelClaimCbor*: `string`
 
 ## Multi-claim Channel
 **url:** /multi-claim
 PARAMETERS:
 
-> 1. mappedOutrefsMsgs: `list of OutRef`
+> 1. *channelIds*: `list of channelId`
 
 RESPONSE:
-> channelClaimsCbor: `string`
+> 1. *channelClaimsCbor*: `string`
 
 ## Close Channel
 **url:** /close
 PARAMETERS:
 
-> 1. txOutRef: `ChannelId`
+> 1. *channelId*: `channelId`
 
 RESPONSE:
-> closedChannelCbor: `string`
+> 1. *closedChannelCbor*: `string`
 
 ## Build Message
 **url:** /build-message
 PARAMETERS:
 
-> 1. nonce: `bigint`
-> 2. txOutRef: `ChannelId`
-> 3. amount: `bigint`
+> 1. *nonce*: `bigint`
+> 2. *channelId*: `channelId`
+> 3. *amount*: `bigint`
 
 RESPONSE:
-> message: `string`
+> 1. *payload*: `string`
 
 # Contract Queries
 
@@ -77,14 +76,14 @@ RESPONSE:
 **url:** /channels-with-id
 PARAMETERS:
 
-> 1. channelId?: `bigint`
+> 1. *channelId?*: `channelId`
 
 RESPONSE:
-> channels: `list of Channel`
+> 1. *channels*: `list of Channel`
 
 Where
 
-> Channel:
+> `Channel`:
 >> 1. channelId: `bigint`
 >> 2. nonce: `bigint`
 >> 3. active: `boolean`
@@ -98,17 +97,17 @@ Where
 **url:** /channels-from-sender
 PARAMETERS:
 
-> 1. senderAddress?: `string`
+> 1. *senderAddress?*: `string`
 
 RESPONSE:
-> channels: `list of Channel`
+> 1. *channels*: `list of Channel`
 
 
 ## Channels from a particular receiver
 **url:** /channels-from-receiver
 PARAMETERS:
 
-> 1. receiverAddress?: `string`
+> 1. *receiverAddress?*: `string`
 
 RESPONSE:
-> channels: `list of Channel`
+> 1. *channels*: `list of Channel`
