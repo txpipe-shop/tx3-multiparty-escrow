@@ -1,4 +1,4 @@
-import { Data, Lucid } from "@spacebudz/lucid";
+import { Data, fromUnit, Hasher, Lucid } from "@spacebudz/lucid";
 import { SingularityChannelSpend } from "../types/plutus.ts";
 import { ChannelInfo } from "../types/types.ts";
 
@@ -9,9 +9,12 @@ export const getChannelById = async (
   const validator = new SingularityChannelSpend();
   const scriptAddress = lucid.utils.scriptToAddress(validator);
   const utxos = await lucid.utxosAt(scriptAddress);
+  const policyId = Hasher.hashScript(validator);
   const channel = utxos.find((utxo) => {
     if (!utxo.datum) {
-      console.warn(`Channel UTxO without datum found: ${utxo.txHash}#${utxo.outputIndex}`);
+      console.warn(
+        `Channel UTxO without datum found: ${utxo.txHash}#${utxo.outputIndex}`
+      );
       return false;
     }
     const datum = Data.from(utxo.datum, SingularityChannelSpend.datum);
@@ -21,14 +24,26 @@ export const getChannelById = async (
     throw new Error(`Channel with id ${channelId} not found`);
   }
   const { assets: balance } = channel;
-  const { nonce, signer, receiver, groupId, expirationDate } =
-    Data.from(channel.datum!, SingularityChannelSpend.datum);
+  const [channelToken] = Object.keys(balance).filter(([key]) =>
+    key.startsWith(policyId)
+  );
+  const sender = fromUnit(channelToken).assetName;
+  if (!sender) {
+    throw new Error(
+      `Invalid sender address: ${sender}. Must have a payment key`
+    );
+  }
+  const { nonce, signer, receiver, groupId, expirationDate } = Data.from(
+    channel.datum!,
+    SingularityChannelSpend.datum
+  );
   return {
     balance,
     channelId,
     nonce,
     signer,
     receiver,
+    sender,
     groupId,
     expirationDate,
     active: Date.now() < expirationDate,
