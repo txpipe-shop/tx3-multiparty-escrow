@@ -13,64 +13,63 @@ PARAMETERS:
 > 6. groupId: `string`
 
 RESPONSE:
-> tx: `openChannelTx`
-> channelId: `string`
+> 1. openChannelCbor: `string`
+> 2. channelId: `string`
 
 ## Update Channel
 **url:** /update
 PARAMETERS:
 
-> 1. txOutRef: `OutRef`
+> 1. txOutRef: `ChannelId`
 > 2. addDeposit?: `bigint`
 > 3. expirationDate?: `bigint`
 
 Where
-> OutRef:
+> ChannelId:
 >> 1. txHash: `string`
 >> 2. outputIndex: `number`
 
 
 RESPONSE:
-> tx: `updatedChannelTx`
+> updatedChannelCbor: `string`
 
 ## Claim Channel
 **url:** /claim
 PARAMETERS:
 
-> 1. txOutRef: `OutRef`
-> 2. msg: `string`
+> txOutRef: `ChannelId`
 
 RESPONSE:
-> tx: `channelClaimTx`
+> channelClaimCbor: `string`
 
 ## Multi-claim Channel
 **url:** /multi-claim
 PARAMETERS:
 
-> 1. mappedOutrefsMsgs: `list of (OutRef, string)`
+> 1. mappedOutrefsMsgs: `list of OutRef`
 
 RESPONSE:
-> tx: `channelClaimsTx`
+> channelClaimsCbor: `string`
 
 ## Close Channel
 **url:** /close
 PARAMETERS:
 
-> 1. txOutRef: `OutRef`
+> 1. txOutRef: `ChannelId`
 
 RESPONSE:
-> tx: `closedChannelTx`
+> closedChannelCbor: `string`
 
 ## Build Message
 **url:** /build-message
 PARAMETERS:
 
 > 1. nonce: `bigint`
-> 2. txOutRef: `OutRef`
+> 2. txOutRef: `ChannelId`
 > 3. amount: `bigint`
 
 RESPONSE:
-> nonce: `bigint`
+> message: `string`
 
 # Contract Queries
 
