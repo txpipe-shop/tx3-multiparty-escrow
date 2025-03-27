@@ -42,9 +42,10 @@ const signedTx = await tx.sign().commit();
 const openTx = await signedTx.submit();
 await lucid.awaitTx(openTx);
 
-console.log(`\n\n\t>>>>>Channel opened with ID: ${channelId}
-  \t>>>>>Initial Deposit: 6
-  \t>>>>>Tx ID: ${openTx}\n\n`);
+console.log(`\n
+    > Channel opened with ID: ${channelId}
+    > Initial Deposit: 6
+    > Tx ID: ${openTx}\n\n`);
 
 await printUtxos(lucid, senderAddress);
 const validator = new SingularityChannelMint();
@@ -64,9 +65,10 @@ const signedUpdateTx = await updateTx.sign().commit();
 const updatedTx = await signedUpdateTx.submit();
 await lucid.awaitTx(updatedTx);
 
-console.log(`\n\n\t>>>>>Channel updated with ID: ${channelId}
-\t>>>>>Add Deposit: 3
-\t>>>>>Tx ID: ${updatedTx}\n\n`);
+console.log(`\n
+    > Channel updated with ID: ${channelId}
+    > Add Deposit: 3
+    > Tx ID: ${updatedTx}\n\n`);
 
 printUtxos(lucid, senderAddress);
 printUtxos(lucid, undefined, utxoAtScript);
