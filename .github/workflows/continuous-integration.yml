@@ -11,6 +11,6 @@ jobs:
         with:
           version: v1.1.12
       - run: aiken check
-        working-directory: contract/onchain
+        working-directory: src/onchain
       - run: aiken build
-        working-directory: contract/onchain
+        working-directory: src/onchain

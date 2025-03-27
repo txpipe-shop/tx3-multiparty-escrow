@@ -1,0 +1,16 @@
+use aiken/crypto.{VerificationKey}
+
+pub type Datum {
+  channel_id: ByteArray,
+  nonce: Int,
+  signer: ByteArray,
+  receiver: VerificationKey,
+  group_id: Int,
+  expiration_date: Int,
+}
+
+pub type Action {
+  Update
+  Claim
+  Close
+}

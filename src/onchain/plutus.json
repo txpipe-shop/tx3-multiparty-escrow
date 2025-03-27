@@ -1,0 +1,126 @@
+{
+  "preamble": {
+    "title": "txpipe/multiparty-escrow",
+    "description": "Aiken contracts for project 'txpipe/multiparty-escrow'",
+    "version": "0.0.0",
+    "plutusVersion": "v3",
+    "compiler": {
+      "name": "Aiken",
+      "version": "v1.1.12+0da4f70"
+    },
+    "license": "Apache-2.0"
+  },
+  "validators": [
+    {
+      "title": "singularity.channel.mint",
+      "redeemer": {
+        "title": "redeemer",
+        "schema": {
+          "$ref": "#/definitions/Data"
+        }
+      },
+      "compiledCode": "58cb01010029800aba2aba1aab9faab9eaab9dab9a488888966002646465300130053754003300800398040012444b30013370e9000001c4c9289bae300b3009375400915980099b874800800e2653001300c00198061806800cc024dd50014528a4444b30013370e90000014566002601c6ea801a00316403d15980099b874800800a2b3001300e375400d0018b201e8acc004cdc3a400800515980098071baa006800c5900f45900c201840303009375400916401c8038600e6010002600e00260066ea801e29344d9590011",
+      "hash": "42708af329d5dafb0ec362aaa149a48a410ea4564260230f121e9d7f"
+    },
+    {
+      "title": "singularity.channel.spend",
+      "datum": {
+        "title": "datum",
+        "schema": {
+          "$ref": "#/definitions/types~1Datum"
+        }
+      },
+      "redeemer": {
+        "title": "redeemer",
+        "schema": {
+          "$ref": "#/definitions/types~1Action"
+        }
+      },
+      "compiledCode": "58cb01010029800aba2aba1aab9faab9eaab9dab9a488888966002646465300130053754003300800398040012444b30013370e9000001c4c9289bae300b3009375400915980099b874800800e2653001300c00198061806800cc024dd50014528a4444b30013370e90000014566002601c6ea801a00316403d15980099b874800800a2b3001300e375400d0018b201e8acc004cdc3a400800515980098071baa006800c5900f45900c201840303009375400916401c8038600e6010002600e00260066ea801e29344d9590011",
+      "hash": "42708af329d5dafb0ec362aaa149a48a410ea4564260230f121e9d7f"
+    },
+    {
+      "title": "singularity.channel.else",
+      "redeemer": {
+        "schema": {}
+      },
+      "compiledCode": "58cb01010029800aba2aba1aab9faab9eaab9dab9a488888966002646465300130053754003300800398040012444b30013370e9000001c4c9289bae300b3009375400915980099b874800800e2653001300c00198061806800cc024dd50014528a4444b30013370e90000014566002601c6ea801a00316403d15980099b874800800a2b3001300e375400d0018b201e8acc004cdc3a400800515980098071baa006800c5900f45900c201840303009375400916401c8038600e6010002600e00260066ea801e29344d9590011",
+      "hash": "42708af329d5dafb0ec362aaa149a48a410ea4564260230f121e9d7f"
+    }
+  ],
+  "definitions": {
+    "ByteArray": {
+      "dataType": "bytes"
+    },
+    "Data": {
+      "title": "Data",
+      "description": "Any Plutus data."
+    },
+    "Int": {
+      "dataType": "integer"
+    },
+    "aiken/crypto/VerificationKey": {
+      "title": "VerificationKey",
+      "dataType": "bytes"
+    },
+    "types/Action": {
+      "title": "Action",
+      "anyOf": [
+        {
+          "title": "Update",
+          "dataType": "constructor",
+          "index": 0,
+          "fields": []
+        },
+        {
+          "title": "Claim",
+          "dataType": "constructor",
+          "index": 1,
+          "fields": []
+        },
+        {
+          "title": "Close",
+          "dataType": "constructor",
+          "index": 2,
+          "fields": []
+        }
+      ]
+    },
+    "types/Datum": {
+      "title": "Datum",
+      "anyOf": [
+        {
+          "title": "Datum",
+          "dataType": "constructor",
+          "index": 0,
+          "fields": [
+            {
+              "title": "channel_id",
+              "$ref": "#/definitions/ByteArray"
+            },
+            {
+              "title": "nonce",
+              "$ref": "#/definitions/Int"
+            },
+            {
+              "title": "signer",
+              "$ref": "#/definitions/ByteArray"
+            },
+            {
+              "title": "receiver",
+              "$ref": "#/definitions/aiken~1crypto~1VerificationKey"
+            },
+            {
+              "title": "group_id",
+              "$ref": "#/definitions/Int"
+            },
+            {
+              "title": "expiration_date",
+              "$ref": "#/definitions/Int"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
