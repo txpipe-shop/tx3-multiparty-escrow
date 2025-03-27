@@ -18,6 +18,7 @@ export const openChannel = async (
     initialDeposit,
   }: OpenChannelParams
 ) => {
+  lucid.selectReadOnlyWallet({ address: senderAddress });
   const utxos = await lucid.wallet.getUtxos();
   const utxo = utxos[0];
   const channelId: string = utxo.txHash + fromText(String(utxo.outputIndex)); // Check index

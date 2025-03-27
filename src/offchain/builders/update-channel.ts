@@ -9,7 +9,7 @@ import { UpdateChannelParams } from "./../../shared/api-types.ts";
 
 export const updateChannel = async (
   lucid: Lucid,
-  { channelId, addDeposit, expirationDate }: UpdateChannelParams
+  { channelId, addDeposit, expirationDate, userAddress }: UpdateChannelParams
 ) => {
   const validator = new SingularityChannelMint();
   const scriptAddress = Addresses.scriptToAddress(lucid.network, validator);
@@ -54,6 +54,7 @@ export const updateChannel = async (
 
   if (newExpirationDate != datum.expirationDate) tx.addSigner(senderPubKeyHash);
 
+  lucid.selectReadOnlyWallet({ address: userAddress });
   const completeTx = await tx.commit();
   return { updatedChannelTx: completeTx.toString() };
 };

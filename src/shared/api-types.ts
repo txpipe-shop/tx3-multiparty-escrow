@@ -110,6 +110,7 @@ export const OpenChannelSchema = z.object({
 
 export const UpdateChannelSchema = z.object({
   channelId: OutRef,
+  userAddress: addressSchema,
   addDeposit: z.bigint().optional(),
   expirationDate: z.bigint().optional(),
 });
