@@ -1,10 +1,8 @@
-import { Assets, Lucid, OutRef } from "@spacebudz/lucid";
-import { SingularityChannelSpend, TypesDatum } from "../types/plutus.ts";
+import { Lucid } from "@spacebudz/lucid";
+import { SingularityChannelSpend } from "../types/plutus.ts";
+import { ChannelInfo } from "../types/types.ts";
 
-export type ChannelInfo = OutRef &
-  TypesDatum & { balance: Assets; active: boolean };
-
-export const getChannels = async (lucid: Lucid) => {
+export const getAllChannels = async (lucid: Lucid): Promise<ChannelInfo[]> => {
   const validator = new SingularityChannelSpend();
   const scriptAddress = lucid.utils.scriptToAddress(validator);
   const utxos = await lucid.utxosAt(scriptAddress);
