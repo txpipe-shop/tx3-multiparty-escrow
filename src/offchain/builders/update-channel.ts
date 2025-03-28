@@ -13,13 +13,23 @@ export const updateChannel = async (
 ) => {
   const validator = new SingularityChannelMint();
   const scriptAddress = Addresses.scriptToAddress(lucid.network, validator);
-  const scriptHash = Addresses.inspect(scriptAddress).payment?.hash;
+  const scriptAddressDetails = Addresses.inspect(scriptAddress).payment;
+  if (!scriptAddressDetails) throw new Error("Script credentials not found");
+  const scriptHash = scriptAddressDetails.hash;
 
   const utxoAtScript = (await lucid.utxosAt(scriptAddress)).find(
-    (utxo) =>
-      Data.from(utxo.datum ?? "", SingularityChannelSpend.datum).channelId ==
-      channelId
+    ({ txHash, outputIndex, datum }) => {
+      if (!datum)
+        console.warn(
+          `Channel UTxO without datum found: ${txHash}#${outputIndex}`
+        );
+      return (
+        datum &&
+        Data.from(datum, SingularityChannelSpend.datum).channelId == channelId
+      );
+    }
   );
+
   if (!utxoAtScript) throw new Error("Channel not found");
 
   const channelToken = Object.keys(utxoAtScript.assets).find(
@@ -30,7 +40,8 @@ export const updateChannel = async (
   const senderPubKeyHash = fromUnit(channelToken).assetName;
   if (!senderPubKeyHash) throw new Error("senderPubKeyHash not found");
 
-  const datumStr = utxoAtScript.datum!;
+  const datumStr = utxoAtScript.datum;
+  if (!datumStr) throw new Error("Datum not found at Channel UTxO");
   const datum: TypesDatum = Data.from(datumStr, SingularityChannelSpend.datum);
 
   const newDeposit = utxoAtScript.assets[config.token] + (addDeposit ?? 0n);
