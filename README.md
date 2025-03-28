@@ -45,12 +45,12 @@ Run `bash parse-blueprint.sh` to generate the contract types from the validator'
 To test the offchain operations, you can run the following commands from the `src` folder.
 The tests will always consider the creation of a channel with an initial deposit of 6 tokens.
 
-**Create an order**
+**Create an channel**
 ```shell
    $> npm run test-open
 ```
-**Update an order**
-In this case, an order will be created and then updated.
+**Update an channel**
+A channel will be created and then updated.
 ```shell
    $> npm run test-update
 ```
