@@ -1,21 +1,29 @@
 import { Addresses, Crypto, Emulator, Lucid } from "@spacebudz/lucid";
+import { generateMnemonic } from "bip39";
 import { config } from "../../config.ts";
 import { openChannel } from "../builders/open-channel.ts";
 import { updateChannel } from "../builders/update-channel.ts";
 import { SingularityChannelMint } from "../types/plutus.ts";
 import { printUtxos } from "./utils.ts";
 
-const senderPrivKey = Crypto.generatePrivateKey();
+const {
+  privateKey: senderPrivKey,
+  publicKey: senderPubKey,
+  credential: senderCredential,
+} = Crypto.seedToDetails(generateMnemonic(256), 0, "Payment");
 const senderAddress = Addresses.credentialToAddress(
   { Emulator: 0 },
-  Crypto.privateKeyToDetails(senderPrivKey).credential
+  senderCredential
 );
-const senderPubKey = Crypto.privateKeyToDetails(senderPrivKey).publicKey;
 
-const providerPrivKey = Crypto.generatePrivateKey();
-const providerAddress = Addresses.credentialToAddress(
+const { privateKey: receiverPrivKey } = Crypto.seedToDetails(
+  generateMnemonic(256),
+  0,
+  "Payment"
+);
+const receiverAddress = Addresses.credentialToAddress(
   { Emulator: 0 },
-  Crypto.privateKeyToDetails(providerPrivKey).credential
+  Crypto.privateKeyToDetails(receiverPrivKey).credential
 );
 
 const emulator = new Emulator([
@@ -25,17 +33,17 @@ const emulator = new Emulator([
   },
 ]);
 const lucid = new Lucid({ provider: emulator });
-
 await printUtxos(lucid, senderAddress);
 
 const { openChannelCbor, channelId } = await openChannel(lucid, {
   senderAddress,
   signerPubKey: senderPubKey,
-  receiverAddress: providerAddress,
+  receiverAddress: receiverAddress,
   initialDeposit: 6n,
   expirationDate: 2n,
   groupId: 10n,
 });
+
 lucid.selectWalletFromPrivateKey(senderPrivKey);
 const tx = await lucid.fromTx(openChannelCbor);
 const signedTx = await tx.sign().commit();
@@ -50,8 +58,8 @@ console.log(`\n
 await printUtxos(lucid, senderAddress);
 const validator = new SingularityChannelMint();
 const scriptAddress = lucid.newScript(validator).toAddress();
-const utxoAtScript = await lucid.utxosAt(scriptAddress);
-printUtxos(lucid, undefined, utxoAtScript);
+const utxosAtScript = await lucid.utxosAt(scriptAddress);
+printUtxos(lucid, undefined, utxosAtScript);
 
 const { updatedChannelTx } = await updateChannel(lucid, {
   userAddress: senderAddress,
@@ -70,5 +78,6 @@ console.log(`\n
     > Add Deposit: 3
     > Tx ID: ${updatedTx}\n\n`);
 
+const finalUtxosAtScript = await lucid.utxosAt(scriptAddress);
 printUtxos(lucid, senderAddress);
-printUtxos(lucid, undefined, utxoAtScript);
+printUtxos(lucid, undefined, finalUtxosAtScript);

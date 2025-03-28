@@ -1,21 +1,28 @@
 import { Addresses, Crypto, Emulator, Lucid } from "@spacebudz/lucid";
+import { generateMnemonic } from "bip39";
 import { config } from "../../config.ts";
 import { openChannel } from "../builders/open-channel.ts";
 import { SingularityChannelMint } from "../types/plutus.ts";
 import { printUtxos } from "./utils.ts";
 
-const senderPrivKey = Crypto.generatePrivateKey();
+const {
+  privateKey: senderPrivKey,
+  publicKey: senderPubKey,
+  credential: senderCredential,
+} = Crypto.seedToDetails(generateMnemonic(256), 0, "Payment");
 const senderAddress = Addresses.credentialToAddress(
   { Emulator: 0 },
-  Crypto.privateKeyToDetails(senderPrivKey).credential
+  senderCredential
 );
 
-const senderPubKey = Crypto.privateKeyToDetails(senderPrivKey).publicKey;
-
-const providerPrivKey = Crypto.generatePrivateKey();
-const providerAddress = Addresses.credentialToAddress(
+const { privateKey: receiverPrivKey } = Crypto.seedToDetails(
+  generateMnemonic(256),
+  0,
+  "Payment"
+);
+const receiverAddress = Addresses.credentialToAddress(
   { Emulator: 0 },
-  Crypto.privateKeyToDetails(providerPrivKey).credential
+  Crypto.privateKeyToDetails(receiverPrivKey).credential
 );
 
 const emulator = new Emulator([
@@ -25,13 +32,12 @@ const emulator = new Emulator([
   },
 ]);
 const lucid = new Lucid({ provider: emulator });
-
 printUtxos(lucid, senderAddress);
 
 const { openChannelCbor, channelId } = await openChannel(lucid, {
   senderAddress,
   signerPubKey: senderPubKey,
-  receiverAddress: providerAddress,
+  receiverAddress: receiverAddress,
   initialDeposit: 6n,
   expirationDate: 2n,
   groupId: 10n,
@@ -50,5 +56,5 @@ console.log(`\n
 printUtxos(lucid, senderAddress);
 const validator = new SingularityChannelMint();
 const scriptAddress = lucid.newScript(validator).toAddress();
-const utxoAtScript = await lucid.utxosAt(scriptAddress);
-printUtxos(lucid, undefined, utxoAtScript);
+const utxosAtScript = await lucid.utxosAt(scriptAddress);
+printUtxos(lucid, undefined, utxosAtScript);

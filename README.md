@@ -47,9 +47,10 @@ The tests will always consider the creation of a channel with an initial deposit
 
 **Create an order**
 ```shell
-   $> deno run --allow-env --allow-read offchain/test/openChannel.ts
+   $> npm run test-open
 ```
 **Update an order**
+In this case, an order will be created and then updated.
 ```shell
-   $> deno run --allow-env --allow-read offchain/test/openAndUpdateChannel.ts
+   $> npm run test-update
 ```
