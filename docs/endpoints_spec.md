@@ -2,6 +2,7 @@
 
 ## Notation
 The *senderAddress* and *receiverAddress* parameters will be `string`s in `bech32` format, e.g. addr_test1vzwlx094fypzcfsz53n5gufc6h84tawp9pdyklm05pr385gl956ej.
+
 The `channelId` type is a string that represents a transaction UTxO Ref, which has concatenated its txHash with the output index.
 
 ## Open Channel
@@ -49,6 +50,7 @@ PARAMETERS:
 
 RESPONSE:
 > 1. *closedChannelCbor*: `string`
+
 
 # Contract Queries
 
