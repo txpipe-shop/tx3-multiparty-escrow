@@ -3,7 +3,7 @@
 ## Notation
 The *senderAddress* and *receiverAddress* parameters will be `string`s in `bech32` format, e.g. addr_test1vzwlx094fypzcfsz53n5gufc6h84tawp9pdyklm05pr385gl956ej.
 
-The `channelId` type is a string that represents a transaction Utxo-Ref, which has concatenated its txHash with the output index.
+The `channelId` type is a string that represents a transaction UTxO Ref, which has concatenated its txHash with the output index.
 
 ## Open Channel
 
@@ -36,19 +36,11 @@ RESPONSE:
 **url:** /claim
 PARAMETERS:
 
-> 1. *channelId*: `channelId`
+> 1. *channelId*: `list of channelId`
 
 RESPONSE:
 > 1. *channelClaimCbor*: `string`
 
-## Multi-claim Channel
-**url:** /multi-claim
-PARAMETERS:
-
-> 1. *channelIds*: `list of channelId`
-
-RESPONSE:
-> 1. *channelClaimsCbor*: `string`
 
 ## Close Channel
 **url:** /close
@@ -59,20 +51,11 @@ PARAMETERS:
 RESPONSE:
 > 1. *closedChannelCbor*: `string`
 
-## Build Message
-**url:** /build-message
-PARAMETERS:
-
-> 1. *nonce*: `bigint`
-> 2. *channelId*: `channelId`
-> 3. *amount*: `bigint`
-
-RESPONSE:
-> 1. *payload*: `string`
 
 # Contract Queries
 
-## Channels given a channelID
+## Channels given a channelId
+
 **url:** /channels-with-id
 PARAMETERS:
 

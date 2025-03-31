@@ -1,4 +1,9 @@
-# multyparty-escrow
+# MultiParty Escrow
+The MultiParty Escrow (MPE) smart contract manages payment channels between **clients** —who act as senders, consumers, or service customers— and **service providers**, who serve as receivers or recipients.
+
+## Documentation
+- [Requirements](./requeriments.md)
+- [Design](./design.md)
 
 ## Environment files
 
@@ -34,3 +39,16 @@ Inside `onchain`, run `aiken build`.
 
 ### Generate types
 Run `bash parse-blueprint.sh` to generate the contract types from the validator's blueprint.
+
+### Tests
+To test the offchain operations, you can run the following commands from the `src` folder.
+
+**Create a channel**
+```shell
+   $> npm run test-open
+```
+**Update a channel**
+A channel will be created and then updated.
+```shell
+   $> npm run test-update
+```

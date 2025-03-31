@@ -1,21 +1,24 @@
 import { Addresses, Data, fromText, Lucid, toUnit } from "@spacebudz/lucid";
+import { config } from "../../config.ts";
+import { OpenChannelParams } from "../../shared/api-types.ts";
 import {
-  TypesDatum,
   SingularityChannelMint,
   SingularityChannelSpend,
+  TypesDatum,
 } from "../types/plutus.ts";
-import { OpenChannelParams } from "../../shared/api-types.ts";
-import { config } from "../../config.ts";
 
-export const openChannel = async (lucid: Lucid, params: OpenChannelParams) => {
-  const {
+export const openChannel = async (
+  lucid: Lucid,
+  {
     senderAddress,
     receiverAddress,
     signerPubKey,
     groupId,
     expirationDate,
     initialDeposit,
-  } = params;
+  }: OpenChannelParams
+) => {
+  lucid.selectReadOnlyWallet({ address: senderAddress });
   const utxos = await lucid.wallet.getUtxos();
   const utxo = utxos[0];
   const channelId: string = utxo.txHash + fromText(String(utxo.outputIndex)); // Check index
@@ -48,10 +51,10 @@ export const openChannel = async (lucid: Lucid, params: OpenChannelParams) => {
     .payToContract(
       scriptAddress,
       { Inline: Data.to(datum, SingularityChannelSpend.datum) },
-      { [config.token]: initialDeposit }
+      { [config.token]: initialDeposit, [channelToken]: 1n }
     )
     .attachMetadata(674, { msg: ["Open Channel"] })
     .commit();
 
-  return { cbor: tx.toString(), channelId };
+  return { openChannelCbor: tx.toString(), channelId };
 };
