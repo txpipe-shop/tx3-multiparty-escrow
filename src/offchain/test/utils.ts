@@ -1,4 +1,5 @@
 import { Lucid, toText, Utxo } from "@spacebudz/lucid";
+import { ChannelInfo } from "../types/types";
 
 const parseAssets = (walletUtxo: Utxo) => {
   return Object.fromEntries(
@@ -35,4 +36,18 @@ export const printUtxos = async (
   console.log(`-------------------------${title}------------------------------
 ${parseUtxos(walletUtxos)}
 ------------------------------------------------------------------`);
+};
+
+export const pprintChannels = (
+  header: string,
+  channels: ChannelInfo[] | ChannelInfo
+) => {
+  const pad = (text: string, length = 80, padChar = "-") => {
+    const padLength = Math.max(0, (length - text.length) / 2);
+    const pad = padChar.repeat(Math.floor(padLength));
+    return `<<<<<<${pad}${text}${pad}>>>>>>`;
+  };
+  console.log(pad(header, 80));
+  console.dir(channels, { depth: null });
+  console.log(`${pad("", 80)}\n`);
 };

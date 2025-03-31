@@ -2,7 +2,7 @@ import { Addresses, Data, fromUnit, Hasher, Lucid } from "@spacebudz/lucid";
 import { SingularityChannelSpend } from "../types/plutus.ts";
 import { ChannelInfo } from "../types/types.ts";
 
-export const getChannelsFromSender = async (
+export const getChannelsFromReceiver = async (
   lucid: Lucid,
   receiverAddr: string
 ): Promise<ChannelInfo[]> => {
