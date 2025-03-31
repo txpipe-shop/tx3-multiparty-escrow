@@ -26,32 +26,39 @@ export const getChannelsFromReceiver = async (
         );
         return null;
       }
-      const { channelId, nonce, signer, receiver, groupId, expirationDate } =
-        Data.from(utxo.datum, SingularityChannelSpend.datum);
-      const [channelToken] = Object.keys(balance).filter((key) =>
-        key.startsWith(policyId)
-      );
-      const sender = fromUnit(channelToken).assetName;
-      if (!sender) {
-        console.warn(`Invalid sender asset name: ${sender}`);
+      try {
+        const { channelId, nonce, signer, receiver, groupId, expirationDate } =
+          Data.from(utxo.datum, SingularityChannelSpend.datum);
+        const [channelToken] = Object.keys(balance).filter((key) =>
+          key.startsWith(policyId)
+        );
+        const sender = fromUnit(channelToken).assetName;
+        if (!sender) {
+          console.warn(`Invalid sender asset name: ${sender}`);
+          return null;
+        }
+        if (receiver !== receiverKey.hash) {
+          return null;
+        }
+        return {
+          txHash,
+          outputIndex,
+          balance,
+          channelId,
+          nonce,
+          signer,
+          sender,
+          receiver,
+          groupId,
+          expirationDate,
+          active: Date.now() < expirationDate,
+        };
+      } catch (error) {
+        console.warn(
+          `Invalid datum found in channel UTxO: ${utxo.txHash}#${utxo.outputIndex}`
+        );
         return null;
       }
-      if (receiver !== receiverKey.hash) {
-        return null;
-      }
-      return {
-        txHash,
-        outputIndex,
-        balance,
-        channelId,
-        nonce,
-        signer,
-        sender,
-        receiver,
-        groupId,
-        expirationDate,
-        active: Date.now() < expirationDate,
-      };
     })
     .filter((channel) => channel !== null);
 };

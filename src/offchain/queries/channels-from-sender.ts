@@ -31,21 +31,28 @@ export const getChannelsFromSender = async (
         );
         return null;
       }
-      const { channelId, nonce, signer, receiver, groupId, expirationDate } =
-        Data.from(utxo.datum, SingularityChannelSpend.datum);
-      return {
-        txHash,
-        outputIndex,
-        balance,
-        channelId,
-        nonce,
-        signer,
-        sender,
-        receiver,
-        groupId,
-        expirationDate,
-        active: Date.now() < expirationDate,
-      };
+      try {
+        const { channelId, nonce, signer, receiver, groupId, expirationDate } =
+          Data.from(utxo.datum, SingularityChannelSpend.datum);
+        return {
+          txHash,
+          outputIndex,
+          balance,
+          channelId,
+          nonce,
+          signer,
+          sender,
+          receiver,
+          groupId,
+          expirationDate,
+          active: Date.now() < expirationDate,
+        };
+      } catch (error) {
+        console.warn(
+          `Invalid datum found in channel UTxO: ${utxo.txHash}#${utxo.outputIndex}`
+        );
+        return null;
+      }
     })
     .filter((channel) => channel !== null);
 };

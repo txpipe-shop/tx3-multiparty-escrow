@@ -17,8 +17,15 @@ export const getChannelById = async (
       );
       return false;
     }
-    const datum = Data.from(utxo.datum, SingularityChannelSpend.datum);
-    return datum.channelId === channelId;
+    try {
+      const datum = Data.from(utxo.datum, SingularityChannelSpend.datum);
+      return datum.channelId === channelId;
+    } catch (error) {
+      console.warn(
+        `Invalid datum found in channel UTxO: ${utxo.txHash}#${utxo.outputIndex}`
+      );
+      return false;
+    }
   });
   if (!channel) {
     throw new Error(`Channel with id ${channelId} not found`);
@@ -29,9 +36,7 @@ export const getChannelById = async (
   );
   const sender = fromUnit(channelToken).assetName;
   if (!sender) {
-    throw new Error(
-      `Invalid sender token name: ${sender}.`
-    );
+    throw new Error(`Invalid sender token name: ${sender}.`);
   }
   const { nonce, signer, receiver, groupId, expirationDate } = Data.from(
     channel.datum!,
