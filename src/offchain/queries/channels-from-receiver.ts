@@ -28,7 +28,7 @@ export const getChannelsFromSender = async (
       }
       const { channelId, nonce, signer, receiver, groupId, expirationDate } =
         Data.from(utxo.datum, SingularityChannelSpend.datum);
-      const [channelToken] = Object.keys(balance).filter(([key]) =>
+      const [channelToken] = Object.keys(balance).filter((key) =>
         key.startsWith(policyId)
       );
       const sender = fromUnit(channelToken).assetName;

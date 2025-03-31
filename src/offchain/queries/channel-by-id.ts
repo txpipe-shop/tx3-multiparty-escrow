@@ -24,7 +24,7 @@ export const getChannelById = async (
     throw new Error(`Channel with id ${channelId} not found`);
   }
   const { assets: balance, txHash, outputIndex } = channel;
-  const [channelToken] = Object.keys(balance).filter(([key]) =>
+  const [channelToken] = Object.keys(balance).filter((key) =>
     key.startsWith(policyId)
   );
   const sender = fromUnit(channelToken).assetName;

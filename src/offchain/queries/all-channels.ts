@@ -11,7 +11,7 @@ export const getAllChannels = async (lucid: Lucid): Promise<ChannelInfo[]> => {
   return utxos
     .map((utxo) => {
       const { assets: balance, txHash, outputIndex } = utxo;
-      const [channelToken] = Object.keys(utxo.assets).filter(([key]) =>
+      const [channelToken] = Object.keys(utxo.assets).filter((key) =>
         key.startsWith(policyId)
       );
       const sender = fromUnit(channelToken).assetName;

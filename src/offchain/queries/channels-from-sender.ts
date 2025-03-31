@@ -21,7 +21,7 @@ export const getChannelsFromSender = async (
 
   return utxos
     .filter((utxo) => {
-      utxo.assets[channelToken] === 1n;
+      return utxo.assets[channelToken] === 1n;
     })
     .map((utxo) => {
       const { assets: balance, txHash, outputIndex } = utxo;
