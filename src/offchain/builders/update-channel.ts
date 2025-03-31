@@ -75,5 +75,5 @@ export const updateChannel = async (
 
   lucid.selectReadOnlyWallet({ address: userAddress });
   const completeTx = await tx.commit();
-  return { updatedChannelTx: completeTx.toString() };
+  return { updatedChannelCbor: completeTx.toString() };
 };

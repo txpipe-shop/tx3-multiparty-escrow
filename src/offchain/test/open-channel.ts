@@ -51,7 +51,8 @@ await lucid.awaitTx(openTx);
 console.log(`\n
     > Channel opened with ID: ${channelId}
     > Initial Deposit: 6
-    > Tx ID: ${openTx}\n\n`);
+    > Tx ID: ${openTx}
+    > CBOR: ${openChannelCbor}\n\n`);
 
 printUtxos(lucid, senderAddress);
 const validator = new SingularityChannelMint();

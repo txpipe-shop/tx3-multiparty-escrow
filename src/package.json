@@ -6,7 +6,7 @@
     "build": "tsc",
     "dev": "tsx watch --experimental-wasm-modules ./api/index.ts",
     "test-open": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/open-channel.ts",
-    "test-update": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/open-and-update-channel.ts"
+    "test-update": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/update-channel.ts"
   },
   "author": "",
   "license": "ISC",

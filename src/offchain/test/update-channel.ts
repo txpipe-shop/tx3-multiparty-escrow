@@ -53,7 +53,8 @@ await lucid.awaitTx(openTx);
 console.log(`\n
     > Channel opened with ID: ${channelId}
     > Initial Deposit: 6
-    > Tx ID: ${openTx}\n\n`);
+    > Tx ID: ${openTx}
+    > CBOR: ${openChannelCbor}\n\n`);
 
 await printUtxos(lucid, senderAddress);
 const validator = new SingularityChannelMint();
@@ -61,14 +62,14 @@ const scriptAddress = lucid.newScript(validator).toAddress();
 const utxosAtScript = await lucid.utxosAt(scriptAddress);
 printUtxos(lucid, undefined, utxosAtScript);
 
-const { updatedChannelTx } = await updateChannel(lucid, {
+const { updatedChannelCbor } = await updateChannel(lucid, {
   userAddress: senderAddress,
   channelId,
   addDeposit: 3n,
   expirationDate: 3n,
 });
 lucid.selectWalletFromPrivateKey(senderPrivKey);
-const updateTx = await lucid.fromTx(updatedChannelTx);
+const updateTx = await lucid.fromTx(updatedChannelCbor);
 const signedUpdateTx = await updateTx.sign().commit();
 const updatedTx = await signedUpdateTx.submit();
 await lucid.awaitTx(updatedTx);
@@ -76,7 +77,8 @@ await lucid.awaitTx(updatedTx);
 console.log(`\n
     > Channel updated with ID: ${channelId}
     > Add Deposit: 3
-    > Tx ID: ${updatedTx}\n\n`);
+    > Tx ID: ${updatedTx}
+    > CBOR: ${updatedChannelCbor}\n\n`);
 
 const finalUtxosAtScript = await lucid.utxosAt(scriptAddress);
 printUtxos(lucid, senderAddress);
