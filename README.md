@@ -52,3 +52,8 @@ A channel will be created and then updated.
 ```shell
    $> npm run test-update
 ```
+
+**Build a message**
+```shell
+   $> npm run test-build-msg
+```
