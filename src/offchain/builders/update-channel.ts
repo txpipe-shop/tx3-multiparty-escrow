@@ -19,14 +19,22 @@ export const updateChannel = async (
 
   const utxoAtScript = (await lucid.utxosAt(scriptAddress)).find(
     ({ txHash, outputIndex, datum }) => {
-      if (!datum)
+      if (!datum) {
         console.warn(
           `Channel UTxO without datum found: ${txHash}#${outputIndex}`
         );
-      return (
-        datum &&
-        Data.from(datum, SingularityChannelSpend.datum).channelId == channelId
-      );
+        return false;
+      }
+      try {
+        const { channelId: cId } = Data.from(
+          datum,
+          SingularityChannelSpend.datum
+        );
+        return cId == channelId;
+      } catch (e) {
+        console.warn(e);
+        return false;
+      }
     }
   );
 
