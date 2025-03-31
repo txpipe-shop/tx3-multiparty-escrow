@@ -13,17 +13,28 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/OpenChannelParams'
+            example:
+              senderAddress: "addr_test1vzwlx094fypzcfsz53n5gufc6h84tawp9pdyklm05pr385gl956ej"
+              signerPubKey: "145562a792f2ca28ae87f1f7afd25b126f76547103204f62432999bcc2b5c542"
+              receiverAddress: "addr_test1xyzvwx123fypzcfsz53n5gufc6h84tawp9pdyklm05pr385g"
+              initialDeposit: "1000000"
+              expirationDate: "1716148967"
+              groupId: "ZC63QytbzJt75kHGkZ8PEWXXDl2GDFRVwUT1CI2lbwY="
       responses:
-        '200':
-          description: Transaction for opening channel
+        "200":
+          description: Channel opened successfully
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  tx:
+                  openChannelCbor:
                     type: string
-
+                  channelId:
+                    type: string
+              example:
+                openChannelCbor: "84a400d9..."
+                channelId: "b126f76547103204f62432999bcc2b5cb126f76547103204f62432999bcc2b5c0"
   /update:
     post:
       summary: Update an existing channel
@@ -33,57 +44,50 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateChannelParams'
+            example:
+              channelId: "b126f76547103204f62432999bcc2b5cb126f76547103204f62432999bcc2b5c0"
+              addDeposit: "500000"
+              expirationDate: "1716148967"
+              userAddress: "addr_test1vzwlx094fypzcfsz53n5gufc6h84tawp9pdyklm05pr385gl956ej"
       responses:
-        '200':
-          description: Transaction for updating channel
+        "200":
+          description: Channel updated successfully
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  tx:
+                  updateChannelCbor:
                     type: string
-
+              example:
+                updateChannelCbor: "84a400d9..."
   /claim:
     post:
-      summary: Claim an existing channel
+      summary: Claim funds from a channel
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ClaimChannelParams'
+              type: array
+              items:
+                $ref: '#/components/schemas/ClaimParams'
+            example:
+              - channelId: "b126f76547103204f62432999bcc2b5cb126f76547103204f62432999bcc2b5c0"
+                signature: "4eb27d97d08c53f4d5d53aabd395e7eaa3a095ac084db3201974146804e1bde1"
+                amount: "1500000"
       responses:
-        '200':
-          description: Transaction for claiming channel
+        "200":
+          description: Channel claim successful
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  tx:
+                  claimChannelCbor:
                     type: string
-
-  /multi-claim:
-    post:
-      summary: Multi-claim multiple channels
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/MultiClaimChannelParams'
-      responses:
-        '200':
-          description: Transaction for multi-claiming channels
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  tx:
-                    type: string
-
+              example:
+                claimChannelCbor: "84a400d9..."
   /close:
     post:
       summary: Close an existing channel
@@ -92,101 +96,88 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CloseChannelParams'
+              type: object
+              properties:
+                channelId:
+                  type: string
+            example:
+              channelId: "b126f76547103204f62432999bcc2b5cb126f76547103204f62432999bcc2b5c0"
       responses:
-        '200':
-          description: Transaction for closing channel
+        "200":
+          description: Channel closed successfully
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  tx:
+                  closedChannelCbor:
                     type: string
-
-  /build-message:
-    post:
-      summary: Build a message for a channel
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BuildMessageParams'
+              example:
+                closedChannelCbor: "84a400d9..."
+  /channels:
+    get:
+      summary: Get all channels
       responses:
-        '200':
-          description: Built message nonce
+        "200":
+          description: List of all channels
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  nonce:
-                    type: string  # bigint
-
-  /channels-with-id:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Channel'
+  /channel-with-id:
     get:
-      summary: Get channels by ID
+      summary: Get a channel by channelId
       parameters:
         - name: channelId
           in: query
+          required: true
           schema:
-            type: string  # bigint
+            type: string
       responses:
-        '200':
-          description: List of channels
+        "200":
+          description: Channel details
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  channels:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Channel'
-
+                $ref: '#/components/schemas/Channel'
   /channels-from-sender:
     get:
-      summary: Get channels from a sender
+      summary: Get channels by sender
       parameters:
         - name: senderAddress
           in: query
+          required: true
           schema:
             type: string
       responses:
-        '200':
-          description: List of channels
+        "200":
+          description: List of channels from sender
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  channels:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Channel'
-
+                type: array
+                items:
+                  $ref: '#/components/schemas/Channel'
   /channels-from-receiver:
     get:
-      summary: Get channels from a receiver
+      summary: Get channels by receiver
       parameters:
         - name: receiverAddress
           in: query
+          required: true
           schema:
             type: string
       responses:
-        '200':
-          description: List of channels
+        "200":
+          description: List of channels from receiver
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  channels:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Channel'
-
+                type: array
+                items:
+                  $ref: '#/components/schemas/Channel'
 components:
   schemas:
     OpenChannelParams:
@@ -199,77 +190,48 @@ components:
         receiverAddress:
           type: string
         initialDeposit:
-          type: string  # bigint
+          type: integer
         expirationDate:
-          type: string  # bigint
+          type: integer
         groupId:
           type: string
-
     UpdateChannelParams:
       type: object
       properties:
-        txOutRef:
-          $ref: '#/components/schemas/OutRef'
-        addDeposit:
-          type: string  # bigint
-        expirationDate:
-          type: string  # bigint
-
-    ClaimChannelParams:
-      type: object
-      properties:
-        txOutRef:
-          $ref: '#/components/schemas/OutRef'
-        msg:
+        channelId:
           type: string
-
-    MultiClaimChannelParams:
-      type: array
-      items:
-        type: object
-        properties:
-          txOutRef:
-            $ref: '#/components/schemas/OutRef'
-          msg:
-            type: string
-
-    CloseChannelParams:
+        addDeposit:
+          type: integer
+        expirationDate:
+          type: integer
+        userAddress:
+          type: string
+    ClaimParams:
       type: object
       properties:
-        txOutRef:
-          $ref: '#/components/schemas/OutRef'
-
-    BuildMessageParams:
-      type: object
-      properties:
-        nonce:
-          type: string  # bigint
-        txOutRef:
-          $ref: '#/components/schemas/OutRef'
+        channelId:
+          type: string
+        signature:
+          type: string
         amount:
-          type: string  # bigint
-
-    OutRef:
+          type: integer
+    Channel:
       type: object
       properties:
         txHash:
           type: string
         outputIndex:
           type: integer
-
-    Channel:
-      type: object
-      properties:
         channelId:
-          type: string  # bigint
+          type: string
         nonce:
-          type: string  # bigint
+          type: integer
         active:
           type: boolean
         expirationDate:
-          type: string  # bigint
+          type: integer
         balance:
-          type: string  # bigint
+          type: object
         senderAddress:
           type: string
         signerAddress:
