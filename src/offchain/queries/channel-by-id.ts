@@ -23,14 +23,14 @@ export const getChannelById = async (
   if (!channel) {
     throw new Error(`Channel with id ${channelId} not found`);
   }
-  const { assets: balance } = channel;
+  const { assets: balance, txHash, outputIndex } = channel;
   const [channelToken] = Object.keys(balance).filter(([key]) =>
     key.startsWith(policyId)
   );
   const sender = fromUnit(channelToken).assetName;
   if (!sender) {
     throw new Error(
-      `Invalid sender address: ${sender}. Must have a payment key`
+      `Invalid sender token name: ${sender}.`
     );
   }
   const { nonce, signer, receiver, groupId, expirationDate } = Data.from(
@@ -38,6 +38,8 @@ export const getChannelById = async (
     SingularityChannelSpend.datum
   );
   return {
+    txHash,
+    outputIndex,
     balance,
     channelId,
     nonce,

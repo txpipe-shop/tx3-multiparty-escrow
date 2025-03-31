@@ -24,7 +24,7 @@ export const getChannelsFromSender = async (
       utxo.assets[channelToken] === 1n;
     })
     .map((utxo) => {
-      const { assets: balance } = utxo;
+      const { assets: balance, txHash, outputIndex } = utxo;
       if (!utxo.datum) {
         console.warn(
           `Channel UTxO without datum found: ${utxo.txHash}#${utxo.outputIndex}`
@@ -34,6 +34,8 @@ export const getChannelsFromSender = async (
       const { channelId, nonce, signer, receiver, groupId, expirationDate } =
         Data.from(utxo.datum, SingularityChannelSpend.datum);
       return {
+        txHash,
+        outputIndex,
         balance,
         channelId,
         nonce,
