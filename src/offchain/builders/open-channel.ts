@@ -58,6 +58,7 @@ export const openChannel = async (
       { Inline: toChannelDatum(datum) },
       { [config.token]: initialDeposit, [channelToken]: 1n }
     )
+    .validTo(Number(expirationDate))
     .attachMetadata(674, { msg: ["Open Channel"] })
     .commit();
 

@@ -1,4 +1,4 @@
-import { Addresses, fromUnit, Lucid, Utxo } from "@spacebudz/lucid";
+import { Addresses, Lucid, toUnit, Utxo } from "@spacebudz/lucid";
 import { config } from "../../config.ts";
 import {
   fromChannelDatum,
@@ -10,7 +10,13 @@ import { UpdateChannelParams } from "./../../shared/api-types.ts";
 
 export const updateChannel = async (
   lucid: Lucid,
-  { channelId, addDeposit, expirationDate, userAddress }: UpdateChannelParams,
+  {
+    channelId,
+    addDeposit,
+    expirationDate,
+    userAddress,
+    senderAddress,
+  }: UpdateChannelParams,
   scriptRef: Utxo
 ) => {
   const validator = new ChannelValidator();
@@ -18,41 +24,40 @@ export const updateChannel = async (
   const scriptAddressDetails = Addresses.inspect(scriptAddress).payment;
   if (!scriptAddressDetails) throw new Error("Script credentials not found");
   const scriptHash = scriptAddressDetails.hash;
+  const senderDetails = Addresses.inspect(senderAddress).payment;
+  if (!senderDetails) throw new Error("Sender's credentials not found");
+  const senderPubKeyHash = senderDetails.hash;
 
-  const utxoAtScript = (await lucid.utxosAt(scriptAddress)).find(
-    ({ txHash, outputIndex, datum }) => {
-      if (!datum) {
-        console.warn(
-          `Channel UTxO without datum found: ${txHash}#${outputIndex}`
-        );
-        return false;
-      }
-      try {
-        const { channelId: cId } = fromChannelDatum(datum);
-        return cId == channelId;
-      } catch (e) {
-        console.warn(e);
-        return false;
-      }
+  const channelToken = toUnit(scriptHash, senderPubKeyHash);
+  const channelUtxo = (
+    await lucid.utxosAtWithUnit(scriptAddress, channelToken)
+  ).find(({ txHash, outputIndex, datum }) => {
+    if (!datum) {
+      console.warn(
+        `Channel UTxO without datum found: ${txHash}#${outputIndex}`
+      );
+      return false;
     }
-  );
+    try {
+      const { channelId: cId } = fromChannelDatum(datum);
+      return cId == channelId;
+    } catch (e) {
+      console.warn(e);
+      return false;
+    }
+  });
 
-  if (!utxoAtScript) throw new Error("Channel not found");
+  if (!channelUtxo) throw new Error("Channel not found");
 
-  const channelToken = Object.keys(utxoAtScript.assets).find(
-    (asset) => fromUnit(asset).policyId === scriptHash
-  );
-  if (!channelToken) throw new Error("channelToken not found");
-
-  const senderPubKeyHash = fromUnit(channelToken).assetName;
-  if (!senderPubKeyHash) throw new Error("senderPubKeyHash not found");
-
-  const datumStr = utxoAtScript.datum;
-  if (!datumStr) throw new Error("Datum not found at Channel UTxO");
+  const datumStr = channelUtxo.datum!;
   const datum: ChannelDatum = fromChannelDatum(datumStr);
 
-  const newDeposit = utxoAtScript.assets[config.token] + (addDeposit ?? 0n);
-  const newExpirationDate = expirationDate || datum.expirationDate;
+  if (datum.expirationDate < Date.now()) throw new Error("Channel expired");
+  if (expirationDate && expirationDate < datum.expirationDate)
+    throw new Error("New expiration date must be greater than current");
+
+  const newDeposit = channelUtxo.assets[config.token] + (addDeposit ?? 0n);
+  const newExpirationDate = expirationDate ?? datum.expirationDate;
 
   const newDatum: ChannelDatum = {
     ...datum,
@@ -71,12 +76,13 @@ export const updateChannel = async (
   const tx = lucid
     .newTx()
     .readFrom([scriptRef])
-    .collectFrom([utxoAtScript], toChannelRedeemer("Update"))
+    .collectFrom([channelUtxo], toChannelRedeemer("Update"))
     .payToContract(
       scriptAddress,
       { Inline: toChannelDatum(newDatum) },
       { [config.token]: newDeposit, [channelToken]: 1n }
     )
+    .validTo(Number(datum.expirationDate))
     .attachMetadata(674, { msg: [msg] });
 
   if (updateExpiration) tx.addSigner(senderPubKeyHash);
