@@ -34,7 +34,7 @@ export const getChannelsFromReceiver = async (
         );
         const sender = fromUnit(channelToken).assetName;
         if (!sender) {
-          console.warn(`Invalid sender asset name: ${sender}`);
+          console.warn(`Invalid sender asset name: ${sender}. Utxo: ${txHash}#${outputIndex}`);
           return null;
         }
         if (receiver !== receiverKey.hash) {

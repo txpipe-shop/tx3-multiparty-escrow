@@ -36,7 +36,7 @@ export const getChannelById = async (
   );
   const sender = fromUnit(channelToken).assetName;
   if (!sender) {
-    throw new Error(`Invalid sender token name: ${sender}.`);
+    throw new Error(`Invalid sender token name: ${sender}. Utxo: ${txHash}#${outputIndex}`);
   }
   const { nonce, signer, receiver, groupId, expirationDate } = Data.from(
     channel.datum!,

@@ -17,7 +17,8 @@ export const getAllChannels = async (lucid: Lucid): Promise<ChannelInfo[]> => {
       const sender = fromUnit(channelToken).assetName;
       if (!sender) {
         console.warn(
-          `Invalid sender address: ${sender}. Must have a payment key`
+          `Invalid sender address: ${sender}. Must have a payment key.\n
+           Utxo: : ${utxo.txHash}#${utxo.outputIndex}`
         );
         return null;
       }
