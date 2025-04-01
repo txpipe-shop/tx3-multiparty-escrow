@@ -8,7 +8,6 @@ export const getChannelsFromSender = async (
 ): Promise<ChannelInfo[]> => {
   const validator = new SingularityChannelSpend();
   const scriptAddress = lucid.utils.scriptToAddress(validator);
-  const utxos = await lucid.utxosAt(scriptAddress);
   const policyId = Hasher.hashScript(validator);
   const senderKey = Addresses.inspect(senderAddr).payment;
   if (!senderKey) {
@@ -19,40 +18,47 @@ export const getChannelsFromSender = async (
   const sender = senderKey.hash;
   const channelToken = `${policyId}${sender}`;
 
-  return utxos
-    .filter((utxo) => {
-      return utxo.assets[channelToken] === 1n;
-    })
-    .map((utxo) => {
-      const { assets: balance, txHash, outputIndex } = utxo;
-      if (!utxo.datum) {
-        console.warn(
-          `Channel UTxO without datum found: ${utxo.txHash}#${utxo.outputIndex}`
-        );
-        return null;
-      }
-      try {
-        const { channelId, nonce, signer, receiver, groupId, expirationDate } =
-          Data.from(utxo.datum, SingularityChannelSpend.datum);
-        return {
-          txHash,
-          outputIndex,
-          balance,
-          channelId,
-          nonce,
-          signer,
-          sender,
-          receiver,
-          groupId,
-          expirationDate,
-          active: Date.now() < expirationDate,
-        };
-      } catch (error) {
-        console.warn(
-          `Invalid datum found in channel UTxO: ${utxo.txHash}#${utxo.outputIndex}`
-        );
-        return null;
-      }
-    })
-    .filter((channel) => channel !== null);
+  return await lucid
+    .utxosAtWithUnit(scriptAddress, channelToken)
+    .then((utxos) =>
+      utxos
+        .map((utxo) => {
+          const { assets: balance, txHash, outputIndex } = utxo;
+          if (!utxo.datum) {
+            console.warn(
+              `Channel UTxO without datum found: ${utxo.txHash}#${utxo.outputIndex}`
+            );
+            return null;
+          }
+          try {
+            const {
+              channelId,
+              nonce,
+              signer,
+              receiver,
+              groupId,
+              expirationDate,
+            } = Data.from(utxo.datum, SingularityChannelSpend.datum);
+            return {
+              txHash,
+              outputIndex,
+              balance,
+              channelId,
+              nonce,
+              signer,
+              sender,
+              receiver,
+              groupId,
+              expirationDate,
+              active: Date.now() < expirationDate,
+            };
+          } catch (error) {
+            console.warn(
+              `Invalid datum found in channel UTxO: ${utxo.txHash}#${utxo.outputIndex}`
+            );
+            return null;
+          }
+        })
+        .filter((channel) => channel !== null)
+    );
 };
