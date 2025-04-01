@@ -14,7 +14,7 @@ export const SignatureSchema = Data.Tuple([
 
 export const buildMessage = async (
   lucid: Lucid,
-  { channelId, amount }: BuildMessageParams
+  { channelId, amount }: BuildMessageParams,
 ) => {
   const validator = new SingularityChannelMint();
   const scriptAddress = Addresses.scriptToAddress(lucid.network, validator);
@@ -23,21 +23,21 @@ export const buildMessage = async (
     ({ txHash, outputIndex, datum }) => {
       if (!datum) {
         console.warn(
-          `Channel UTxO without datum found: ${txHash}#${outputIndex}`
+          `Channel UTxO without datum found: ${txHash}#${outputIndex}`,
         );
         return false;
       }
       try {
         const { channelId: cId } = Data.from(
           datum,
-          SingularityChannelSpend.datum
+          SingularityChannelSpend.datum,
         );
         return cId == channelId;
       } catch (e) {
         console.warn(e);
         return false;
       }
-    }
+    },
   );
   if (!utxoAtScript) throw new Error("Channel not found");
 

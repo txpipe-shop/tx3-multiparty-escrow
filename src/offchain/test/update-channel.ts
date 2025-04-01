@@ -14,17 +14,17 @@ const {
 } = Crypto.seedToDetails(generateMnemonic(256), 0, "Payment");
 const senderAddress = Addresses.credentialToAddress(
   { Emulator: 0 },
-  senderCredential
+  senderCredential,
 );
 
 const { privateKey: receiverPrivKey } = Crypto.seedToDetails(
   generateMnemonic(256),
   0,
-  "Payment"
+  "Payment",
 );
 const receiverAddress = Addresses.credentialToAddress(
   { Emulator: 0 },
-  Crypto.privateKeyToDetails(receiverPrivKey).credential
+  Crypto.privateKeyToDetails(receiverPrivKey).credential,
 );
 
 const emulator = new Emulator([

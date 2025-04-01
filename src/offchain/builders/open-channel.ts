@@ -1,11 +1,15 @@
-import { Addresses, Data, fromText, Lucid, OutRef, toUnit, Utxo } from "@spacebudz/lucid";
+import {
+  Addresses,
+  Data,
+  fromText,
+  Lucid,
+  toUnit,
+  Utxo,
+} from "@spacebudz/lucid";
 import { config } from "../../config.ts";
 import { OpenChannelParams } from "../../shared/api-types.ts";
-import {
-  ChannelValidator,
-  ChannelDatum,
-} from "../types/types.ts";
 import { toChannelDatum } from "../lib/utils.ts";
+import { ChannelDatum, ChannelValidator } from "../types/types.ts";
 
 export const openChannel = async (
   lucid: Lucid,
@@ -22,7 +26,7 @@ export const openChannel = async (
   lucid.selectReadOnlyWallet({ address: senderAddress });
   const utxos = await lucid.wallet.getUtxos();
   const utxo = utxos[0];
-  const channelId: string = utxo.txHash + fromText(String(utxo.outputIndex)); // Check index
+  const channelId: string = utxo.txHash + fromText(String(utxo.outputIndex));
 
   const receiverPubKeyHash =
     Addresses.addressToCredential(receiverAddress).hash;

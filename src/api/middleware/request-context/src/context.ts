@@ -1,8 +1,8 @@
-import { AsyncLocalStorage } from 'node:async_hooks';
+import { AsyncLocalStorage } from "node:async_hooks";
 
 let currentContext: AsyncLocalStorage<unknown>;
 
-export function context<T = any>(): AsyncLocalStorage<T> {
+export function context<T>(): AsyncLocalStorage<T> {
   if (currentContext === undefined) {
     currentContext = new AsyncLocalStorage<T>();
   }

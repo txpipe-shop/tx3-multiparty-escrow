@@ -1,8 +1,12 @@
 import { Addresses, fromUnit, Lucid, Utxo } from "@spacebudz/lucid";
 import { config } from "../../config.ts";
-import { ChannelValidator, ChannelDatum } from "../types/types.ts";
+import {
+  fromChannelDatum,
+  toChannelDatum,
+  toChannelRedeemer,
+} from "../lib/utils.ts";
+import { ChannelDatum, ChannelValidator } from "../types/types.ts";
 import { UpdateChannelParams } from "./../../shared/api-types.ts";
-import { fromChannelDatum, toChannelDatum, toChannelRedeemer } from "../lib/utils.ts";
 
 export const updateChannel = async (
   lucid: Lucid,
@@ -50,25 +54,33 @@ export const updateChannel = async (
   const newDeposit = utxoAtScript.assets[config.token] + (addDeposit ?? 0n);
   const newExpirationDate = expirationDate || datum.expirationDate;
 
-  const newDatum: ChannelDatum = { ...datum, expirationDate: newExpirationDate };
+  const newDatum: ChannelDatum = {
+    ...datum,
+    expirationDate: newExpirationDate,
+  };
+
+  const updateExpiration = newExpirationDate != datum.expirationDate;
+  const updateBalance = !!addDeposit;
+  const msg =
+    updateExpiration && updateBalance
+      ? "Update Channel Expiration and Balance"
+      : updateExpiration
+      ? "Update Channel Expiration"
+      : "Update Channel Balance";
 
   const tx = lucid
     .newTx()
     .readFrom([scriptRef])
-    .collectFrom(
-      [utxoAtScript],
-      toChannelRedeemer("Update")
-    )
+    .collectFrom([utxoAtScript], toChannelRedeemer("Update"))
     .payToContract(
       scriptAddress,
       { Inline: toChannelDatum(newDatum) },
       { [config.token]: newDeposit, [channelToken]: 1n }
     )
-    .attachMetadata(674, { msg: ["Update Channel"] });
+    .attachMetadata(674, { msg: [msg] });
 
-  if (newExpirationDate != datum.expirationDate) tx.addSigner(senderPubKeyHash);
+  if (updateExpiration) tx.addSigner(senderPubKeyHash);
 
-  lucid.selectReadOnlyWallet({ address: userAddress });
   const completeTx = await tx.commit();
   return { updatedChannelCbor: completeTx.toString() };
 };
