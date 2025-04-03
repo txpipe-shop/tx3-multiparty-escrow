@@ -1,12 +1,12 @@
-import { Addresses, Data, fromUnit, Hasher, Lucid } from "@spacebudz/lucid";
-import { SingularityChannelSpend } from "../types/plutus.ts";
-import { ChannelInfo } from "../types/types.ts";
+import { Addresses, fromUnit, Hasher, Lucid } from "@spacebudz/lucid";
+import { Channel, ChannelInfo } from "../types/types.ts";
+import { fromChannelDatum } from "../lib/utils.ts";
 
 export const getChannelsFromReceiver = async (
   lucid: Lucid,
   receiverAddr: string
 ): Promise<ChannelInfo[]> => {
-  const validator = new SingularityChannelSpend();
+  const validator = new Channel();
   const scriptAddress = lucid.utils.scriptToAddress(validator);
   const utxos = await lucid.utxosAt(scriptAddress);
   const policyId = Hasher.hashScript(validator);
@@ -28,13 +28,15 @@ export const getChannelsFromReceiver = async (
       }
       try {
         const { channelId, nonce, signer, receiver, groupId, expirationDate } =
-          Data.from(utxo.datum, SingularityChannelSpend.datum);
+          fromChannelDatum(utxo.datum);
         const [channelToken] = Object.keys(balance).filter((key) =>
           key.startsWith(policyId)
         );
         const sender = fromUnit(channelToken).assetName;
         if (!sender) {
-          console.warn(`Invalid sender asset name: ${sender}. Utxo: ${txHash}#${outputIndex}`);
+          console.warn(
+            `Invalid sender asset name: ${sender}. Utxo: ${txHash}#${outputIndex}`
+          );
           return null;
         }
         if (receiver !== receiverKey.hash) {

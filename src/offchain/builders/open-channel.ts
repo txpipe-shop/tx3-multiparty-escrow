@@ -2,10 +2,10 @@ import { Addresses, Data, fromText, Lucid, OutRef, toUnit, Utxo } from "@spacebu
 import { config } from "../../config.ts";
 import { OpenChannelParams } from "../../shared/api-types.ts";
 import {
-  SingularityChannelMint,
-  SingularityChannelSpend,
-  TypesDatum,
-} from "../types/plutus.ts";
+  Channel,
+  ChannelDatum,
+} from "../types/types.ts";
+import { toChannelDatum } from "../lib/utils.ts";
 
 export const openChannel = async (
   lucid: Lucid,
@@ -27,7 +27,7 @@ export const openChannel = async (
   const receiverPubKeyHash =
     Addresses.addressToCredential(receiverAddress).hash;
 
-  const datum: TypesDatum = {
+  const datum: ChannelDatum = {
     channelId,
     nonce: 0n,
     signer: signerPubKey,
@@ -36,7 +36,7 @@ export const openChannel = async (
     expirationDate,
   };
 
-  const validator = new SingularityChannelMint();
+  const validator = new Channel();
   const scriptAddress = Addresses.scriptToAddress(lucid.network, validator);
   const mintingPolicyId = Addresses.scriptToCredential(validator).hash;
 
@@ -51,7 +51,7 @@ export const openChannel = async (
     .mint({ [channelToken]: 1n }, Data.void())
     .payToContract(
       scriptAddress,
-      { Inline: Data.to(datum, SingularityChannelSpend.datum) },
+      { Inline: toChannelDatum(datum) },
       { [config.token]: initialDeposit, [channelToken]: 1n }
     )
     .attachMetadata(674, { msg: ["Open Channel"] })

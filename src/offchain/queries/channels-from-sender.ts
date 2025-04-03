@@ -1,12 +1,12 @@
-import { Addresses, Data, Hasher, Lucid } from "@spacebudz/lucid";
-import { SingularityChannelSpend } from "../types/plutus.ts";
-import { ChannelInfo } from "../types/types.ts";
+import { Addresses, Hasher, Lucid } from "@spacebudz/lucid";
+import { Channel, ChannelInfo } from "../types/types.ts";
+import { fromChannelDatum } from "../lib/utils.ts";
 
 export const getChannelsFromSender = async (
   lucid: Lucid,
   senderAddr: string
 ): Promise<ChannelInfo[]> => {
-  const validator = new SingularityChannelSpend();
+  const validator = new Channel();
   const scriptAddress = lucid.utils.scriptToAddress(validator);
   const policyId = Hasher.hashScript(validator);
   const senderKey = Addresses.inspect(senderAddr).payment;
@@ -38,7 +38,7 @@ export const getChannelsFromSender = async (
               receiver,
               groupId,
               expirationDate,
-            } = Data.from(utxo.datum, SingularityChannelSpend.datum);
+            } = fromChannelDatum(utxo.datum);
             return {
               txHash,
               outputIndex,

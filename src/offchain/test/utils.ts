@@ -1,5 +1,5 @@
 import { Lucid, toText, Utxo } from "@spacebudz/lucid";
-import { ChannelInfo } from "../types/types";
+import { ChannelInfo } from "../types/types.ts";
 
 const parseAssets = (walletUtxo: Utxo) => {
   return Object.fromEntries(
