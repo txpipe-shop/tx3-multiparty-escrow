@@ -1,18 +1,15 @@
-import { Addresses, Data, fromUnit, Lucid, Utxo } from "@spacebudz/lucid";
+import { Addresses, fromUnit, Lucid, Utxo } from "@spacebudz/lucid";
 import { config } from "../../config.ts";
-import {
-  SingularityChannelMint,
-  SingularityChannelSpend,
-  TypesDatum,
-} from "../types/plutus.ts";
+import { ChannelValidator, ChannelDatum } from "../types/types.ts";
 import { UpdateChannelParams } from "./../../shared/api-types.ts";
+import { fromChannelDatum, toChannelDatum, toChannelRedeemer } from "../lib/utils.ts";
 
 export const updateChannel = async (
   lucid: Lucid,
   { channelId, addDeposit, expirationDate, userAddress }: UpdateChannelParams,
   scriptRef: Utxo
 ) => {
-  const validator = new SingularityChannelMint();
+  const validator = new ChannelValidator();
   const scriptAddress = Addresses.scriptToAddress(lucid.network, validator);
   const scriptAddressDetails = Addresses.inspect(scriptAddress).payment;
   if (!scriptAddressDetails) throw new Error("Script credentials not found");
@@ -27,10 +24,7 @@ export const updateChannel = async (
         return false;
       }
       try {
-        const { channelId: cId } = Data.from(
-          datum,
-          SingularityChannelSpend.datum
-        );
+        const { channelId: cId } = fromChannelDatum(datum);
         return cId == channelId;
       } catch (e) {
         console.warn(e);
@@ -51,23 +45,23 @@ export const updateChannel = async (
 
   const datumStr = utxoAtScript.datum;
   if (!datumStr) throw new Error("Datum not found at Channel UTxO");
-  const datum: TypesDatum = Data.from(datumStr, SingularityChannelSpend.datum);
+  const datum: ChannelDatum = fromChannelDatum(datumStr);
 
   const newDeposit = utxoAtScript.assets[config.token] + (addDeposit ?? 0n);
   const newExpirationDate = expirationDate || datum.expirationDate;
 
-  const newDatum: TypesDatum = { ...datum, expirationDate: newExpirationDate };
+  const newDatum: ChannelDatum = { ...datum, expirationDate: newExpirationDate };
 
   const tx = lucid
     .newTx()
     .readFrom([scriptRef])
     .collectFrom(
       [utxoAtScript],
-      Data.to("Update", SingularityChannelSpend.redeemer)
+      toChannelRedeemer("Update")
     )
     .payToContract(
       scriptAddress,
-      { Inline: Data.to(newDatum, SingularityChannelSpend.datum) },
+      { Inline: toChannelDatum(newDatum) },
       { [config.token]: newDeposit, [channelToken]: 1n }
     )
     .attachMetadata(674, { msg: ["Update Channel"] });
