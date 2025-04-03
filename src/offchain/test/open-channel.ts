@@ -44,9 +44,7 @@ const { cbor } = await deployScript(lucid);
 lucid.selectWalletFromPrivateKey(senderPrivKey);
 const txDeployHash = await lucid
   .fromTx(cbor)
-  .then((txComp) => {
-    return txComp.sign().commit();
-  })
+  .then((txComp) => txComp.sign().commit())
   .then((txSigned) => txSigned.submit());
 await lucid.awaitTx(txDeployHash);
 const [scriptRef] = await lucid.utxosByOutRef([
@@ -63,7 +61,7 @@ const { openChannelCbor, channelId } = await openChannel(
     expirationDate: 2n,
     groupId: 10n,
   },
-  scriptRef
+  scriptRef,
 );
 const tx = await lucid.fromTx(openChannelCbor);
 lucid.selectWalletFromPrivateKey(senderPrivKey);

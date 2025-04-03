@@ -4,7 +4,7 @@ import { ChannelInfo, ChannelValidator } from "../types/types.ts";
 
 export const getChannelsFromReceiver = async (
   lucid: Lucid,
-  receiverAddr: string
+  receiverAddr: string,
 ): Promise<ChannelInfo[]> => {
   const validator = new ChannelValidator();
   const scriptAddress = lucid.utils.scriptToAddress(validator);
@@ -13,7 +13,7 @@ export const getChannelsFromReceiver = async (
   const receiverKey = Addresses.inspect(receiverAddr).payment;
   if (!receiverKey) {
     throw new Error(
-      `Invalid receiver address: ${receiverAddr}. Must have a payment key`
+      `Invalid receiver address: ${receiverAddr}. Must have a payment key`,
     );
   }
 
@@ -22,7 +22,7 @@ export const getChannelsFromReceiver = async (
       const { assets: balance, txHash, outputIndex, datum } = utxo;
       if (!datum) {
         console.warn(
-          `Channel UTxO without datum found: ${txHash}#${outputIndex}`
+          `Channel UTxO without datum found: ${txHash}#${outputIndex}`,
         );
         return null;
       }
@@ -30,12 +30,12 @@ export const getChannelsFromReceiver = async (
         const { channelId, nonce, signer, receiver, groupId, expirationDate } =
           fromChannelDatum(datum);
         const [channelToken] = Object.keys(balance).filter((key) =>
-          key.startsWith(policyId)
+          key.startsWith(policyId),
         );
         const sender = fromUnit(channelToken).assetName;
         if (!sender) {
           console.warn(
-            `Invalid sender asset name: ${sender}. Utxo: ${txHash}#${outputIndex}`
+            `Invalid sender asset name: ${sender}. Utxo: ${txHash}#${outputIndex}`,
           );
           return null;
         }
@@ -57,7 +57,7 @@ export const getChannelsFromReceiver = async (
         };
       } catch (_) {
         console.warn(
-          `Invalid datum found in channel UTxO: ${txHash}#${outputIndex}`
+          `Invalid datum found in channel UTxO: ${txHash}#${outputIndex}`,
         );
         return null;
       }

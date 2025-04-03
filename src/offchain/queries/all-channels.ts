@@ -12,19 +12,19 @@ export const getAllChannels = async (lucid: Lucid): Promise<ChannelInfo[]> => {
     .map((utxo) => {
       const { assets: balance, txHash, outputIndex, datum } = utxo;
       const [channelToken] = Object.keys(utxo.assets).filter((key) =>
-        key.startsWith(policyId)
+        key.startsWith(policyId),
       );
       const sender = fromUnit(channelToken).assetName;
       if (!sender) {
         console.warn(
           `Invalid sender address: ${sender}. Must have a payment key.
-          Utxo: : ${txHash}#${outputIndex}`
+          Utxo: : ${txHash}#${outputIndex}`,
         );
         return null;
       }
       if (!datum) {
         console.warn(
-          `Channel UTxO without datum found: ${txHash}#${outputIndex}`
+          `Channel UTxO without datum found: ${txHash}#${outputIndex}`,
         );
         return null;
       }
@@ -46,7 +46,7 @@ export const getAllChannels = async (lucid: Lucid): Promise<ChannelInfo[]> => {
         };
       } catch (_) {
         console.warn(
-          `Invalid datum found in channel UTxO: ${utxo.txHash}#${utxo.outputIndex}`
+          `Invalid datum found in channel UTxO: ${utxo.txHash}#${utxo.outputIndex}`,
         );
         return null;
       }

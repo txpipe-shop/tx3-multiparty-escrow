@@ -1,5 +1,10 @@
 import { Assets, OutRef } from "@spacebudz/lucid";
-import { SingularityChannelMint, SingularityChannelSpend, TypesAction, TypesDatum } from "./plutus.ts";
+import {
+  SingularityChannelMint,
+  SingularityChannelSpend,
+  TypesAction,
+  TypesDatum,
+} from "./plutus.ts";
 
 // Aliases for types defined in plutus generated file
 export const ChannelValidator = SingularityChannelSpend;

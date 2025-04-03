@@ -21,7 +21,7 @@ export const openChannel = async (
     expirationDate,
     initialDeposit,
   }: OpenChannelParams,
-  scriptRef: Utxo
+  scriptRef: Utxo,
 ) => {
   lucid.selectReadOnlyWallet({ address: senderAddress });
   const utxos = await lucid.wallet.getUtxos();
@@ -56,7 +56,7 @@ export const openChannel = async (
     .payToContract(
       scriptAddress,
       { Inline: toChannelDatum(datum) },
-      { [config.token]: initialDeposit, [channelToken]: 1n }
+      { [config.token]: initialDeposit, [channelToken]: 1n },
     )
     .validTo(Number(expirationDate))
     .attachMetadata(674, { msg: ["Open Channel"] })

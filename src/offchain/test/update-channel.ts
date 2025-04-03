@@ -1,11 +1,11 @@
 import { Addresses, Crypto, Emulator, Lucid } from "@spacebudz/lucid";
 import { generateMnemonic } from "bip39";
 import { config } from "../../config.ts";
+import { deployScript } from "../builders/deploy-script.ts";
 import { openChannel } from "../builders/open-channel.ts";
 import { updateChannel } from "../builders/update-channel.ts";
 import { ChannelValidator } from "../types/types.ts";
 import { printUtxos } from "./utils.ts";
-import { deployScript } from "../builders/deploy-script.ts";
 
 const {
   privateKey: senderPrivKey,
@@ -40,9 +40,7 @@ const { cbor } = await deployScript(lucid);
 lucid.selectWalletFromPrivateKey(senderPrivKey);
 const txDeployHash = await lucid
   .fromTx(cbor)
-  .then((txComp) => {
-    return txComp.sign().commit();
-  })
+  .then((txComp) => txComp.sign().commit())
   .then((txSigned) => txSigned.submit());
 await lucid.awaitTx(txDeployHash);
 const [scriptRef] = await lucid.utxosByOutRef([
@@ -55,10 +53,10 @@ const { openChannelCbor, channelId } = await openChannel(
     signerPubKey: senderPubKey,
     receiverAddress: receiverAddress,
     initialDeposit: 6n,
-    expirationDate: 2n,
+    expirationDate: BigInt(Date.now()) + 2n * 24n * 60n * 60n * 1000n,
     groupId: 10n,
   },
-  scriptRef
+  scriptRef,
 );
 
 const tx = await lucid.fromTx(openChannelCbor);
@@ -83,11 +81,12 @@ const { updatedChannelCbor } = await updateChannel(
   lucid,
   {
     userAddress: senderAddress,
+    senderAddress,
     channelId,
     addDeposit: 3n,
-    expirationDate: 3n,
+    expirationDate: BigInt(Date.now()) + 5n * 24n * 60n * 60n * 1000n,
   },
-  scriptRef
+  scriptRef,
 );
 lucid.selectWalletFromPrivateKey(senderPrivKey);
 const updateTx = await lucid.fromTx(updatedChannelCbor);
