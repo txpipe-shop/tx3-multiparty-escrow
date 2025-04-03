@@ -5,6 +5,7 @@ import { openChannel } from "../builders/open-channel.ts";
 import { updateChannel } from "../builders/update-channel.ts";
 import { SingularityChannelMint } from "../types/plutus.ts";
 import { printUtxos } from "./utils.ts";
+import { deployScript } from "../builders/deploy-script.ts";
 
 const {
   privateKey: senderPrivKey,
@@ -35,17 +36,33 @@ const emulator = new Emulator([
 const lucid = new Lucid({ provider: emulator });
 await printUtxos(lucid, senderAddress);
 
-const { openChannelCbor, channelId } = await openChannel(lucid, {
-  senderAddress,
-  signerPubKey: senderPubKey,
-  receiverAddress: receiverAddress,
-  initialDeposit: 6n,
-  expirationDate: 2n,
-  groupId: 10n,
-});
-
+const { cbor } = await deployScript(lucid);
 lucid.selectWalletFromPrivateKey(senderPrivKey);
+const txDeployHash = await lucid
+  .fromTx(cbor)
+  .then((txComp) => {
+    return txComp.sign().commit();
+  })
+  .then((txSigned) => txSigned.submit());
+await lucid.awaitTx(txDeployHash);
+const [scriptRef] = await lucid.utxosByOutRef([
+  { txHash: txDeployHash, outputIndex: 0 },
+]);
+const { openChannelCbor, channelId } = await openChannel(
+  lucid,
+  {
+    senderAddress,
+    signerPubKey: senderPubKey,
+    receiverAddress: receiverAddress,
+    initialDeposit: 6n,
+    expirationDate: 2n,
+    groupId: 10n,
+  },
+  scriptRef
+);
+
 const tx = await lucid.fromTx(openChannelCbor);
+lucid.selectWalletFromPrivateKey(senderPrivKey);
 const signedTx = await tx.sign().commit();
 const openTx = await signedTx.submit();
 await lucid.awaitTx(openTx);
@@ -62,12 +79,16 @@ const scriptAddress = lucid.newScript(validator).toAddress();
 const utxosAtScript = await lucid.utxosAt(scriptAddress);
 printUtxos(lucid, undefined, utxosAtScript);
 
-const { updatedChannelCbor } = await updateChannel(lucid, {
-  userAddress: senderAddress,
-  channelId,
-  addDeposit: 3n,
-  expirationDate: 3n,
-});
+const { updatedChannelCbor } = await updateChannel(
+  lucid,
+  {
+    userAddress: senderAddress,
+    channelId,
+    addDeposit: 3n,
+    expirationDate: 3n,
+  },
+  scriptRef
+);
 lucid.selectWalletFromPrivateKey(senderPrivKey);
 const updateTx = await lucid.fromTx(updatedChannelCbor);
 const signedUpdateTx = await updateTx.sign().commit();

@@ -1,4 +1,4 @@
-import { Addresses, Data, fromText, Lucid, toUnit } from "@spacebudz/lucid";
+import { Addresses, Data, fromText, Lucid, OutRef, toUnit, Utxo } from "@spacebudz/lucid";
 import { config } from "../../config.ts";
 import { OpenChannelParams } from "../../shared/api-types.ts";
 import {
@@ -16,7 +16,8 @@ export const openChannel = async (
     groupId,
     expirationDate,
     initialDeposit,
-  }: OpenChannelParams
+  }: OpenChannelParams,
+  scriptRef: Utxo
 ) => {
   lucid.selectReadOnlyWallet({ address: senderAddress });
   const utxos = await lucid.wallet.getUtxos();
@@ -44,9 +45,9 @@ export const openChannel = async (
 
   const tx = await lucid
     .newTx()
+    .readFrom([scriptRef])
     .collectFrom([utxo])
-    .attachScript(validator)
-    .addSigner(senderPubKeyHash) // Third party?
+    .addSigner(senderPubKeyHash)
     .mint({ [channelToken]: 1n }, Data.void())
     .payToContract(
       scriptAddress,
