@@ -6,7 +6,7 @@ const parseAssets = (walletUtxo: Utxo) => {
     Object.entries(walletUtxo.assets).map(([key, value]) => {
       const newKey = key.slice(0, 56) + " " + toText(key.slice(56));
       return [newKey, typeof value === "bigint" ? value.toString() : value];
-    }),
+    })
   );
 };
 const maxLength = 70;
@@ -22,13 +22,13 @@ const parseUtxos = (utxos: Utxo[]) =>
         return value.slice(0, maxLength) + "...";
       return value;
     },
-    4,
+    4
   );
 
 export const printUtxos = async (
   lucid: Lucid,
   address?: string,
-  utxos?: Utxo[],
+  utxos?: Utxo[]
 ) => {
   if (address) lucid.selectReadOnlyWallet({ address });
   const walletUtxos = utxos ?? (await lucid.wallet.getUtxos());
@@ -38,7 +38,7 @@ ${parseUtxos(walletUtxos)}
 ------------------------------------------------------------------`);
 };
 
-export const pprintChannels = (
+export const printChannels = (
   header: string,
   channels: ChannelInfo[] | ChannelInfo
 ) => {

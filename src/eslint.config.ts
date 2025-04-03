@@ -6,19 +6,7 @@ import globals from "globals";
 /** @type {import('eslint').Linter.Config[]} */
 export default [
   {
-    ignores: [
-      "docs",
-      "node_modules",
-      "scripts",
-      "services/metera",
-      ".github",
-      "libraries/utxorpc-sdk",
-      "**/dist",
-      "**/scripts",
-      "services/public-api/test.ts",
-      "**/.next",
-      "libraries/integration-tests",
-    ],
+    ignores: ["docs", "node_modules", ".github"],
   },
   {
     files: ["**/*.{js,mjs,cjs,ts}"],

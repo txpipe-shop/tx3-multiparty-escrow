@@ -1,6 +1,6 @@
 import { Addresses, fromUnit, Hasher, Lucid } from "@spacebudz/lucid";
-import { ChannelValidator, ChannelInfo } from "../types/types.ts";
 import { fromChannelDatum } from "../lib/utils.ts";
+import { ChannelInfo, ChannelValidator } from "../types/types.ts";
 
 export const getChannelsFromReceiver = async (
   lucid: Lucid,
@@ -19,16 +19,16 @@ export const getChannelsFromReceiver = async (
 
   return utxos
     .map((utxo) => {
-      const { assets: balance, txHash, outputIndex } = utxo;
-      if (!utxo.datum) {
+      const { assets: balance, txHash, outputIndex, datum } = utxo;
+      if (!datum) {
         console.warn(
-          `Channel UTxO without datum found: ${utxo.txHash}#${utxo.outputIndex}`
+          `Channel UTxO without datum found: ${txHash}#${outputIndex}`
         );
         return null;
       }
       try {
         const { channelId, nonce, signer, receiver, groupId, expirationDate } =
-          fromChannelDatum(utxo.datum);
+          fromChannelDatum(datum);
         const [channelToken] = Object.keys(balance).filter((key) =>
           key.startsWith(policyId)
         );
@@ -55,9 +55,9 @@ export const getChannelsFromReceiver = async (
           expirationDate,
           active: Date.now() < expirationDate,
         };
-      } catch (error) {
+      } catch (_) {
         console.warn(
-          `Invalid datum found in channel UTxO: ${utxo.txHash}#${utxo.outputIndex}`
+          `Invalid datum found in channel UTxO: ${txHash}#${outputIndex}`
         );
         return null;
       }

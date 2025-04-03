@@ -1,6 +1,6 @@
 import { fromUnit, Hasher, Lucid } from "@spacebudz/lucid";
-import { ChannelValidator, ChannelInfo } from "../types/types.ts";
 import { fromChannelDatum } from "../lib/utils.ts";
+import { ChannelInfo, ChannelValidator } from "../types/types.ts";
 
 export const getChannelById = async (
   lucid: Lucid,
@@ -20,7 +20,7 @@ export const getChannelById = async (
     try {
       const datum = fromChannelDatum(utxo.datum);
       return datum.channelId === channelId;
-    } catch (error) {
+    } catch (_) {
       console.warn(
         `Invalid datum found in channel UTxO: ${utxo.txHash}#${utxo.outputIndex}`
       );
