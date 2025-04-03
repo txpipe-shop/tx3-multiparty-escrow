@@ -16,17 +16,17 @@ const {
 } = Crypto.seedToDetails(generateMnemonic(256), 0, "Payment");
 const senderAddress = Addresses.credentialToAddress(
   { Emulator: 0 },
-  senderCredential
+  senderCredential,
 );
 
 const { privateKey: receiverPrivKey } = Crypto.seedToDetails(
   generateMnemonic(256),
   0,
-  "Payment"
+  "Payment",
 );
 const receiverAddress = Addresses.credentialToAddress(
   { Emulator: 0 },
-  Crypto.privateKeyToDetails(receiverPrivKey).credential
+  Crypto.privateKeyToDetails(receiverPrivKey).credential,
 );
 
 const emulator = new Emulator([
@@ -79,10 +79,10 @@ console.log(`\n
 
 printChannels(
   "GET SENDERS CHANNELS AFTER TX",
-  await getChannelsFromSender(lucid, senderAddress)
+  await getChannelsFromSender(lucid, senderAddress),
 );
 printChannels("GET CHANNEL BY ID", await getChannelById(lucid, channelId));
 printChannels(
   "GET CHANNELS FROM RECEIVER",
-  await getChannelsFromReceiver(lucid, receiverAddress)
+  await getChannelsFromReceiver(lucid, receiverAddress),
 );

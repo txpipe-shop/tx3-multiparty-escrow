@@ -13,18 +13,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          path: src
 
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "18.20.4"
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18.20.4
 
       - name: Install dependencies
         working-directory: src
