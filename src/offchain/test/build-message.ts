@@ -2,6 +2,7 @@ import { Addresses, Crypto, Emulator, Lucid } from "@spacebudz/lucid";
 import { generateMnemonic } from "bip39";
 import { config } from "../../config.ts";
 import { buildMessage } from "../builders/build-message.ts";
+import { deployScript } from "../builders/deploy-script.ts";
 import { openChannel } from "../builders/open-channel.ts";
 import { SingularityChannelMint } from "../types/plutus.ts";
 import { printUtxos } from "./utils.ts";
@@ -35,15 +36,29 @@ const emulator = new Emulator([
 const lucid = new Lucid({ provider: emulator });
 
 await printUtxos(lucid, senderAddress);
+const { cbor } = await deployScript(lucid);
+lucid.selectWalletFromPrivateKey(senderPrivKey);
+const txDeployHash = await lucid
+  .fromTx(cbor)
+  .then((txComp) => txComp.sign().commit())
+  .then((txSigned) => txSigned.submit());
+await lucid.awaitTx(txDeployHash);
+const [scriptRef] = await lucid.utxosByOutRef([
+  { txHash: txDeployHash, outputIndex: 0 },
+]);
 
-const { openChannelCbor, channelId } = await openChannel(lucid, {
-  senderAddress,
-  signerPubKey: senderPubKey,
-  receiverAddress: receiverAddress,
-  initialDeposit: 6n,
-  expirationDate: 2n,
-  groupId: 10n,
-});
+const { openChannelCbor, channelId } = await openChannel(
+  lucid,
+  {
+    senderAddress,
+    signerPubKey: senderPubKey,
+    receiverAddress: receiverAddress,
+    initialDeposit: 6n,
+    expirationDate: 2n,
+    groupId: 10n,
+  },
+  scriptRef,
+);
 lucid.selectWalletFromPrivateKey(senderPrivKey);
 const tx = await lucid.fromTx(openChannelCbor);
 const signedTx = await tx.sign().commit();
