@@ -1,4 +1,4 @@
-import { Addresses, Data, fromUnit, Lucid } from "@spacebudz/lucid";
+import { Addresses, Data, fromUnit, Lucid, Utxo } from "@spacebudz/lucid";
 import { config } from "../../config.ts";
 import {
   SingularityChannelMint,
@@ -9,7 +9,8 @@ import { UpdateChannelParams } from "./../../shared/api-types.ts";
 
 export const updateChannel = async (
   lucid: Lucid,
-  { channelId, addDeposit, expirationDate, userAddress }: UpdateChannelParams
+  { channelId, addDeposit, expirationDate, userAddress }: UpdateChannelParams,
+  scriptRef: Utxo
 ) => {
   const validator = new SingularityChannelMint();
   const scriptAddress = Addresses.scriptToAddress(lucid.network, validator);
@@ -59,11 +60,11 @@ export const updateChannel = async (
 
   const tx = lucid
     .newTx()
+    .readFrom([scriptRef])
     .collectFrom(
       [utxoAtScript],
       Data.to("Update", SingularityChannelSpend.redeemer)
     )
-    .attachScript(validator)
     .payToContract(
       scriptAddress,
       { Inline: Data.to(newDatum, SingularityChannelSpend.datum) },

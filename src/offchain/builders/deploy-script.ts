@@ -8,7 +8,7 @@ import { SingularityChannelSpend } from "../types/plutus.ts";
 
 async function deployScript(
   lucid: Lucid
-): Promise<{ txDeployHash: string }> {
+): Promise<{ cbor: string }> {
   const cred = Addresses.inspect(await lucid.wallet.address()).payment;
   if (!cred) {
     throw new Error("Failed to get payment key hash");
@@ -22,7 +22,7 @@ async function deployScript(
   );
 
   const validator = new SingularityChannelSpend();
-  const txDeployHash = await lucid
+  const tx = await lucid
     .newTx()
     .payToContract(
       refScriptAddress,
@@ -36,13 +36,7 @@ async function deployScript(
       {}
     )
     .commit()
-    .then((txComp) => {
-      return txComp.sign().commit();
-    })
-    .then((txSigned) => txSigned.submit());
-
-  lucid.awaitTx(txDeployHash);
-  return { txDeployHash };
+  return { cbor: tx.toString() };
 }
 
 export { deployScript };
