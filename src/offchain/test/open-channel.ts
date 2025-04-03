@@ -7,6 +7,7 @@ import { pprintChannels, printUtxos } from "./utils.ts";
 import { getChannelsFromSender } from "../queries/channels-from-sender.ts";
 import { getChannelsFromReceiver } from "../queries/channels-from-receiver.ts";
 import { getChannelById } from "../queries/channel-by-id.ts";
+import { deployScript } from "../builders/deploy-script.ts";
 
 const {
   privateKey: senderPrivKey,
@@ -39,16 +40,33 @@ await printUtxos(lucid, senderAddress);
 
 pprintChannels("GET ALL CHANNELS BEFORE TX", await getAllChannels(lucid));
 
-const { openChannelCbor, channelId } = await openChannel(lucid, {
-  senderAddress,
-  signerPubKey: senderPubKey,
-  receiverAddress: receiverAddress,
-  initialDeposit: 6n,
-  expirationDate: 2n,
-  groupId: 10n,
-});
+const { cbor } = await deployScript(lucid);
 lucid.selectWalletFromPrivateKey(senderPrivKey);
+const txDeployHash = await lucid
+  .fromTx(cbor)
+  .then((txComp) => {
+    return txComp.sign().commit();
+  })
+  .then((txSigned) => txSigned.submit());
+await lucid.awaitTx(txDeployHash);
+const [scriptRef] = await lucid.utxosByOutRef([
+  { txHash: txDeployHash, outputIndex: 0 },
+]);
+
+const { openChannelCbor, channelId } = await openChannel(
+  lucid,
+  {
+    senderAddress,
+    signerPubKey: senderPubKey,
+    receiverAddress: receiverAddress,
+    initialDeposit: 6n,
+    expirationDate: 2n,
+    groupId: 10n,
+  },
+  scriptRef
+);
 const tx = await lucid.fromTx(openChannelCbor);
+lucid.selectWalletFromPrivateKey(senderPrivKey);
 const signedTx = await tx.sign().commit();
 const openTx = await signedTx.submit();
 await lucid.awaitTx(openTx);
