@@ -2,7 +2,7 @@ import { Addresses, Data, fromText, Lucid, OutRef, toUnit, Utxo } from "@spacebu
 import { config } from "../../config.ts";
 import { OpenChannelParams } from "../../shared/api-types.ts";
 import {
-  Channel,
+  ChannelValidator,
   ChannelDatum,
 } from "../types/types.ts";
 import { toChannelDatum } from "../lib/utils.ts";
@@ -36,7 +36,7 @@ export const openChannel = async (
     expirationDate,
   };
 
-  const validator = new Channel();
+  const validator = new ChannelValidator();
   const scriptAddress = Addresses.scriptToAddress(lucid.network, validator);
   const mintingPolicyId = Addresses.scriptToCredential(validator).hash;
 

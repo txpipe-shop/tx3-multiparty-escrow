@@ -3,7 +3,7 @@ import { generateMnemonic } from "bip39";
 import { config } from "../../config.ts";
 import { openChannel } from "../builders/open-channel.ts";
 import { updateChannel } from "../builders/update-channel.ts";
-import { SingularityChannelMint } from "../types/plutus.ts";
+import { ChannelValidator } from "../types/types.ts";
 import { printUtxos } from "./utils.ts";
 import { deployScript } from "../builders/deploy-script.ts";
 
@@ -74,7 +74,7 @@ console.log(`\n
     > CBOR: ${openChannelCbor}\n\n`);
 
 await printUtxos(lucid, senderAddress);
-const validator = new SingularityChannelMint();
+const validator = new ChannelValidator();
 const scriptAddress = lucid.newScript(validator).toAddress();
 const utxosAtScript = await lucid.utxosAt(scriptAddress);
 printUtxos(lucid, undefined, utxosAtScript);

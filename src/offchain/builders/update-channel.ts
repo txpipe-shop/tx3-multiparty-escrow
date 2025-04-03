@@ -1,6 +1,6 @@
 import { Addresses, fromUnit, Lucid, Utxo } from "@spacebudz/lucid";
 import { config } from "../../config.ts";
-import { Channel, ChannelDatum } from "../types/types.ts";
+import { ChannelValidator, ChannelDatum } from "../types/types.ts";
 import { UpdateChannelParams } from "./../../shared/api-types.ts";
 import { fromChannelDatum, toChannelDatum, toChannelRedeemer } from "../lib/utils.ts";
 
@@ -9,7 +9,7 @@ export const updateChannel = async (
   { channelId, addDeposit, expirationDate, userAddress }: UpdateChannelParams,
   scriptRef: Utxo
 ) => {
-  const validator = new Channel();
+  const validator = new ChannelValidator();
   const scriptAddress = Addresses.scriptToAddress(lucid.network, validator);
   const scriptAddressDetails = Addresses.inspect(scriptAddress).payment;
   if (!scriptAddressDetails) throw new Error("Script credentials not found");
