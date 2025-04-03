@@ -2,8 +2,11 @@ import { Addresses, Crypto, Emulator, Lucid } from "@spacebudz/lucid";
 import { generateMnemonic } from "bip39";
 import { config } from "../../config.ts";
 import { openChannel } from "../builders/open-channel.ts";
-import { SingularityChannelMint } from "../types/plutus.ts";
-import { printUtxos } from "./utils.ts";
+import { getAllChannels } from "../queries/all-channels.ts";
+import { pprintChannels, printUtxos } from "./utils.ts";
+import { getChannelsFromSender } from "../queries/channels-from-sender.ts";
+import { getChannelsFromReceiver } from "../queries/channels-from-receiver.ts";
+import { getChannelById } from "../queries/channel-by-id.ts";
 
 const {
   privateKey: senderPrivKey,
@@ -32,7 +35,9 @@ const emulator = new Emulator([
   },
 ]);
 const lucid = new Lucid({ provider: emulator });
-printUtxos(lucid, senderAddress);
+await printUtxos(lucid, senderAddress);
+
+pprintChannels("GET ALL CHANNELS BEFORE TX", await getAllChannels(lucid));
 
 const { openChannelCbor, channelId } = await openChannel(lucid, {
   senderAddress,
@@ -54,8 +59,6 @@ console.log(`\n
     > Tx ID: ${openTx}
     > CBOR: ${openChannelCbor}\n\n`);
 
-printUtxos(lucid, senderAddress);
-const validator = new SingularityChannelMint();
-const scriptAddress = lucid.newScript(validator).toAddress();
-const utxosAtScript = await lucid.utxosAt(scriptAddress);
-printUtxos(lucid, undefined, utxosAtScript);
+pprintChannels("GET SENDERS CHANNELS AFTER TX", await getChannelsFromSender(lucid, senderAddress));
+pprintChannels("GET CHANNEL BY ID", await getChannelById(lucid, channelId));
+pprintChannels("GET CHANNELS FROM RECEIVER", await getChannelsFromReceiver(lucid, receiverAddress));
