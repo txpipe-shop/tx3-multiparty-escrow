@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import fs from 'fs';
+import fs from "fs";
 import { z } from "zod";
 dotenv.config();
 
@@ -10,9 +10,7 @@ const envSchema = z
       .refine(
         (val) =>
           Number.isFinite(Number.parseInt(val)) && Number.parseInt(val) > 0,
-        {
-          message: `Port must be a positive integer`,
-        }
+        { message: `Port must be a positive integer` },
       )
       .transform((val) => Number.parseInt(val)),
     PROVIDER_PROJECT_ID: z.string(),

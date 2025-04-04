@@ -1,11 +1,15 @@
-import { Addresses, Data, fromText, Lucid, OutRef, toUnit, Utxo } from "@spacebudz/lucid";
+import {
+  Addresses,
+  Data,
+  fromText,
+  Lucid,
+  toUnit,
+  Utxo,
+} from "@spacebudz/lucid";
 import { config } from "../../config.ts";
 import { OpenChannelParams } from "../../shared/api-types.ts";
-import {
-  ChannelValidator,
-  ChannelDatum,
-} from "../types/types.ts";
 import { toChannelDatum } from "../lib/utils.ts";
+import { ChannelDatum, ChannelValidator } from "../types/types.ts";
 
 export const openChannel = async (
   lucid: Lucid,
@@ -17,12 +21,12 @@ export const openChannel = async (
     expirationDate,
     initialDeposit,
   }: OpenChannelParams,
-  scriptRef: Utxo
+  scriptRef: Utxo,
 ) => {
   lucid.selectReadOnlyWallet({ address: senderAddress });
   const utxos = await lucid.wallet.getUtxos();
   const utxo = utxos[0];
-  const channelId: string = utxo.txHash + fromText(String(utxo.outputIndex)); // Check index
+  const channelId: string = utxo.txHash + fromText(String(utxo.outputIndex));
 
   const receiverPubKeyHash =
     Addresses.addressToCredential(receiverAddress).hash;
@@ -52,8 +56,9 @@ export const openChannel = async (
     .payToContract(
       scriptAddress,
       { Inline: toChannelDatum(datum) },
-      { [config.token]: initialDeposit, [channelToken]: 1n }
+      { [config.token]: initialDeposit, [channelToken]: 1n },
     )
+    .validTo(Number(expirationDate))
     .attachMetadata(674, { msg: ["Open Channel"] })
     .commit();
 

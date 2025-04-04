@@ -12,7 +12,7 @@ import { context } from "../../context.ts";
 export function addRequestId(
   req: IncomingMessage,
   res: ServerResponse,
-  next: () => void
+  next: () => void,
 ) {
   let requestId = req.headers[REQUEST_ID_HEADER];
 

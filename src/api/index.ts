@@ -1,4 +1,3 @@
-
 import { env } from "../config.ts";
 import { createServer } from "./entry-points/server.ts";
 import { setRoutes } from "./entry-points/routes.ts";

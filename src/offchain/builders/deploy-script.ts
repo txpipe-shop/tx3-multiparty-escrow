@@ -1,14 +1,7 @@
-import {
-  Addresses,
-  Data,
-  Lucid,
-  Utils,
-} from "@spacebudz/lucid";
+import { Addresses, Data, Lucid, Utils } from "@spacebudz/lucid";
 import { SingularityChannelSpend } from "../types/plutus.ts";
 
-async function deployScript(
-  lucid: Lucid
-): Promise<{ cbor: string }> {
+async function deployScript(lucid: Lucid): Promise<{ cbor: string }> {
   const cred = Addresses.inspect(await lucid.wallet.address()).payment;
   if (!cred) {
     throw new Error("Failed to get payment key hash");
@@ -18,7 +11,7 @@ async function deployScript(
     lucid.newScript({
       type: "Sig",
       keyHash: cred.hash,
-    }).script
+    }).script,
   );
 
   const validator = new SingularityChannelSpend();
@@ -33,9 +26,9 @@ async function deployScript(
           script: Utils.applyDoubleCborEncoding(validator.script),
         },
       },
-      {}
+      {},
     )
-    .commit()
+    .commit();
   return { cbor: tx.toString() };
 }
 

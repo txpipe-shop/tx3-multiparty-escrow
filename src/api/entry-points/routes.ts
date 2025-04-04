@@ -1,9 +1,8 @@
-import e from "express";
-import { JSONBig } from "./server.ts";
 import { Lucid } from "@spacebudz/lucid";
+import e from "express";
 
-const setRoutes = (lucid: Lucid, expressApp: e.Application) => {
-  expressApp.post("route", async (req, res) => {
+const setRoutes = (_lucid: Lucid, expressApp: e.Application) => {
+  expressApp.post("route", async (_req, _res) => {
     // logic
   });
 };

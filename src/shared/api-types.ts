@@ -111,6 +111,7 @@ export const OpenChannelSchema = z.object({
 export const UpdateChannelSchema = z.object({
   channelId: OutRef,
   userAddress: addressSchema,
+  senderAddress: addressSchema,
   addDeposit: z.bigint().optional(),
   expirationDate: z.bigint().optional(),
 });
@@ -124,7 +125,7 @@ export const MultiClaimChannelSchema = z.array(
   z.object({
     channelId: OutRef,
     msg: z.string(),
-  })
+  }),
 );
 
 export const CloseChannelSchema = z.object({
@@ -133,6 +134,7 @@ export const CloseChannelSchema = z.object({
 
 export const BuildMessageSchema = z.object({
   channelId: OutRef,
+  senderAddress: addressSchema,
   amount: z.bigint(),
 });
 

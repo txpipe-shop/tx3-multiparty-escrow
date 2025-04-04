@@ -2,8 +2,8 @@
 The MultiParty Escrow (MPE) smart contract manages payment channels between **clients** —who act as senders, consumers, or service customers— and **service providers**, who serve as receivers or recipients.
 
 ## Documentation
-- [Requirements](./requeriments.md)
-- [Design](./design.md)
+- [Requirements](./docs/requeriments.md)
+- [Design](./docs/design.md)
 
 ## Environment files
 
@@ -51,4 +51,9 @@ To test the offchain operations, you can run the following commands from the `sr
 A channel will be created and then updated.
 ```shell
    $> npm run test-update
+```
+
+**Build a message**
+```shell
+   $> npm run test-build-msg
 ```
