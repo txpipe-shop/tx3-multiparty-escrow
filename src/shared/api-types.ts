@@ -134,6 +134,7 @@ export const CloseChannelSchema = z.object({
 
 export const BuildMessageSchema = z.object({
   channelId: OutRef,
+  senderAddress: addressSchema,
   amount: z.bigint(),
 });
 

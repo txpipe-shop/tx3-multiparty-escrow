@@ -24,6 +24,7 @@ export const updateChannel = async (
   const scriptAddressDetails = Addresses.inspect(scriptAddress).payment;
   if (!scriptAddressDetails) throw new Error("Script credentials not found");
   const scriptHash = scriptAddressDetails.hash;
+
   const senderDetails = Addresses.inspect(senderAddress).payment;
   if (!senderDetails) throw new Error("Sender's credentials not found");
   const senderPubKeyHash = senderDetails.hash;

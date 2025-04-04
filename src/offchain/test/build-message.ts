@@ -80,6 +80,7 @@ printUtxos(lucid, undefined, utxoAtScript);
 const { payload } = await buildMessage(lucid, {
   channelId,
   amount: 3n,
+  senderAddress,
 });
 
 lucid.selectWalletFromPrivateKey(senderPrivKey);

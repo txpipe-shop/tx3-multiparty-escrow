@@ -1,9 +1,7 @@
-import { Addresses, Data, Lucid } from "@spacebudz/lucid";
-import {
-  SingularityChannelMint,
-  SingularityChannelSpend,
-  TypesDatum,
-} from "../types/plutus.ts";
+import { Addresses, Data, Lucid, toUnit } from "@spacebudz/lucid";
+import { fromChannelDatum } from "../lib/utils.ts";
+import { SingularityChannelSpend, TypesDatum } from "../types/plutus.ts";
+import { ChannelValidator } from "../types/types.ts";
 import { BuildMessageParams } from "./../../shared/api-types.ts";
 
 export const SignatureSchema = Data.Tuple([
@@ -14,34 +12,40 @@ export const SignatureSchema = Data.Tuple([
 
 export const buildMessage = async (
   lucid: Lucid,
-  { channelId, amount }: BuildMessageParams,
+  { channelId, amount, senderAddress }: BuildMessageParams,
 ) => {
-  const validator = new SingularityChannelMint();
+  const validator = new ChannelValidator();
   const scriptAddress = Addresses.scriptToAddress(lucid.network, validator);
+  const scriptAddressDetails = Addresses.inspect(scriptAddress).payment;
+  if (!scriptAddressDetails) throw new Error("Script credentials not found");
+  const scriptHash = scriptAddressDetails.hash;
 
-  const utxoAtScript = (await lucid.utxosAt(scriptAddress)).find(
-    ({ txHash, outputIndex, datum }) => {
-      if (!datum) {
-        console.warn(
-          `Channel UTxO without datum found: ${txHash}#${outputIndex}`,
-        );
-        return false;
-      }
-      try {
-        const { channelId: cId } = Data.from(
-          datum,
-          SingularityChannelSpend.datum,
-        );
-        return cId == channelId;
-      } catch (e) {
-        console.warn(e);
-        return false;
-      }
-    },
-  );
-  if (!utxoAtScript) throw new Error("Channel not found");
+  const senderDetails = Addresses.inspect(senderAddress).payment;
+  if (!senderDetails) throw new Error("Sender's credentials not found");
+  const senderPubKeyHash = senderDetails.hash;
 
-  const datumStr = utxoAtScript.datum;
+  const channelToken = toUnit(scriptHash, senderPubKeyHash);
+
+  const channelUtxo = (
+    await lucid.utxosAtWithUnit(scriptAddress, channelToken)
+  ).find(({ txHash, outputIndex, datum }) => {
+    if (!datum) {
+      console.warn(
+        `Channel UTxO without datum found: ${txHash}#${outputIndex}`,
+      );
+      return false;
+    }
+    try {
+      const { channelId: cId } = fromChannelDatum(datum);
+      return cId == channelId;
+    } catch (e) {
+      console.warn(e);
+      return false;
+    }
+  });
+  if (!channelUtxo) throw new Error("Channel not found");
+
+  const datumStr = channelUtxo.datum;
   if (!datumStr) throw new Error("Datum not found at Channel UTxO");
   const datum: TypesDatum = Data.from(datumStr, SingularityChannelSpend.datum);
 
