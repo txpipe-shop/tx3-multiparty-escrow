@@ -1,6 +1,6 @@
 import { Addresses, Data, Lucid, toUnit } from "@spacebudz/lucid";
 import { fromChannelDatum } from "../lib/utils.ts";
-import { SingularityChannelSpend, TypesDatum } from "../types/plutus.ts";
+import { TypesDatum } from "../types/plutus.ts";
 import { ChannelValidator } from "../types/types.ts";
 import { BuildMessageParams } from "./../../shared/api-types.ts";
 
@@ -36,8 +36,7 @@ export const buildMessage = async (
       return false;
     }
     try {
-      const { channelId: cId } = fromChannelDatum(datum);
-      return cId == channelId;
+      return fromChannelDatum(datum).channelId == channelId;
     } catch (e) {
       console.warn(e);
       return false;
@@ -45,9 +44,8 @@ export const buildMessage = async (
   });
   if (!channelUtxo) throw new Error("Channel not found");
 
-  const datumStr = channelUtxo.datum;
-  if (!datumStr) throw new Error("Datum not found at Channel UTxO");
-  const datum: TypesDatum = Data.from(datumStr, SingularityChannelSpend.datum);
+  const datumStr = channelUtxo.datum!;
+  const datum: TypesDatum = fromChannelDatum(datumStr);
 
   const msg: [bigint, string, bigint] = [datum.nonce, datum.channelId, amount];
   const payload = Data.to(msg, SignatureSchema);
