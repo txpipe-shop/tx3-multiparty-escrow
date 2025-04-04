@@ -61,8 +61,9 @@ export const closeChannel = async (
     .readFrom([scriptRef])
     .collectFrom([channelUtxo], toChannelRedeemer("Close"))
     .mint({ [channelToken]: -1n }, Data.void())
-    .attachMetadata(674, { msg: ["Close Channel"] })
     .payTo(senderAddress, payout)
+    .validTo(Number(datum.expirationDate))
+    .attachMetadata(674, { msg: ["Close Channel"] })
     .addSigner(senderPubKeyHash)
     .commit();
 
