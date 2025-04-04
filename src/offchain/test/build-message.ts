@@ -88,3 +88,6 @@ const message = await lucid.wallet.signMessage(senderAddress, payload);
 
 console.log("\n\nSigned Message:");
 console.log(message);
+
+const verification = lucid.verifyMessage(senderAddress, payload, message);
+console.log("\n\nVerification: ", verification);
