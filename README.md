@@ -57,3 +57,8 @@ A channel will be created and then updated.
 ```shell
    $> npm run test-build-msg
 ```
+
+**Close a channel**
+```shell
+   $> npm run test-close
+```

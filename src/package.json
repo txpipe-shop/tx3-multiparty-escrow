@@ -10,7 +10,8 @@
     "pretty-write": "npx prettier --write .",
     "test-open": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/open-channel.ts",
     "test-update": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/update-channel.ts",
-    "test-build-msg": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/build-message.ts"
+    "test-build-msg": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/build-message.ts",
+    "test-close": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/close-channel.ts"
   },
   "author": "",
   "license": "ISC",
