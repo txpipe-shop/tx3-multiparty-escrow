@@ -117,8 +117,11 @@ export const UpdateChannelSchema = z.object({
 });
 
 export const ClaimChannelSchema = z.object({
+  senderAddress: addressSchema,
+  receiverAddress: addressSchema,
   channelId: OutRef,
-  msg: z.string(),
+  amount: z.bigint(),
+  signature: z.string(),
 });
 
 export const MultiClaimChannelSchema = z.array(
