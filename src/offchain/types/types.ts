@@ -10,8 +10,8 @@ import {
 export const ChannelValidator = SingularityChannelSpend;
 export type ChannelDatum = TypesDatum;
 export type ChannelAction = TypesAction;
-export const ChannelDatumSchema = ChannelValidator.datum;
-export const ChannelRedeemerSchema = ChannelValidator.redeemer;
+export const ChannelDatumSchema: ChannelDatum = ChannelValidator.datum;
+export const ChannelRedeemerSchema: ChannelAction = ChannelValidator.redeemer;
 export const MintRedeemerSchema = SingularityChannelMint.redeemer;
 
 export type ChannelInfo = OutRef &
