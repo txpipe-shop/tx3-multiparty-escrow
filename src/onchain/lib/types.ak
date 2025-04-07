@@ -11,6 +11,9 @@ pub type Datum {
 
 pub type Action {
   Update
-  Claim
+  Claim {
+    amount: Int,
+    signature: ByteArray,
+  }
   Close
 }
