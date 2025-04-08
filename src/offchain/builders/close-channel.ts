@@ -11,8 +11,9 @@ import {
   fromChannelDatum,
   getChannelUtxo,
   toChannelRedeemer,
+  validatorDetails,
 } from "../lib/utils.ts";
-import { ChannelDatum, ChannelValidator } from "../types/types.ts";
+import { ChannelDatum } from "../types/types.ts";
 
 /**
  * This operation is used from the sender when channel has expired,
@@ -22,13 +23,11 @@ export const closeChannel = async (
   lucid: Lucid,
   { senderAddress, channelId }: CloseChannelParams,
   scriptRef: Utxo,
+  currentTime: bigint
 ) => {
-  const validator = new ChannelValidator();
-  const mintingPolicyId = Addresses.scriptToCredential(validator).hash;
+  const { scriptHash: mintingPolicyId } = validatorDetails(lucid);
 
-  const senderDetails = Addresses.inspect(senderAddress).payment;
-  if (!senderDetails) throw new Error("Sender's credentials not found");
-  const senderPubKeyHash = senderDetails.hash;
+  const senderPubKeyHash = Addresses.addressToCredential(senderAddress).hash;
 
   const channelToken = toUnit(mintingPolicyId, senderPubKeyHash);
   const channelUtxo = await getChannelUtxo(lucid, channelToken, channelId);
@@ -37,12 +36,10 @@ export const closeChannel = async (
   const datumStr = channelUtxo.datum!;
   const datum: ChannelDatum = fromChannelDatum(datumStr);
 
-  const currentTime = Date.now();
   const hasExpired = currentTime > datum.expirationDate;
   if (!hasExpired) throw new Error("Channel has not expired yet");
 
   const payout = addAssets(channelUtxo.assets, { [channelToken]: -1n });
-
   const tx = await lucid
     .newTx()
     .readFrom([scriptRef])

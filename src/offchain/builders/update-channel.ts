@@ -5,8 +5,9 @@ import {
   getChannelUtxo,
   toChannelDatum,
   toChannelRedeemer,
+  validatorDetails,
 } from "../lib/utils.ts";
-import { ChannelDatum, ChannelValidator } from "../types/types.ts";
+import { ChannelDatum } from "../types/types.ts";
 import { UpdateChannelParams } from "./../../shared/api-types.ts";
 
 export const updateChannel = async (
@@ -19,20 +20,13 @@ export const updateChannel = async (
     senderAddress,
   }: UpdateChannelParams,
   scriptRef: Utxo,
+  currentTime: bigint
 ) => {
-  const validator = new ChannelValidator();
-  const scriptAddress = Addresses.scriptToAddress(lucid.network, validator);
-  const scriptAddressDetails = Addresses.inspect(scriptAddress).payment;
-  if (!scriptAddressDetails) throw new Error("Script credentials not found");
-  const scriptHash = scriptAddressDetails.hash;
+  const { scriptAddress, scriptHash } = validatorDetails(lucid);
 
-  const senderDetails = Addresses.inspect(senderAddress).payment;
-  if (!senderDetails) throw new Error("Sender's credentials not found");
-  const senderPubKeyHash = senderDetails.hash;
+  const senderPubKeyHash = Addresses.addressToCredential(senderAddress).hash;
 
-  const userDetails = Addresses.inspect(userAddress).payment;
-  if (!userDetails) throw new Error("User's credentials not found");
-  const userPubKeyHash = userDetails.hash;
+  const userPubKeyHash = Addresses.addressToCredential(userAddress).hash;
 
   const channelToken = toUnit(scriptHash, senderPubKeyHash);
   const channelUtxo = await getChannelUtxo(lucid, channelToken, channelId);
@@ -41,7 +35,7 @@ export const updateChannel = async (
   const datumStr = channelUtxo.datum!;
   const datum: ChannelDatum = fromChannelDatum(datumStr);
 
-  if (datum.expirationDate < Date.now()) throw new Error("Channel expired");
+  if (datum.expirationDate < currentTime) throw new Error("Channel expired");
   if (expirationDate && expirationDate < datum.expirationDate)
     throw new Error("New expiration date must be greater than current");
 
@@ -59,8 +53,8 @@ export const updateChannel = async (
     updateExpiration && updateBalance
       ? "Update Channel Expiration and Balance"
       : updateExpiration
-        ? "Update Channel Expiration"
-        : "Update Channel Balance";
+      ? "Update Channel Expiration"
+      : "Update Channel Balance";
 
   const tx = lucid
     .newTx()
@@ -69,7 +63,7 @@ export const updateChannel = async (
     .payToContract(
       scriptAddress,
       { Inline: toChannelDatum(newDatum) },
-      { [config.token]: newDeposit, [channelToken]: 1n },
+      { [config.token]: newDeposit, [channelToken]: 1n }
     )
     .validTo(Number(datum.expirationDate))
     .attachMetadata(674, { msg: [msg] });
