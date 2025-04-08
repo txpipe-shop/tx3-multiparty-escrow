@@ -1,6 +1,5 @@
 import { Addresses, Data, Lucid, toUnit } from "@spacebudz/lucid";
 import { fromChannelDatum, getChannelUtxo } from "../lib/utils.ts";
-import { TypesDatum } from "../types/plutus.ts";
 import { ChannelDatum, ChannelValidator } from "../types/types.ts";
 import { BuildMessageParams } from "./../../shared/api-types.ts";
 

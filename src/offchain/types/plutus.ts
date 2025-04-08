@@ -1,6 +1,5 @@
 // deno-lint-ignore-file
 import {
-  applyParamsToScript,
   Data,
   Script,
 } from "@spacebudz/lucid";

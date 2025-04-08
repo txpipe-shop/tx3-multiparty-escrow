@@ -12,7 +12,6 @@ import {
   getChannelUtxo,
   toChannelRedeemer,
 } from "../lib/utils.ts";
-import { TypesDatum } from "../types/plutus.ts";
 import { ChannelDatum, ChannelValidator } from "../types/types.ts";
 
 /**
@@ -25,7 +24,6 @@ export const closeChannel = async (
   scriptRef: Utxo
 ) => {
   const validator = new ChannelValidator();
-  const scriptAddress = Addresses.scriptToAddress(lucid.network, validator);
   const mintingPolicyId = Addresses.scriptToCredential(validator).hash;
 
   const senderDetails = Addresses.inspect(senderAddress).payment;

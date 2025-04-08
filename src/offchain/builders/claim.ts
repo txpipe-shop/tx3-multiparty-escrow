@@ -14,7 +14,7 @@ import {
   toChannelDatum,
   toChannelRedeemer,
 } from "../lib/utils.ts";
-import { ChannelValidator, MintRedeemerSchema } from "../types/types.ts";
+import { ChannelValidator } from "../types/types.ts";
 
 export const claim = async (
   lucid: Lucid,

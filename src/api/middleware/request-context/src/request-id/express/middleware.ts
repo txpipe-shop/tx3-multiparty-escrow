@@ -23,6 +23,7 @@ export function addRequestId(
 
   res.setHeader(REQUEST_ID_HEADER, requestId);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const currentContext: any = context().getStore();
 
   if (currentContext) {
