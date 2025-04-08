@@ -5,11 +5,12 @@ import {
   Script,
 } from "@spacebudz/lucid";
 
+export type Bool = boolean;
 export type ByteArray = string;
 export type Int = bigint;
 export type AikenCryptoVerificationKey = string;
 export type TypesAction = "Update" | {
-  Claim: { amount: Int; signature: ByteArray };
+  Claim: { amount: Int; signature: ByteArray; finalize: Bool };
 } | "Close";
 export type TypesDatum = {
   channelId: ByteArray;
@@ -21,6 +22,20 @@ export type TypesDatum = {
 };
 
 const definitions = {
+  "Bool": {
+    "title": "Bool",
+    "anyOf": [{
+      "title": "False",
+      "dataType": "constructor",
+      "index": 0,
+      "fields": [],
+    }, {
+      "title": "True",
+      "dataType": "constructor",
+      "index": 1,
+      "fields": [],
+    }],
+  },
   "ByteArray": { "dataType": "bytes" },
   "Data": { "title": "Data", "description": "Any Plutus data." },
   "Int": { "dataType": "integer" },
@@ -42,7 +57,7 @@ const definitions = {
       "fields": [{ "title": "amount", "$ref": "#/definitions/Int" }, {
         "title": "signature",
         "$ref": "#/definitions/ByteArray",
-      }],
+      }, { "title": "finalize", "$ref": "#/definitions/Bool" }],
     }, {
       "title": "Close",
       "dataType": "constructor",
@@ -81,7 +96,7 @@ export const SingularityChannelMint = Object.assign(
     return {
       type: "PlutusV3",
       script:
-        "58e101010029800aba2aba1aab9faab9eaab9dab9a488888966002646465300130053754003300800398040012444b30013370e9000001c4c9289bae300b3009375400915980099b874800800e2653001300c00198061806800cc024dd50014528a4444b30013370e90000014566002601c6ea801a00316403d15980099b874800800a264646644b30013015003802c590131bae3012001375a60240046024002601c6ea801a2b30013370e90020014566002601c6ea801a00316403d164030806100c0c024dd5002459007200e18039804000980380098019baa0078a4d1365640041",
+        "59010c01010029800aba2aba1aab9faab9eaab9dab9a488888966002646465300130053754003300800398040012444b30013370e9000001c4c9289bae300b3009375400913259800980080244ca6002601a003300d300e00198051baa0038a51488896600266e1d20000028acc004c03cdd5003c0062c80822b3001300600289919194c004c966002602600315980099b8948010c0480062d1300a301200140451640506ea8c0500066eb4c05000e6eb8c05000922259800980c002401e2c80b060280026026002601e6ea801e2b30013370e90020014566002601e6ea801e003164041164034806900d0c028dd5002c590081b87480090070c01cc020004c01c004c00cdd5003c52689b2b200201",
     };
   },
   { redeemer: { "shape": { "$ref": "#/definitions/Data" }, definitions } },
@@ -98,7 +113,7 @@ export const SingularityChannelSpend = Object.assign(
     return {
       type: "PlutusV3",
       script:
-        "58e101010029800aba2aba1aab9faab9eaab9dab9a488888966002646465300130053754003300800398040012444b30013370e9000001c4c9289bae300b3009375400915980099b874800800e2653001300c00198061806800cc024dd50014528a4444b30013370e90000014566002601c6ea801a00316403d15980099b874800800a264646644b30013015003802c590131bae3012001375a60240046024002601c6ea801a2b30013370e90020014566002601c6ea801a00316403d164030806100c0c024dd5002459007200e18039804000980380098019baa0078a4d1365640041",
+        "59010c01010029800aba2aba1aab9faab9eaab9dab9a488888966002646465300130053754003300800398040012444b30013370e9000001c4c9289bae300b3009375400913259800980080244ca6002601a003300d300e00198051baa0038a51488896600266e1d20000028acc004c03cdd5003c0062c80822b3001300600289919194c004c966002602600315980099b8948010c0480062d1300a301200140451640506ea8c0500066eb4c05000e6eb8c05000922259800980c002401e2c80b060280026026002601e6ea801e2b30013370e90020014566002601e6ea801e003164041164034806900d0c028dd5002c590081b87480090070c01cc020004c01c004c00cdd5003c52689b2b200201",
     };
   },
   { datum: { "shape": { "$ref": "#/definitions/types/Datum" }, definitions } },

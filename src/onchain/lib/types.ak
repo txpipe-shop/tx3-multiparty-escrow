@@ -14,6 +14,7 @@ pub type Action {
   Claim {
     amount: Int,
     signature: ByteArray,
+    finalize: Bool
   }
   Close
 }
