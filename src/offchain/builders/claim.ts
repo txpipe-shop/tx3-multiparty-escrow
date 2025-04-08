@@ -1,4 +1,11 @@
-import { addAssets, Addresses, Lucid, toUnit, Utxo } from "@spacebudz/lucid";
+import {
+  addAssets,
+  Addresses,
+  Data,
+  Lucid,
+  toUnit,
+  Utxo,
+} from "@spacebudz/lucid";
 import { config } from "../../config.ts";
 import { ClaimChannelParams } from "../../shared/api-types.ts";
 import {
@@ -7,7 +14,7 @@ import {
   toChannelDatum,
   toChannelRedeemer,
 } from "../lib/utils.ts";
-import { ChannelValidator } from "../types/types.ts";
+import { ChannelValidator, MintRedeemerSchema } from "../types/types.ts";
 
 export const claim = async (
   lucid: Lucid,
@@ -17,6 +24,7 @@ export const claim = async (
     channelId,
     amount,
     signature,
+    finalize,
   }: ClaimChannelParams,
   scriptRef: Utxo,
   currentTime: bigint
@@ -38,27 +46,42 @@ export const claim = async (
   const hasExpired = currentTime > datum.expirationDate;
   if (hasExpired) throw new Error("Channel already expired");
 
-  // Build values
-  const receiverPayout = {
-    [config.token]: amount,
-  };
-  const newChannelValue = addAssets(channelUtxo.assets, {
-    [config.token]: -amount,
-  });
-  // Build new datum
-  const newDatum = toChannelDatum({ ...datum, nonce: datum.nonce + 1n });
-
-  const tx = await lucid
+  // Start base tx
+  const tx = lucid
     .newTx()
     .readFrom([scriptRef])
     .collectFrom(
       [channelUtxo],
-      toChannelRedeemer({ Claim: { amount, signature } })
+      toChannelRedeemer({ Claim: { amount, signature, finalize } })
     )
-    .payToContract(channelUtxo.address, { Inline: newDatum }, newChannelValue)
-    .payTo(receiverAddress, receiverPayout)
-    .validTo(Number(datum.expirationDate))
-    .attachMetadata(674, { msg: ["Claim Channel"] })
+    .validTo(Number(datum.expirationDate));
+
+  // Check whether it's a normal claim or claim & close
+  const valueResult = addAssets(channelUtxo.assets, {
+    [config.token]: -amount,
+  });
+  let msg: [string];
+  if (finalize) {
+    // Return to sender
+    const returnAssets = addAssets(valueResult, { [channelToken]: -1n });
+    tx.mint({ [channelToken]: -1n }, Data.void()).payTo(
+      senderAddress,
+      returnAssets
+    );
+    msg = ["Claim single channel"];
+  } else {
+    // Build continuing output
+    const newDatum = toChannelDatum({ ...datum, nonce: datum.nonce + 1n });
+    tx.payToContract(channelUtxo.address, { Inline: newDatum }, valueResult);
+    msg = ["Claim multiple channels"];
+  }
+
+  // Build receiver payout and finalize tx
+  const receiverPayout = {
+    [config.token]: amount,
+  };
+  tx.payTo(receiverAddress, receiverPayout)
+    .attachMetadata(674, { msg })
     .commit();
 
   return { cbor: tx.toString() };
