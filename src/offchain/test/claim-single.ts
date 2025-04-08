@@ -16,17 +16,17 @@ const {
 } = Crypto.seedToDetails(senderSeed, 0, "Payment");
 const senderAddress = Addresses.credentialToAddress(
   { Emulator: 0 },
-  senderCredential,
+  senderCredential
 );
 
 const { privateKey: receiverPrivKey } = Crypto.seedToDetails(
   generateMnemonic(256),
   0,
-  "Payment",
+  "Payment"
 );
 const receiverAddress = Addresses.credentialToAddress(
   { Emulator: 0 },
-  Crypto.privateKeyToDetails(receiverPrivKey).credential,
+  Crypto.privateKeyToDetails(receiverPrivKey).credential
 );
 
 const emulator = new Emulator([
@@ -59,7 +59,7 @@ const { openChannelCbor, channelId } = await openChannel(
     expirationDate: BigInt(Date.now()) + 2n * 24n * 60n * 60n * 1000n,
     groupId: 10n,
   },
-  scriptRef,
+  scriptRef
 );
 
 const tx = await lucid.fromTx(openChannelCbor);
@@ -92,16 +92,18 @@ const privKey = getCMLPrivateKey(senderSeed);
 const signature = await signMessage(privKey, payload);
 const { cbor: claimCbor } = await claim(
   lucid,
-  {
-    receiverAddress,
-    senderAddress,
-    channelId,
-    finalize: false,
-    amount: 20n,
-    signature,
-  },
+  [
+    {
+      senderAddress,
+      channelId,
+      finalize: false,
+      amount: 20n,
+      signature,
+    },
+  ],
   scriptRef,
   BigInt(Date.now()),
+  receiverAddress
 );
 
 lucid.selectWalletFromPrivateKey(senderPrivKey);
@@ -132,16 +134,18 @@ lucid.selectWalletFromPrivateKey(senderPrivKey);
 const signature2 = await signMessage(privKey, payload2);
 const { cbor: claimCbor2 } = await claim(
   lucid,
-  {
-    receiverAddress,
-    senderAddress,
-    channelId,
-    finalize: true,
-    amount: 60n,
-    signature: signature2,
-  },
+  [
+    {
+      senderAddress,
+      channelId,
+      finalize: true,
+      amount: 60n,
+      signature: signature2,
+    },
+  ],
   scriptRef,
   BigInt(Date.now()),
+  receiverAddress
 );
 
 lucid.selectWalletFromPrivateKey(senderPrivKey);
