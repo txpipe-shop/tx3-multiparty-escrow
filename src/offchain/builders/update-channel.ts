@@ -2,6 +2,7 @@ import { Addresses, Lucid, toUnit, Utxo } from "@spacebudz/lucid";
 import { config } from "../../config.ts";
 import {
   fromChannelDatum,
+  getChannelUtxo,
   toChannelDatum,
   toChannelRedeemer,
 } from "../lib/utils.ts";
@@ -17,7 +18,7 @@ export const updateChannel = async (
     userAddress,
     senderAddress,
   }: UpdateChannelParams,
-  scriptRef: Utxo,
+  scriptRef: Utxo
 ) => {
   const validator = new ChannelValidator();
   const scriptAddress = Addresses.scriptToAddress(lucid.network, validator);
@@ -34,24 +35,7 @@ export const updateChannel = async (
   const userPubKeyHash = userDetails.hash;
 
   const channelToken = toUnit(scriptHash, senderPubKeyHash);
-  const channelUtxo = (
-    await lucid.utxosAtWithUnit(scriptAddress, channelToken)
-  ).find(({ txHash, outputIndex, datum }) => {
-    if (!datum) {
-      console.warn(
-        `Channel UTxO without datum found: ${txHash}#${outputIndex}`,
-      );
-      return false;
-    }
-    try {
-      const { channelId: cId } = fromChannelDatum(datum);
-      return cId == channelId;
-    } catch (e) {
-      console.warn(e);
-      return false;
-    }
-  });
-
+  const channelUtxo = await getChannelUtxo(lucid, channelToken, channelId);
   if (!channelUtxo) throw new Error("Channel not found");
 
   const datumStr = channelUtxo.datum!;
@@ -75,8 +59,8 @@ export const updateChannel = async (
     updateExpiration && updateBalance
       ? "Update Channel Expiration and Balance"
       : updateExpiration
-        ? "Update Channel Expiration"
-        : "Update Channel Balance";
+      ? "Update Channel Expiration"
+      : "Update Channel Balance";
 
   const tx = lucid
     .newTx()
@@ -85,7 +69,7 @@ export const updateChannel = async (
     .payToContract(
       scriptAddress,
       { Inline: toChannelDatum(newDatum) },
-      { [config.token]: newDeposit, [channelToken]: 1n },
+      { [config.token]: newDeposit, [channelToken]: 1n }
     )
     .validTo(Number(datum.expirationDate))
     .attachMetadata(674, { msg: [msg] });
