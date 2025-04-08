@@ -9,16 +9,16 @@ import {
 
 export const toChannelDatum = (d: ChannelDatum): string =>
   Data.to(d, ChannelDatumSchema);
-export const fromChannelDatum = (d: string): ChannelDatum => Data.from(d, ChannelDatumSchema);
+export const fromChannelDatum = (d: string): ChannelDatum =>
+  Data.from(d, ChannelDatumSchema);
 
 export const toChannelRedeemer = (r: ChannelAction) =>
   Data.to(r, ChannelRedeemerSchema);
 
-
 export const getChannelUtxo = async (
   lucid: Lucid,
   channelToken: string,
-  channelId: string
+  channelId: string,
 ) => {
   const validator = new ChannelValidator();
   const scriptAddress = Addresses.scriptToAddress(lucid.network, validator);
@@ -28,7 +28,7 @@ export const getChannelUtxo = async (
       utxos.find(({ txHash, outputIndex, datum }) => {
         if (!datum) {
           console.warn(
-            `Channel UTxO without datum found: ${txHash}#${outputIndex}`
+            `Channel UTxO without datum found: ${txHash}#${outputIndex}`,
           );
           return false;
         }
@@ -39,6 +39,6 @@ export const getChannelUtxo = async (
           console.warn(e);
           return false;
         }
-      })
+      }),
     );
 };

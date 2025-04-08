@@ -122,7 +122,7 @@ export const ClaimChannelSchema = z.object({
   channelId: OutRef,
   amount: z.bigint(),
   signature: z.string(),
-  finalize: z.boolean()
+  finalize: z.boolean(),
 });
 
 export const MultiClaimChannelSchema = z.array(

@@ -21,7 +21,7 @@ import { ChannelDatum, ChannelValidator } from "../types/types.ts";
 export const closeChannel = async (
   lucid: Lucid,
   { senderAddress, channelId }: CloseChannelParams,
-  scriptRef: Utxo
+  scriptRef: Utxo,
 ) => {
   const validator = new ChannelValidator();
   const mintingPolicyId = Addresses.scriptToCredential(validator).hash;

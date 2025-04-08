@@ -18,7 +18,7 @@ export const updateChannel = async (
     userAddress,
     senderAddress,
   }: UpdateChannelParams,
-  scriptRef: Utxo
+  scriptRef: Utxo,
 ) => {
   const validator = new ChannelValidator();
   const scriptAddress = Addresses.scriptToAddress(lucid.network, validator);
@@ -59,8 +59,8 @@ export const updateChannel = async (
     updateExpiration && updateBalance
       ? "Update Channel Expiration and Balance"
       : updateExpiration
-      ? "Update Channel Expiration"
-      : "Update Channel Balance";
+        ? "Update Channel Expiration"
+        : "Update Channel Balance";
 
   const tx = lucid
     .newTx()
@@ -69,7 +69,7 @@ export const updateChannel = async (
     .payToContract(
       scriptAddress,
       { Inline: toChannelDatum(newDatum) },
-      { [config.token]: newDeposit, [channelToken]: 1n }
+      { [config.token]: newDeposit, [channelToken]: 1n },
     )
     .validTo(Number(datum.expirationDate))
     .attachMetadata(674, { msg: [msg] });

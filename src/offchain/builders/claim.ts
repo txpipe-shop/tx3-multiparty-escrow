@@ -27,7 +27,7 @@ export const claim = async (
     finalize,
   }: ClaimChannelParams,
   scriptRef: Utxo,
-  currentTime: bigint
+  currentTime: bigint,
 ): Promise<{ cbor: string }> => {
   const validator = new ChannelValidator();
   const scriptAddress = Addresses.scriptToAddress(lucid.network, validator);
@@ -52,7 +52,7 @@ export const claim = async (
     .readFrom([scriptRef])
     .collectFrom(
       [channelUtxo],
-      toChannelRedeemer({ Claim: { amount, signature, finalize } })
+      toChannelRedeemer({ Claim: { amount, signature, finalize } }),
     )
     .validTo(Number(datum.expirationDate));
 
@@ -66,7 +66,7 @@ export const claim = async (
     const returnAssets = addAssets(valueResult, { [channelToken]: -1n });
     tx.mint({ [channelToken]: -1n }, Data.void()).payTo(
       senderAddress,
-      returnAssets
+      returnAssets,
     );
     msg = ["Claim single channel"];
   } else {
