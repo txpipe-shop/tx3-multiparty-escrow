@@ -23,7 +23,7 @@ export function addRequestId(
 
   res.setHeader(REQUEST_ID_HEADER, requestId);
 
-  const currentContext = context().getStore();
+  const currentContext: any = context().getStore();
 
   if (currentContext) {
     // Append to the current context
