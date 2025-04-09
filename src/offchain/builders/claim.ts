@@ -122,6 +122,7 @@ export const claim = async (
   };
   const txComplete = await tx
     .payTo(receiverAddress, receiverPayout)
+    .validTo(Number(lowestExpDate))
     .attachMetadata(674, { msg })
     .commit();
 
