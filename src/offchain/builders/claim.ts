@@ -68,21 +68,21 @@ export const claim = async (
       senderAddress,
       returnAssets,
     );
-    msg = ["Claim single channel"];
+    msg = ["Claim and close"];
   } else {
     // Build continuing output
     const newDatum = toChannelDatum({ ...datum, nonce: datum.nonce + 1n });
     tx.payToContract(channelUtxo.address, { Inline: newDatum }, valueResult);
-    msg = ["Claim multiple channels"];
+    msg = ["Claim"];
   }
 
   // Build receiver payout and finalize tx
   const receiverPayout = {
     [config.token]: amount,
   };
-  tx.payTo(receiverAddress, receiverPayout)
+  const txComplete = await tx.payTo(receiverAddress, receiverPayout)
     .attachMetadata(674, { msg })
     .commit();
 
-  return { cbor: tx.toString() };
+  return { cbor: txComplete.toString() };
 };

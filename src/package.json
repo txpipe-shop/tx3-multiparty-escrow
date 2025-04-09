@@ -11,14 +11,15 @@
     "test-open": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/open-channel.ts",
     "test-update": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/update-channel.ts",
     "test-build-msg": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/build-message.ts",
-    "test-close": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/close-channel.ts"
+    "test-close": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/close-channel.ts",
+    "test-claim": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/claim-single.ts"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "type": "module",
   "dependencies": {
-    "@dcspark/cardano-multiplatform-lib-nodejs": "^6.1.0",
+    "@dcspark/cardano-multiplatform-lib-nodejs": "^6.2.0",
     "@spacebudz/lucid": "npm:@jsr/spacebudz__lucid@^0.20.9",
     "axios": "^1.6.2",
     "big-number": "^2.0.0",
