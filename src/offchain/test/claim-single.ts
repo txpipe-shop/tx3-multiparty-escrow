@@ -120,3 +120,44 @@ console.log(`\n
 const finalUtxosAtScript = await lucid.utxosAt(scriptAddress);
 printUtxos(lucid, senderAddress);
 printUtxos(lucid, undefined, finalUtxosAtScript);
+
+
+// Claim and close
+const { payload: payload2 } = await buildMessage(lucid, {
+  channelId,
+  amount: 60n,
+  senderAddress,
+});
+lucid.selectWalletFromPrivateKey(senderPrivKey);
+
+const signature2 = await signMessage(privKey, payload);
+const { cbor: claimCbor2 } = await claim(
+  lucid,
+  {
+    receiverAddress,
+    senderAddress,
+    channelId,
+    finalize: true,
+    amount: 60n,
+    signature: signature2,
+  },
+  scriptRef,
+  BigInt(Date.now())
+);
+
+lucid.selectWalletFromPrivateKey(senderPrivKey);
+const claimTx2 = await lucid
+  .fromTx(claimCbor2)
+  .then((txComp) => txComp.sign().commit())
+  .then((txSigned) => txSigned.submit());
+await lucid.awaitTx(claimTx2);
+
+console.log(`\n
+    > Channel claimed with ID: ${channelId}
+    > Claimed: 20
+    > Tx ID: ${claimTx2}
+    > CBOR: ${claimCbor2}\n\n`);
+
+const finalUtxosAtScript2 = await lucid.utxosAt(scriptAddress);
+printUtxos(lucid, senderAddress);
+printUtxos(lucid, undefined, finalUtxosAtScript2);
