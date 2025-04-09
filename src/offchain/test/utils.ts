@@ -15,7 +15,7 @@ const pad = (text = "", length = 80, padChar = "-") => {
 export const printUtxos = async (
   lucid: Lucid,
   address?: string,
-  utxos?: Utxo[]
+  utxos?: Utxo[],
 ) => {
   if (address) lucid.selectReadOnlyWallet({ address });
   const walletUtxos = utxos ?? (await lucid.wallet.getUtxos());
@@ -27,7 +27,7 @@ export const printUtxos = async (
 
 export const printChannels = (
   header: string,
-  channels: ChannelInfo[] | ChannelInfo
+  channels: ChannelInfo[] | ChannelInfo,
 ) => {
   console.log(pad(header));
   console.dir(channels, { depth: null });
@@ -36,7 +36,7 @@ export const printChannels = (
 
 export const signMessage = async (
   privKey: PrivateKey,
-  message: string
+  message: string,
 ): Promise<string> => {
   const msg = Buffer.from(message, "hex");
   const signedMessage = privKey.sign(msg).to_raw_bytes();
@@ -50,7 +50,7 @@ export const getCMLPrivateKey = (
     addressType?: "Base" | "Enterprise";
     accountIndex?: number;
     network?: Network;
-  } = { addressType: "Base", accountIndex: 0, network: "Mainnet" }
+  } = { addressType: "Base", accountIndex: 0, network: "Mainnet" },
 ): PrivateKey => {
   function harden(num: number): number {
     if (typeof num !== "number") throw new Error("Type number required here!");
@@ -62,7 +62,7 @@ export const getCMLPrivateKey = (
     fromHex(entropy),
     options.password
       ? new TextEncoder().encode(options.password)
-      : new Uint8Array()
+      : new Uint8Array(),
   );
 
   const accountKey = rootKey

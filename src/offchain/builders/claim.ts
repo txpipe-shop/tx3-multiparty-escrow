@@ -80,7 +80,8 @@ export const claim = async (
   const receiverPayout = {
     [config.token]: amount,
   };
-  const txComplete = await tx.payTo(receiverAddress, receiverPayout)
+  const txComplete = await tx
+    .payTo(receiverAddress, receiverPayout)
     .attachMetadata(674, { msg })
     .commit();
 
