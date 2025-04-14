@@ -1,12 +1,12 @@
-import { fromHex, Lucid, Network, toHex, Utxo } from "@spacebudz/lucid";
-import { ChannelInfo } from "../types/types.ts";
 import {
   Bip32PrivateKey,
   PrivateKey,
 } from "@dcspark/cardano-multiplatform-lib-nodejs";
+import { fromHex, Lucid, Network, toHex, Utxo } from "@spacebudz/lucid";
 import { mnemonicToEntropy } from "bip39";
+import { ChannelInfo } from "../types/types.ts";
 
-const pad = (text = "", length = 80, padChar = "-") => {
+const pad = (text = "", length = 120, padChar = "-") => {
   const padLength = Math.max(0, (length - text.length) / 2);
   const pad = padChar.repeat(Math.floor(padLength));
   return `<<<<<<${pad}${text}${pad}>>>>>>`;
@@ -19,7 +19,7 @@ export const printUtxos = async (
 ) => {
   if (address) lucid.selectReadOnlyWallet({ address });
   const walletUtxos = utxos ?? (await lucid.wallet.getUtxos());
-  const title = address ? "WALLET UTXOS" : "SCRIPT UTXOS";
+  const title = address ? `WALLET UTXOS [${address}]` : `SCRIPT UTXOS`;
   console.log(pad(title));
   console.dir(walletUtxos, { depth: null });
   console.log(pad());

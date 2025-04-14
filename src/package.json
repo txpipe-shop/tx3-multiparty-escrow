@@ -12,7 +12,8 @@
     "test-update": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/update-channel.ts",
     "test-build-msg": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/build-message.ts",
     "test-close": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/close-channel.ts",
-    "test-claim": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/claim-single.ts"
+    "test-claim": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/claim-single.ts",
+    "test-multi-claim": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/multi-claim.ts"
   },
   "author": "",
   "license": "ISC",

@@ -21,7 +21,7 @@ export const claim = async (
   params: ClaimChannelParams,
   scriptRef: Utxo,
   currentTime: bigint,
-  receiverAddress: string
+  receiverAddress: string,
 ): Promise<{ cbor: string }> => {
   const validator = new ChannelValidator();
   const scriptAddress = Addresses.scriptToAddress(lucid.network, validator);
@@ -92,7 +92,7 @@ export const claim = async (
         const returnAssets = addAssets(valueResult, { [channelToken]: -1n });
         tx.mint({ [channelToken]: -1n }, Data.void()).payTo(
           senderAddress,
-          returnAssets
+          returnAssets,
         );
       } else {
         // Build continuing output
@@ -103,12 +103,12 @@ export const claim = async (
       // Collect channel utxo and accumulate receiver payout
       tx.collectFrom(
         [utxo],
-        toChannelRedeemer({ Claim: { amount, signature, finalize } })
+        toChannelRedeemer({ Claim: { amount, signature, finalize } }),
       );
       receiverAmount += amount;
     } catch (e) {
       console.error(
-        `Error claiming channel with id: ${channelId}, skipping...`
+        `Error claiming channel with id: ${channelId}, skipping...`,
       );
       console.error(e);
     }
@@ -116,7 +116,9 @@ export const claim = async (
 
   // Build metadata, receiver payout and finalize tx
   const msg =
-    channels.length == 1 ? ["Claim single channel"] : ["Claim multiple channels"];
+    channels.length == 1
+      ? ["Claim single channel"]
+      : ["Claim multiple channels"];
   const receiverPayout = {
     [config.token]: receiverAmount,
   };

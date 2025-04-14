@@ -123,14 +123,14 @@ export const ClaimChannelSchema = z.array(
     amount: z.bigint(),
     signature: z.string(),
     finalize: z.boolean(),
-  })
+  }),
 );
 
 export const MultiClaimChannelSchema = z.array(
   z.object({
     channelId: OutRef,
     msg: z.string(),
-  })
+  }),
 );
 
 export const CloseChannelSchema = z.object({

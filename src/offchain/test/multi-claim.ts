@@ -32,10 +32,11 @@ const receiverAddress = Addresses.credentialToAddress(
 const emulator = new Emulator([
   {
     address: senderAddress,
-    assets: { lovelace: 3000000000n, [config.token]: 120000n },
+    assets: { lovelace: 30_000_000n, [config.token]: 120n },
   },
 ]);
 const lucid = new Lucid({ provider: emulator });
+await printUtxos(lucid, receiverAddress);
 await printUtxos(lucid, senderAddress);
 
 const { cbor } = await deployScript(lucid);
@@ -49,56 +50,99 @@ const [scriptRef] = await lucid.utxosByOutRef([
   { txHash: txDeployHash, outputIndex: 0 },
 ]);
 
-const { openChannelCbor, channelId } = await openChannel(
-  lucid,
-  {
-    senderAddress,
-    signerPubKey: senderPubKey,
-    receiverAddress: receiverAddress,
-    initialDeposit: 600n,
-    expirationDate: BigInt(Date.now()) + 2n * 24n * 60n * 60n * 1000n,
-    groupId: 10n,
-  },
-  scriptRef,
-);
+const { openChannelCbor: openChannelCbor1, channelId: channelId1 } =
+  await openChannel(
+    lucid,
+    {
+      senderAddress,
+      signerPubKey: senderPubKey,
+      receiverAddress: receiverAddress,
+      initialDeposit: 100n,
+      expirationDate: BigInt(Date.now()) + 2n * 24n * 60n * 60n * 1000n,
+      groupId: 10n,
+    },
+    scriptRef,
+  );
 
-const tx = await lucid.fromTx(openChannelCbor);
+const tx1 = await lucid.fromTx(openChannelCbor1);
 lucid.selectWalletFromPrivateKey(senderPrivKey);
-const signedTx = await tx.sign().commit();
-const openTx = await signedTx.submit();
-await lucid.awaitTx(openTx);
+const signedTx1 = await tx1.sign().commit();
+const openTx1 = await signedTx1.submit();
+await lucid.awaitTx(openTx1);
 
 console.log(`\n
-    > Channel opened with ID: ${channelId}
-    > Initial Deposit: 600
-    > Tx ID: ${openTx}
-    > CBOR: ${openChannelCbor}\n\n`);
+    > Channel opened with ID: ${channelId1}
+    > Initial Deposit: 100
+    > Tx ID: ${openTx1}
+    > CBOR: ${openChannelCbor1}\n\n`);
 
 await printUtxos(lucid, senderAddress);
 const validator = new ChannelValidator();
 const scriptAddress = lucid.newScript(validator).toAddress();
-const utxosAtScript = await lucid.utxosAt(scriptAddress);
-printUtxos(lucid, undefined, utxosAtScript);
+const utxosAtScript1 = await lucid.utxosAt(scriptAddress);
+printUtxos(lucid, undefined, utxosAtScript1);
 
-// Normal claim
-const { payload } = await buildMessage(lucid, {
-  channelId,
+const { openChannelCbor: openChannelCbor2, channelId: channelId2 } =
+  await openChannel(
+    lucid,
+    {
+      senderAddress,
+      signerPubKey: senderPubKey,
+      receiverAddress: receiverAddress,
+      initialDeposit: 20n,
+      expirationDate: BigInt(Date.now()) + 2n * 24n * 60n * 60n * 1000n,
+      groupId: 9n,
+    },
+    scriptRef,
+  );
+
+const tx2 = await lucid.fromTx(openChannelCbor2);
+lucid.selectWalletFromPrivateKey(senderPrivKey);
+const signedTx2 = await tx2.sign().commit();
+const openTx2 = await signedTx2.submit();
+await lucid.awaitTx(openTx2);
+
+console.log(`\n
+    > Channel opened with ID: ${channelId2}
+    > Initial Deposit: 20
+    > Tx ID: ${openTx2}
+    > CBOR: ${openChannelCbor2}\n\n`);
+
+await printUtxos(lucid, senderAddress);
+await printUtxos(lucid, receiverAddress);
+const utxosAtScript2 = await lucid.utxosAt(scriptAddress);
+printUtxos(lucid, undefined, utxosAtScript2);
+
+const { payload: payload1ofcId1 } = await buildMessage(lucid, {
+  channelId: channelId1,
+  amount: 20n,
+  senderAddress,
+});
+const { payload: payload1ofcId2 } = await buildMessage(lucid, {
+  channelId: channelId2,
   amount: 20n,
   senderAddress,
 });
 lucid.selectWalletFromPrivateKey(senderPrivKey);
-
 const privKey = getCMLPrivateKey(senderSeed);
-const signature = await signMessage(privKey, payload);
+const signature1 = await signMessage(privKey, payload1ofcId1);
+const signature2 = await signMessage(privKey, payload1ofcId2);
 const { cbor: claimCbor } = await claim(
   lucid,
   [
     {
       senderAddress,
-      channelId,
+      channelId: channelId1,
       finalize: false,
       amount: 20n,
-      signature,
+      signature: signature1,
+    },
+    {
+      senderAddress,
+      channelId: channelId2,
+      finalize: true,
+      amount: 10n,
+      signature: signature2,
     },
   ],
   scriptRef,
@@ -114,33 +158,39 @@ const claimTx = await lucid
 await lucid.awaitTx(claimTx);
 
 console.log(`\n
-    > Channel claimed with ID: ${channelId}
-    > Claimed: 20
+    > Channels claimed with
     > Tx ID: ${claimTx}
-    > CBOR: ${claimCbor}\n\n`);
+    > CBOR: ${claimCbor}
+    > Channel IDs and Amounts:
+      > ID: ${channelId1}
+      > Claimed: 20
+
+      > ID: ${channelId2}
+      > Claimed: 10\n\n`);
 
 const finalUtxosAtScript = await lucid.utxosAt(scriptAddress);
 printUtxos(lucid, senderAddress);
+await printUtxos(lucid, receiverAddress);
 printUtxos(lucid, undefined, finalUtxosAtScript);
 
 // Claim and close
-const { payload: payload2 } = await buildMessage(lucid, {
-  channelId,
+const { payload: payload2ofcId1 } = await buildMessage(lucid, {
+  channelId: channelId1,
   amount: 60n,
   senderAddress,
 });
 lucid.selectWalletFromPrivateKey(senderPrivKey);
 
-const signature2 = await signMessage(privKey, payload2);
+const signature3 = await signMessage(privKey, payload2ofcId1);
 const { cbor: claimCbor2 } = await claim(
   lucid,
   [
     {
       senderAddress,
-      channelId,
+      channelId: channelId1,
       finalize: true,
       amount: 60n,
-      signature: signature2,
+      signature: signature3,
     },
   ],
   scriptRef,
@@ -156,11 +206,12 @@ const claimTx2 = await lucid
 await lucid.awaitTx(claimTx2);
 
 console.log(`\n
-    > Channel claimed with ID: ${channelId}
+    > Channel claimed with ID: ${channelId1}
     > Claimed: 60
     > Tx ID: ${claimTx2}
     > CBOR: ${claimCbor2}\n\n`);
 
 const finalUtxosAtScript2 = await lucid.utxosAt(scriptAddress);
 printUtxos(lucid, senderAddress);
+await printUtxos(lucid, receiverAddress);
 printUtxos(lucid, undefined, finalUtxosAtScript2);
