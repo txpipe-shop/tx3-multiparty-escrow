@@ -126,13 +126,6 @@ export const ClaimChannelSchema = z.array(
   }),
 );
 
-export const MultiClaimChannelSchema = z.array(
-  z.object({
-    channelId: OutRef,
-    msg: z.string(),
-  }),
-);
-
 export const CloseChannelSchema = z.object({
   senderAddress: addressSchema,
   channelId: OutRef,
@@ -148,6 +141,5 @@ export type channelIdType = z.infer<typeof OutRef>;
 export type OpenChannelParams = z.infer<typeof OpenChannelSchema>;
 export type UpdateChannelParams = z.infer<typeof UpdateChannelSchema>;
 export type ClaimChannelParams = z.infer<typeof ClaimChannelSchema>;
-export type MultiClaimChannelParams = z.infer<typeof MultiClaimChannelSchema>;
 export type CloseChannelParams = z.infer<typeof CloseChannelSchema>;
 export type BuildMessageParams = z.infer<typeof BuildMessageSchema>;
