@@ -49,6 +49,7 @@ paths:
               addDeposit: "500000"
               expirationDate: "1716148967"
               userAddress: "addr_test1vzwlx094fypzcfsz53n5gufc6h84tawp9pdyklm05pr385gl956ej"
+              senderAddress: "addr_test1vzwlx094fypzcfsz53n5gufc6h84tawp9pdyklm05pr385gl956ej"
       responses:
         "200":
           description: Channel updated successfully
@@ -76,6 +77,8 @@ paths:
               - channelId: "b126f76547103204f62432999bcc2b5cb126f76547103204f62432999bcc2b5c0"
                 signature: "4eb27d97d08c53f4d5d53aabd395e7eaa3a095ac084db3201974146804e1bde1"
                 amount: "1500000"
+                finalize: false
+                senderAddress: "addr_test1vzwlx094fypzcfsz53n5gufc6h84tawp9pdyklm05pr385gl956ej"
       responses:
         "200":
           description: Channel claim successful
@@ -96,12 +99,10 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                channelId:
-                  type: string
+              $ref: '#/components/schemas/ClaimParams'
             example:
               channelId: "b126f76547103204f62432999bcc2b5cb126f76547103204f62432999bcc2b5c0"
+              senderAddress: "addr_test1vzwlx094fypzcfsz53n5gufc6h84tawp9pdyklm05pr385gl956ej"
       responses:
         "200":
           description: Channel closed successfully
@@ -206,6 +207,8 @@ components:
           type: integer
         userAddress:
           type: string
+        senderAddress:
+          type: string
     ClaimParams:
       type: object
       properties:
@@ -215,6 +218,17 @@ components:
           type: string
         amount:
           type: integer
+        senderAddress:
+          type: string
+        finalize:
+          type: boolean
+    CloseParams:
+      type: object
+      properties:
+        channelId:
+          type: string
+        senderAddress:
+          type: string
     Channel:
       type: object
       properties:

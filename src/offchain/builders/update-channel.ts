@@ -2,6 +2,7 @@ import { Addresses, Lucid, toUnit, Utxo } from "@spacebudz/lucid";
 import { config } from "../../config.ts";
 import {
   fromChannelDatum,
+  getChannelUtxo,
   toChannelDatum,
   toChannelRedeemer,
 } from "../lib/utils.ts";
@@ -34,24 +35,7 @@ export const updateChannel = async (
   const userPubKeyHash = userDetails.hash;
 
   const channelToken = toUnit(scriptHash, senderPubKeyHash);
-  const channelUtxo = (
-    await lucid.utxosAtWithUnit(scriptAddress, channelToken)
-  ).find(({ txHash, outputIndex, datum }) => {
-    if (!datum) {
-      console.warn(
-        `Channel UTxO without datum found: ${txHash}#${outputIndex}`,
-      );
-      return false;
-    }
-    try {
-      const { channelId: cId } = fromChannelDatum(datum);
-      return cId == channelId;
-    } catch (e) {
-      console.warn(e);
-      return false;
-    }
-  });
-
+  const channelUtxo = await getChannelUtxo(lucid, channelToken, channelId);
   if (!channelUtxo) throw new Error("Channel not found");
 
   const datumStr = channelUtxo.datum!;
