@@ -1,11 +1,11 @@
 import { Emulator, Lucid } from "@spacebudz/lucid";
 import { config } from "../../config.ts";
 import { testOpenOperation, testUpdateOperation } from "./operations.ts";
-import { getRandomUser, printUtxos } from "./utils.ts";
+import { getRandomUser, getScriptRef, printUtxos } from "./utils.ts";
 
 const {
   privateKey: senderPrivKey,
-  publicKey: senderPubKey,
+  pubKeyHash: senderPubKey,
   address: senderAddress,
 } = getRandomUser();
 
@@ -19,10 +19,12 @@ const emulator = new Emulator([
 ]);
 const lucid = new Lucid({ provider: emulator });
 await printUtxos(lucid, senderAddress);
+const scriptRef = await getScriptRef(lucid, senderPrivKey);
 
 const channelId = await testOpenOperation(
   {
     lucid,
+    scriptRef,
     senderAddress,
     receiverAddress,
     signerPubKey: senderPubKey,
@@ -36,6 +38,7 @@ const channelId = await testOpenOperation(
 await testUpdateOperation(
   {
     lucid,
+    scriptRef,
     userAddress: senderAddress,
     senderAddress,
     channelId,

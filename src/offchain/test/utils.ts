@@ -117,5 +117,5 @@ export const getRandomUser = () => {
     "Payment"
   );
   const address = Addresses.credentialToAddress({ Emulator: 0 }, credential);
-  return { privateKey, publicKey, address };
+  return { privateKey, publicKey, address, pubKeyHash: credential.hash };
 };

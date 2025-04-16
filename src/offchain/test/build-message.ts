@@ -2,11 +2,11 @@ import { Emulator, Lucid } from "@spacebudz/lucid";
 import { config } from "../../config.ts";
 import { buildMessage } from "../builders/build-message.ts";
 import { testOpenOperation } from "./operations.ts";
-import { getRandomUser } from "./utils.ts";
+import { getRandomUser, getScriptRef } from "./utils.ts";
 
 const {
   privateKey: senderPrivKey,
-  publicKey: senderPubKey,
+  pubKeyHash: senderPubKey,
   address: senderAddress,
 } = getRandomUser();
 
@@ -20,9 +20,11 @@ const emulator = new Emulator([
 ]);
 const lucid = new Lucid({ provider: emulator });
 lucid.selectReadOnlyWallet({ address: senderAddress });
+const scriptRef = await getScriptRef(lucid, senderPrivKey);
 const channelId = await testOpenOperation(
   {
     lucid,
+    scriptRef,
     senderAddress,
     receiverAddress,
     signerPubKey: senderPubKey,

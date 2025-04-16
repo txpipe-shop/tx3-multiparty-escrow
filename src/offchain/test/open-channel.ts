@@ -5,11 +5,16 @@ import { getChannelById } from "../queries/channel-by-id.ts";
 import { getChannelsFromReceiver } from "../queries/channels-from-receiver.ts";
 import { getChannelsFromSender } from "../queries/channels-from-sender.ts";
 import { testOpenOperation } from "./operations.ts";
-import { getRandomUser, printChannels, printUtxos } from "./utils.ts";
+import {
+  getRandomUser,
+  getScriptRef,
+  printChannels,
+  printUtxos,
+} from "./utils.ts";
 
 const {
   privateKey: senderPrivKey,
-  publicKey: senderPubKey,
+  pubKeyHash: senderPubKey,
   address: senderAddress,
 } = getRandomUser();
 
@@ -26,10 +31,12 @@ const lucid = new Lucid({ provider: emulator });
 await printUtxos(lucid, senderAddress);
 
 printChannels("GET ALL CHANNELS BEFORE TX", await getAllChannels(lucid));
+const scriptRef = await getScriptRef(lucid, senderPrivKey);
 
 const channelId = await testOpenOperation(
   {
     lucid,
+    scriptRef,
     senderAddress,
     receiverAddress,
     signerPubKey: senderPubKey,

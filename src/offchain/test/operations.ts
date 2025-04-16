@@ -1,4 +1,4 @@
-import { Lucid } from "@spacebudz/lucid";
+import { Lucid, Utxo } from "@spacebudz/lucid";
 import {
   CloseChannelParams,
   OpenChannelParams,
@@ -8,22 +8,22 @@ import { closeChannel } from "../builders/close-channel.ts";
 import { openChannel } from "../builders/open-channel.ts";
 import { updateChannel } from "../builders/update-channel.ts";
 import { validatorDetails } from "../lib/utils.ts";
-import { getScriptRef, printUtxos, signAndSubmit } from "./utils.ts";
+import { printUtxos, signAndSubmit } from "./utils.ts";
 
 export const testOpenOperation = async (
   {
     lucid,
+    scriptRef,
     senderAddress,
     receiverAddress,
     signerPubKey,
     groupId,
     expirationDate,
     initialDeposit,
-  }: OpenChannelParams & { lucid: Lucid },
+  }: OpenChannelParams & { lucid: Lucid; scriptRef: Utxo },
   senderPrivKey: string,
   printLogs: boolean = true,
 ) => {
-  const scriptRef = await getScriptRef(lucid, senderPrivKey);
   const { openChannelCbor, channelId } = await openChannel(
     lucid,
     {
@@ -57,14 +57,18 @@ export const testOpenOperation = async (
 export const testCloseChannel = async (
   {
     lucid,
+    scriptRef,
     senderAddress,
     channelId,
     currentTime,
-  }: CloseChannelParams & { lucid: Lucid; currentTime: bigint },
+  }: CloseChannelParams & {
+    lucid: Lucid;
+    scriptRef: Utxo;
+    currentTime: bigint;
+  },
   senderPrivKey: string,
   printLogs: boolean = true,
 ) => {
-  const scriptRef = await getScriptRef(lucid, senderPrivKey);
   const { closedChannelCbor } = await closeChannel(
     lucid,
     { senderAddress, channelId },
@@ -89,17 +93,21 @@ export const testCloseChannel = async (
 export const testUpdateOperation = async (
   {
     lucid,
+    scriptRef,
     userAddress,
     senderAddress,
     channelId,
     addDeposit,
     expirationDate,
     currentTime,
-  }: UpdateChannelParams & { lucid: Lucid; currentTime: bigint },
+  }: UpdateChannelParams & {
+    lucid: Lucid;
+    scriptRef: Utxo;
+    currentTime: bigint;
+  },
   userPrivKey: string,
   printLogs: boolean = true,
 ) => {
-  const scriptRef = await getScriptRef(lucid, userPrivKey);
   const { updatedChannelCbor } = await updateChannel(
     lucid,
     {

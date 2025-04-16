@@ -23,6 +23,8 @@ export const openChannel = async (
   }: OpenChannelParams,
   scriptRef: Utxo,
 ) => {
+  if (expirationDate < Date.now())
+    throw new Error("Expiration date is in the past");
   lucid.selectReadOnlyWallet({ address: senderAddress });
   const utxos = await lucid.wallet.getUtxos();
   const utxo = utxos[0];
@@ -42,7 +44,10 @@ export const openChannel = async (
   const { scriptAddress, scriptHash: mintingPolicyId } =
     validatorDetails(lucid);
 
-  const senderPubKeyHash = Addresses.addressToCredential(senderAddress).hash;
+  // const senderPubKeyHash = Addresses.addressToCredential(senderAddress).hash;
+  const userDetails = Addresses.inspect(senderAddress).payment;
+  if (!userDetails) throw new Error("User's credentials not found");
+  const senderPubKeyHash = userDetails.hash;
 
   const channelToken = toUnit(mintingPolicyId, senderPubKeyHash);
   const tx = await lucid
