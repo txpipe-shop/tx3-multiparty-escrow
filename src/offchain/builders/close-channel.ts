@@ -23,7 +23,7 @@ export const closeChannel = async (
   lucid: Lucid,
   { senderAddress, channelId }: CloseChannelParams,
   scriptRef: Utxo,
-  currentTime: bigint
+  currentTime: bigint,
 ) => {
   const { scriptHash: mintingPolicyId } = validatorDetails(lucid);
 

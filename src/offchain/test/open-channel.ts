@@ -14,7 +14,7 @@ import {
 
 const {
   privateKey: senderPrivKey,
-  pubKeyHash: senderPubKey,
+  publicKey: senderPubKey,
   address: senderAddress,
 } = getRandomUser();
 

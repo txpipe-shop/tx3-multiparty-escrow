@@ -1,9 +1,11 @@
 import { Lucid, Utxo } from "@spacebudz/lucid";
 import {
+  ClaimChannelParams,
   CloseChannelParams,
   OpenChannelParams,
   UpdateChannelParams,
 } from "../../shared/api-types.ts";
+import { claim } from "../builders/claim.ts";
 import { closeChannel } from "../builders/close-channel.ts";
 import { openChannel } from "../builders/open-channel.ts";
 import { updateChannel } from "../builders/update-channel.ts";
@@ -134,5 +136,55 @@ export const testUpdateOperation = async (
     const { scriptAddress } = validatorDetails(lucid);
     const utxosAtScript = await lucid.utxosAt(scriptAddress);
     printUtxos(lucid, undefined, utxosAtScript);
+  }
+};
+
+export const testClaimOperation = async (
+  {
+    lucid,
+    scriptRef,
+    listOfClaims,
+    currentTime,
+    receiverAddress,
+  }: {
+    lucid: Lucid;
+    scriptRef: Utxo;
+    listOfClaims: ClaimChannelParams;
+    currentTime: bigint;
+    receiverAddress: string;
+  },
+  userPrivKey: string,
+  printLogs: boolean = true,
+) => {
+  const { claimChannelCbor: claimCbor } = await claim(
+    lucid,
+    listOfClaims,
+    scriptRef,
+    currentTime,
+    receiverAddress,
+  );
+
+  lucid.selectWalletFromPrivateKey(userPrivKey);
+  const claimTx = await lucid
+    .fromTx(claimCbor)
+    .then((txComp) => txComp.sign().commit())
+    .then((txSigned) => txSigned.submit());
+  await lucid.awaitTx(claimTx);
+
+  console.log(`\n
+    > Tx ID: ${claimTx}
+    > CBOR: ${claimCbor}
+    > Channels claimed with`);
+  listOfClaims.map(({ amount, channelId }) =>
+    console.log(`
+      > ID: ${channelId}
+      > Claimed amount: ${amount}
+    `),
+  );
+
+  if (printLogs) {
+    const { scriptAddress } = validatorDetails(lucid);
+    const finalUtxosAtScript = await lucid.utxosAt(scriptAddress);
+    printUtxos(lucid, undefined, finalUtxosAtScript);
   }
 };

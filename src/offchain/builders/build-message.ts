@@ -15,7 +15,7 @@ export const SignatureSchema = Data.Tuple([
 
 export const buildMessage = async (
   lucid: Lucid,
-  { channelId, amount, senderAddress }: BuildMessageParams
+  { channelId, amount, senderAddress }: BuildMessageParams,
 ) => {
   const { scriptHash } = validatorDetails(lucid);
   const senderPubKeyHash = Addresses.addressToCredential(senderAddress).hash;

@@ -1,84 +1,48 @@
-import { Addresses, Crypto, Emulator, Lucid } from "@spacebudz/lucid";
-import { generateMnemonic } from "bip39";
+import { Emulator, Lucid } from "@spacebudz/lucid";
 import { config } from "../../config.ts";
 import { buildMessage } from "../builders/build-message.ts";
-import { claim } from "../builders/claim.ts";
-import { deployScript } from "../builders/deploy-script.ts";
-import { openChannel } from "../builders/open-channel.ts";
-import { ChannelValidator } from "../types/types.ts";
-import { getCMLPrivateKey, printUtxos, signMessage } from "./utils.ts";
+import { testClaimOperation, testOpenOperation } from "./operations.ts";
+import {
+  getCMLPrivateKey,
+  getRandomUser,
+  getScriptRef,
+  printUtxos,
+  signMessage,
+} from "./utils.ts";
 
-const senderSeed = generateMnemonic(256);
 const {
   privateKey: senderPrivKey,
   publicKey: senderPubKey,
-  credential: senderCredential,
-} = Crypto.seedToDetails(senderSeed, 0, "Payment");
-const senderAddress = Addresses.credentialToAddress(
-  { Emulator: 0 },
-  senderCredential,
-);
+  seed: senderSeed,
+  address: senderAddress,
+} = getRandomUser();
 
-const { privateKey: receiverPrivKey } = Crypto.seedToDetails(
-  generateMnemonic(256),
-  0,
-  "Payment",
-);
-const receiverAddress = Addresses.credentialToAddress(
-  { Emulator: 0 },
-  Crypto.privateKeyToDetails(receiverPrivKey).credential,
-);
+const { address: receiverAddress } = getRandomUser();
 
 const emulator = new Emulator([
   {
     address: senderAddress,
-    assets: { lovelace: 3000000000n, [config.token]: 120000n },
+    assets: { lovelace: 30_000_000n, [config.token]: 120000n },
   },
 ]);
 const lucid = new Lucid({ provider: emulator });
 await printUtxos(lucid, senderAddress);
 
-const { cbor } = await deployScript(lucid);
-lucid.selectWalletFromPrivateKey(senderPrivKey);
-const txDeployHash = await lucid
-  .fromTx(cbor)
-  .then((txComp) => txComp.sign().commit())
-  .then((txSigned) => txSigned.submit());
-await lucid.awaitTx(txDeployHash);
-const [scriptRef] = await lucid.utxosByOutRef([
-  { txHash: txDeployHash, outputIndex: 0 },
-]);
+const scriptRef = await getScriptRef(lucid, senderPrivKey);
 
-const { openChannelCbor, channelId } = await openChannel(
-  lucid,
+const channelId = await testOpenOperation(
   {
+    lucid,
+    scriptRef,
     senderAddress,
+    receiverAddress,
     signerPubKey: senderPubKey,
-    receiverAddress: receiverAddress,
-    initialDeposit: 600n,
-    expirationDate: BigInt(Date.now()) + 2n * 24n * 60n * 60n * 1000n,
     groupId: 10n,
+    expirationDate: BigInt(Date.now() + 2 * 24 * 60 * 60 * 1000),
+    initialDeposit: 600n,
   },
-  scriptRef,
+  senderPrivKey,
 );
-
-const tx = await lucid.fromTx(openChannelCbor);
-lucid.selectWalletFromPrivateKey(senderPrivKey);
-const signedTx = await tx.sign().commit();
-const openTx = await signedTx.submit();
-await lucid.awaitTx(openTx);
-
-console.log(`\n
-    > Channel opened with ID: ${channelId}
-    > Initial Deposit: 600
-    > Tx ID: ${openTx}
-    > CBOR: ${openChannelCbor}\n\n`);
-
-await printUtxos(lucid, senderAddress);
-const validator = new ChannelValidator();
-const scriptAddress = lucid.newScript(validator).toAddress();
-const utxosAtScript = await lucid.utxosAt(scriptAddress);
-printUtxos(lucid, undefined, utxosAtScript);
 
 // Normal claim
 const { payload } = await buildMessage(lucid, {
@@ -87,41 +51,27 @@ const { payload } = await buildMessage(lucid, {
   senderAddress,
 });
 lucid.selectWalletFromPrivateKey(senderPrivKey);
-
 const privKey = getCMLPrivateKey(senderSeed);
 const signature = await signMessage(privKey, payload);
-const { claimChannelCbor: claimCbor } = await claim(
-  lucid,
-  [
-    {
-      senderAddress,
-      channelId,
-      finalize: false,
-      amount: 20n,
-      signature,
-    },
-  ],
-  scriptRef,
-  BigInt(Date.now()),
-  receiverAddress,
+
+await testClaimOperation(
+  {
+    lucid,
+    listOfClaims: [
+      {
+        senderAddress,
+        channelId,
+        finalize: false,
+        amount: 20n,
+        signature: signature,
+      },
+    ],
+    scriptRef,
+    currentTime: BigInt(Date.now()),
+    receiverAddress,
+  },
+  senderPrivKey,
 );
-
-lucid.selectWalletFromPrivateKey(senderPrivKey);
-const claimTx = await lucid
-  .fromTx(claimCbor)
-  .then((txComp) => txComp.sign().commit())
-  .then((txSigned) => txSigned.submit());
-await lucid.awaitTx(claimTx);
-
-console.log(`\n
-    > Channel claimed with ID: ${channelId}
-    > Claimed: 20
-    > Tx ID: ${claimTx}
-    > CBOR: ${claimCbor}\n\n`);
-
-const finalUtxosAtScript = await lucid.utxosAt(scriptAddress);
-printUtxos(lucid, senderAddress);
-printUtxos(lucid, undefined, finalUtxosAtScript);
 
 // Claim and close
 const { payload: payload2 } = await buildMessage(lucid, {
@@ -130,37 +80,23 @@ const { payload: payload2 } = await buildMessage(lucid, {
   senderAddress,
 });
 lucid.selectWalletFromPrivateKey(senderPrivKey);
-
 const signature2 = await signMessage(privKey, payload2);
-const { claimChannelCbor: claimCbor2 } = await claim(
-  lucid,
-  [
-    {
-      senderAddress,
-      channelId,
-      finalize: true,
-      amount: 60n,
-      signature: signature2,
-    },
-  ],
-  scriptRef,
-  BigInt(Date.now()),
-  receiverAddress,
+
+await testClaimOperation(
+  {
+    lucid,
+    listOfClaims: [
+      {
+        senderAddress,
+        channelId,
+        finalize: true,
+        amount: 60n,
+        signature: signature2,
+      },
+    ],
+    scriptRef,
+    currentTime: BigInt(Date.now()),
+    receiverAddress,
+  },
+  senderPrivKey,
 );
-
-lucid.selectWalletFromPrivateKey(senderPrivKey);
-const claimTx2 = await lucid
-  .fromTx(claimCbor2)
-  .then((txComp) => txComp.sign().commit())
-  .then((txSigned) => txSigned.submit());
-await lucid.awaitTx(claimTx2);
-
-console.log(`\n
-    > Channel claimed with ID: ${channelId}
-    > Claimed: 60
-    > Tx ID: ${claimTx2}
-    > CBOR: ${claimCbor2}\n\n`);
-
-const finalUtxosAtScript2 = await lucid.utxosAt(scriptAddress);
-printUtxos(lucid, senderAddress);
-printUtxos(lucid, undefined, finalUtxosAtScript2);
