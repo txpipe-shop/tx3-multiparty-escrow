@@ -59,7 +59,9 @@
 2. **addDeposit**: `bigint`
 3. **expirationDate**: `bigint`
 4. **userAddress**: `string`
+5. **senderAddress**: `string`
 
+where **userAddress** is the address of the wallet signing the transaction, and **senderAddress** is the address of the sender agent described in the channel.
 #### Example:
 
 ```json
@@ -68,6 +70,7 @@
   "addDeposit": 500000n,
   "expirationDate": 1716148967n,
   "userAddress": "addr_test1vzwlx094fypzcfsz53n5gufc6h84tawp9pdyklm05pr385gl956ej",
+  "senderAddress": "addr_test1vzwlx094fypzcfsz53n5gufc6h84tawp9pdyklm05pr385gl956ej",
 }
 ```
 
@@ -97,6 +100,8 @@ where ClaimParams =
     "channelId": `channelId`
     "signature": `string`
     "amount": `bigint`
+    "senderAddress": `string`
+    "finalize": boolean
 }
 ```
 
@@ -107,7 +112,9 @@ where ClaimParams =
     {
   "channelId": "b126f76547103204f62432999bcc2b5cb126f76547103204f62432999bcc2b5c0",
   "signature": "4eb27d97d08c53f4d5d53aabd395e7eaa3a095ac084db3201974146804e1bde14d9340aef918d945912152dcb8f5b00fa8514ac3657c315d37e8580fbcd66400",
-  "amount": 1500000n
+  "amount": 1500000n,
+  "finalize": false,
+  "senderAddress": "addr_test1vzwlx094fypzcfsz53n5gufc6h84tawp9pdyklm05pr385gl956ej"
 }
 ]
 ```
@@ -138,7 +145,8 @@ where ClaimParams =
 
 ```json
 {
-  "channelId": "b126f76547103204f62432999bcc2b5cb126f76547103204f62432999bcc2b5c0"
+  "channelId": "b126f76547103204f62432999bcc2b5cb126f76547103204f62432999bcc2b5c0",
+  "senderAddress": "addr_test1vzwlx094fypzcfsz53n5gufc6h84tawp9pdyklm05pr385gl956ej"
 }
 ```
 
