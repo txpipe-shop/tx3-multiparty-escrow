@@ -22,7 +22,7 @@ export const claim = async (
   scriptRef: Utxo,
   currentTime: bigint,
   receiverAddress: string,
-): Promise<{ cbor: string }> => {
+): Promise<{ claimChannelCbor: string }> => {
   const validator = new ChannelValidator();
   const scriptAddress = Addresses.scriptToAddress(lucid.network, validator);
   const scriptAddressDetails = Addresses.inspect(scriptAddress).payment;
@@ -128,5 +128,5 @@ export const claim = async (
     .attachMetadata(674, { msg })
     .commit();
 
-  return { cbor: txComplete.toString() };
+  return { claimChannelCbor: txComplete.toString() };
 };

@@ -127,7 +127,7 @@ lucid.selectWalletFromPrivateKey(senderPrivKey);
 const privKey = getCMLPrivateKey(senderSeed);
 const signature1 = await signMessage(privKey, payload1ofcId1);
 const signature2 = await signMessage(privKey, payload1ofcId2);
-const { cbor: claimCbor } = await claim(
+const { claimChannelCbor: claimCbor } = await claim(
   lucid,
   [
     {
@@ -182,7 +182,7 @@ const { payload: payload2ofcId1 } = await buildMessage(lucid, {
 lucid.selectWalletFromPrivateKey(senderPrivKey);
 
 const signature3 = await signMessage(privKey, payload2ofcId1);
-const { cbor: claimCbor2 } = await claim(
+const { claimChannelCbor: claimCbor2 } = await claim(
   lucid,
   [
     {
