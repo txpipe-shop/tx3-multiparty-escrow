@@ -5,7 +5,7 @@ import { getRandomUser, getScriptRef, printUtxos } from "./utils.ts";
 
 const {
   privateKey: senderPrivKey,
-  pubKeyHash: senderPubKey,
+  publicKey: senderPubKey,
   address: senderAddress,
 } = getRandomUser();
 

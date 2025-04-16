@@ -44,10 +44,7 @@ export const openChannel = async (
   const { scriptAddress, scriptHash: mintingPolicyId } =
     validatorDetails(lucid);
 
-  // const senderPubKeyHash = Addresses.addressToCredential(senderAddress).hash;
-  const userDetails = Addresses.inspect(senderAddress).payment;
-  if (!userDetails) throw new Error("User's credentials not found");
-  const senderPubKeyHash = userDetails.hash;
+  const senderPubKeyHash = Addresses.addressToCredential(senderAddress).hash;
 
   const channelToken = toUnit(mintingPolicyId, senderPubKeyHash);
   const tx = await lucid

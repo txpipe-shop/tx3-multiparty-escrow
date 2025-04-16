@@ -6,7 +6,7 @@ import { getRandomUser, getScriptRef } from "./utils.ts";
 
 const {
   privateKey: senderPrivKey,
-  pubKeyHash: senderPubKey,
+  publicKey: senderPubKey,
   address: senderAddress,
 } = getRandomUser();
 
