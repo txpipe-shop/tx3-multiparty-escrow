@@ -2,8 +2,17 @@ import {
   Bip32PrivateKey,
   PrivateKey,
 } from "@dcspark/cardano-multiplatform-lib-nodejs";
-import { fromHex, Lucid, Network, toHex, Utxo } from "@spacebudz/lucid";
-import { mnemonicToEntropy } from "bip39";
+import {
+  Addresses,
+  Crypto,
+  fromHex,
+  Lucid,
+  Network,
+  toHex,
+  Utxo,
+} from "@spacebudz/lucid";
+import { generateMnemonic, mnemonicToEntropy } from "bip39";
+import { deployScript } from "../builders/deploy-script.ts";
 import { ChannelInfo } from "../types/types.ts";
 
 const pad = (text = "", length = 120, padChar = "-") => {
@@ -20,18 +29,18 @@ export const printUtxos = async (
   if (address) lucid.selectReadOnlyWallet({ address });
   const walletUtxos = utxos ?? (await lucid.wallet.getUtxos());
   const title = address ? `WALLET UTXOS [${address}]` : `SCRIPT UTXOS`;
-  console.log(pad(title));
+  console.log("\x1b[34m%s\x1b[0m", pad(title));
   console.dir(walletUtxos, { depth: null });
-  console.log(pad());
+  console.log("\x1b[34m%s\x1b[0m", pad());
 };
 
 export const printChannels = (
   header: string,
   channels: ChannelInfo[] | ChannelInfo,
 ) => {
-  console.log(pad(header));
+  console.log("\x1b[34m%s\x1b[0m", pad(header));
   console.dir(channels, { depth: null });
-  console.log(pad());
+  console.log("\x1b[34m%s\x1b[0m", pad());
 };
 
 export const signMessage = async (
@@ -72,4 +81,42 @@ export const getCMLPrivateKey = (
 
   const paymentKey = accountKey.derive(0).derive(0).to_raw_key();
   return paymentKey;
+};
+
+export const signAndSubmit = async (
+  lucid: Lucid,
+  privKey: string,
+  cbor: string,
+) => {
+  lucid.selectWalletFromPrivateKey(privKey);
+  const txToSign = await lucid.fromTx(cbor);
+  const signedTx = await txToSign.sign().commit();
+  const tx = await signedTx.submit();
+  await lucid.awaitTx(tx);
+  return tx;
+};
+
+export const getScriptRef = async (lucid: Lucid, privKey: string) => {
+  const { cbor } = await deployScript(lucid);
+  lucid.selectWalletFromPrivateKey(privKey);
+  const txDeployHash = await lucid
+    .fromTx(cbor)
+    .then((txComp) => txComp.sign().commit())
+    .then((txSigned) => txSigned.submit());
+  await lucid.awaitTx(txDeployHash);
+  const [scriptRef] = await lucid.utxosByOutRef([
+    { txHash: txDeployHash, outputIndex: 0 },
+  ]);
+  return scriptRef;
+};
+
+export const getRandomUser = () => {
+  const seed = generateMnemonic(256);
+  const { privateKey, publicKey, credential } = Crypto.seedToDetails(
+    seed,
+    0,
+    "Payment",
+  );
+  const address = Addresses.credentialToAddress({ Emulator: 0 }, credential);
+  return { privateKey, publicKey, address, pubKeyHash: credential.hash, seed };
 };

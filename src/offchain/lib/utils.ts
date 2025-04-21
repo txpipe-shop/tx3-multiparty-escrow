@@ -42,3 +42,15 @@ export const getChannelUtxo = async (
       }),
     );
 };
+
+export const validatorDetails = (lucid: Lucid) => {
+  const validator = new ChannelValidator();
+
+  const scriptAddress = Addresses.scriptToAddress(lucid.network, validator);
+
+  const scriptAddressDetails = Addresses.inspect(scriptAddress).payment;
+  if (!scriptAddressDetails) throw new Error("Script credentials not found");
+  const scriptHash = scriptAddressDetails.hash;
+
+  return { scriptAddress, scriptHash };
+};

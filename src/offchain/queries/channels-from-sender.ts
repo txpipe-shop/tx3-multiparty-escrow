@@ -1,14 +1,12 @@
-import { Addresses, Hasher, Lucid } from "@spacebudz/lucid";
-import { fromChannelDatum } from "../lib/utils.ts";
-import { ChannelInfo, ChannelValidator } from "../types/types.ts";
+import { Addresses, Lucid } from "@spacebudz/lucid";
+import { fromChannelDatum, validatorDetails } from "../lib/utils.ts";
+import { ChannelInfo } from "../types/types.ts";
 
 export const getChannelsFromSender = async (
   lucid: Lucid,
   senderAddr: string,
 ): Promise<ChannelInfo[]> => {
-  const validator = new ChannelValidator();
-  const scriptAddress = lucid.utils.scriptToAddress(validator);
-  const policyId = Hasher.hashScript(validator);
+  const { scriptAddress, scriptHash: policyId } = validatorDetails(lucid);
   const senderKey = Addresses.inspect(senderAddr).payment;
   if (!senderKey) {
     throw new Error(

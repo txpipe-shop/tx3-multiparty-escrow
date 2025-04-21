@@ -8,8 +8,8 @@ import {
 } from "@spacebudz/lucid";
 import { config } from "../../config.ts";
 import { OpenChannelParams } from "../../shared/api-types.ts";
-import { toChannelDatum } from "../lib/utils.ts";
-import { ChannelDatum, ChannelValidator } from "../types/types.ts";
+import { toChannelDatum, validatorDetails } from "../lib/utils.ts";
+import { ChannelDatum } from "../types/types.ts";
 
 export const openChannel = async (
   lucid: Lucid,
@@ -23,6 +23,8 @@ export const openChannel = async (
   }: OpenChannelParams,
   scriptRef: Utxo,
 ) => {
+  if (expirationDate < Date.now())
+    throw new Error("Expiration date is in the past");
   lucid.selectReadOnlyWallet({ address: senderAddress });
   const utxos = await lucid.wallet.getUtxos();
   const utxo = utxos[0];
@@ -39,14 +41,12 @@ export const openChannel = async (
     groupId,
     expirationDate,
   };
-
-  const validator = new ChannelValidator();
-  const scriptAddress = Addresses.scriptToAddress(lucid.network, validator);
-  const mintingPolicyId = Addresses.scriptToCredential(validator).hash;
+  const { scriptAddress, scriptHash: mintingPolicyId } =
+    validatorDetails(lucid);
 
   const senderPubKeyHash = Addresses.addressToCredential(senderAddress).hash;
-  const channelToken = toUnit(mintingPolicyId, senderPubKeyHash);
 
+  const channelToken = toUnit(mintingPolicyId, senderPubKeyHash);
   const tx = await lucid
     .newTx()
     .readFrom([scriptRef])

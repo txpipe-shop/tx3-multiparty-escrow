@@ -13,8 +13,8 @@ import {
   getChannelUtxo,
   toChannelDatum,
   toChannelRedeemer,
+  validatorDetails,
 } from "../lib/utils.ts";
-import { ChannelValidator } from "../types/types.ts";
 
 export const claim = async (
   lucid: Lucid,
@@ -23,21 +23,15 @@ export const claim = async (
   currentTime: bigint,
   receiverAddress: string,
 ): Promise<{ claimChannelCbor: string }> => {
-  const validator = new ChannelValidator();
-  const scriptAddress = Addresses.scriptToAddress(lucid.network, validator);
-  const scriptAddressDetails = Addresses.inspect(scriptAddress).payment;
-  if (!scriptAddressDetails) throw new Error("Script credentials not found");
-  const scriptHash = scriptAddressDetails.hash;
+  const { scriptHash } = validatorDetails(lucid);
 
   // Get all channel utxos
   const channels = [];
   for (const param of params) {
     try {
       const { senderAddress, channelId } = param;
-      const senderDetails = Addresses.inspect(senderAddress).payment;
-      if (!senderDetails) throw new Error("Sender's credentials not found");
-      const senderPubKeyHash = senderDetails.hash;
-
+      const senderPubKeyHash =
+        Addresses.addressToCredential(senderAddress).hash;
       const channelToken = toUnit(scriptHash, senderPubKeyHash);
       const channelUtxo = await getChannelUtxo(lucid, channelToken, channelId);
       if (!channelUtxo) throw new Error("Channel utxo not found");
