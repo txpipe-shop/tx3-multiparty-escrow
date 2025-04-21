@@ -4,13 +4,13 @@ import { ChannelInfo } from "../types/types.ts";
 
 export const getChannelsFromSender = async (
   lucid: Lucid,
-  senderAddr: string
+  senderAddr: string,
 ): Promise<ChannelInfo[]> => {
   const { scriptAddress, scriptHash: policyId } = validatorDetails(lucid);
   const senderKey = Addresses.inspect(senderAddr).payment;
   if (!senderKey) {
     throw new Error(
-      `Invalid sender address: ${senderAddr}. Must have a payment key`
+      `Invalid sender address: ${senderAddr}. Must have a payment key`,
     );
   }
   const sender = senderKey.hash;
@@ -24,7 +24,7 @@ export const getChannelsFromSender = async (
           const { assets: balance, txHash, outputIndex, datum } = utxo;
           if (!datum) {
             console.warn(
-              `Channel UTxO without datum found: ${txHash}#${outputIndex}`
+              `Channel UTxO without datum found: ${txHash}#${outputIndex}`,
             );
             return null;
           }
@@ -52,11 +52,11 @@ export const getChannelsFromSender = async (
             };
           } catch (_) {
             console.warn(
-              `Invalid datum found in channel UTxO: ${txHash}#${outputIndex}`
+              `Invalid datum found in channel UTxO: ${txHash}#${outputIndex}`,
             );
             return null;
           }
         })
-        .filter((channel) => channel !== null)
+        .filter((channel) => channel !== null),
     );
 };
