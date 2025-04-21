@@ -38,9 +38,9 @@ export const printChannels = (
   header: string,
   channels: ChannelInfo[] | ChannelInfo,
 ) => {
-  console.log(pad(header));
+  console.log("\x1b[34m%s\x1b[0m", pad(header));
   console.dir(channels, { depth: null });
-  console.log(pad());
+  console.log("\x1b[34m%s\x1b[0m", pad());
 };
 
 export const signMessage = async (
