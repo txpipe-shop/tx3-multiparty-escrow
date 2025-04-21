@@ -63,7 +63,7 @@ await testClaimOperation(
         channelId,
         finalize: false,
         amount: 20n,
-        signature: signature,
+        signature,
       },
     ],
     scriptRef,
