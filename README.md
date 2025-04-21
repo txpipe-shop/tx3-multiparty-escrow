@@ -41,7 +41,7 @@ Inside `onchain`, run `aiken build`.
 ### Generate types
 Run `bash parse-blueprint.sh` to generate the contract types from the validator's blueprint.
 
-### Tests
+### Test with emulator
 To test the offchain operations, you can run the following commands from the `src` folder.
 
 **Open a channel**
@@ -83,3 +83,20 @@ Finally, another message will be created to claim 60 tokens from channel A, whic
 ```shell
    $> npm run test-close
 ```
+
+**Test combined operations**
+First, a channel is created with an initial deposit of 6 tokens. Then, an update adds 3 more tokens to the channel. A message for 7 tokens is signed and later used to claim the channel. Finally, the channel is closed, returning the remaining tokens to the sender.
+```shell
+   $> npm run test-all
+```
+
+### Test with testnet
+To emulate this operations on preview, complete the  `.env` file at the src with:
+```js
+SEED="decrease cash kangaroo ..."
+```
+Then run:
+```shell
+   $> npm run cli-preview
+```
+And input as appropiate.
