@@ -13,7 +13,9 @@
     "test-build-msg": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/build-message.ts",
     "test-close": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/close-channel.ts",
     "test-claim": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/claim-single.ts",
-    "test-multi-claim": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/multi-claim.ts"
+    "test-multi-claim": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/multi-claim.ts",
+    "test-all": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/combined-operations.ts",
+    "cli-preview": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/testnet.ts"
   },
   "author": "",
   "license": "ISC",
@@ -49,10 +51,12 @@
     "@types/json-bigint": "^1.0.4",
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.10.1",
+    "@types/prompt-sync": "^4.2.3",
     "@typescript-eslint/eslint-plugin": "^8.29.0",
     "eslint-plugin-import": "^2.31.0",
     "jiti": "^2.4.2",
     "pino-pretty": "^7.6.1",
+    "prompt-sync": "^4.2.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.3.2"
   }
