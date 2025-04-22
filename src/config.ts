@@ -29,7 +29,7 @@ const configFileSchema = z.object({
   token: z.string(),
   ref_script: z.object({
     txHash: z.string(),
-  })
+  }),
 });
 const config = configFileSchema.parse(configFile);
 export { config, env };

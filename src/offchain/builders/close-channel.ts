@@ -37,7 +37,7 @@ export const closeChannel = async (
   const datum: ChannelDatum = fromChannelDatum(datumStr);
 
   const hasExpired = currentTime > datum.expirationDate;
-  console.log(datum.expirationDate)
+  console.log(datum.expirationDate);
   if (!hasExpired) throw new Error("Channel has not expired yet");
 
   const payout = addAssets(channelUtxo.assets, { [channelToken]: -1n });
