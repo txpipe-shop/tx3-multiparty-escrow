@@ -35,7 +35,7 @@ await printUtxos(lucid, senderAddress);
 
 const scriptRef = await getScriptRef(lucid, senderPrivKey);
 
-const channelId = await testOpenOperation(
+const { channelId } = await testOpenOperation(
   {
     lucid,
     scriptRef,
