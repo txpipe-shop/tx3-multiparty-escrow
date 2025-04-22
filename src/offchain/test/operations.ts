@@ -53,7 +53,7 @@ export const testOpenOperation = async (
     printUtxos(lucid, undefined, utxosAtScript);
   }
 
-  return channelId;
+  return {channelId, openTx};
 };
 
 export const testCloseChannel = async (

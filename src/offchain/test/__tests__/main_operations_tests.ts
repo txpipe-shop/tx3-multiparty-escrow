@@ -45,7 +45,7 @@ describe("Attack tests", () => {
           initialDeposit: 6n,
         },
         s1PrivKey,
-        false,
+        false
       );
       expect(channelId).toBeUndefined();
     } catch (e) {
@@ -71,13 +71,13 @@ describe("Open channel happy path tests", () => {
         initialDeposit: 6n,
       },
       s1PrivKey,
-      false,
+      false
     );
     const { scriptAddress, scriptHash } = validatorDetails(lucids1);
     const utxosAtScript = await lucids1.utxosAt(scriptAddress);
     const channelUtxo = utxosAtScript[0]; // Should we find it or assume its the fist one?
     const channelToken = Object.keys(channelUtxo.assets).find(
-      (asset) => fromUnit(asset).policyId == scriptHash,
+      (asset) => fromUnit(asset).policyId == scriptHash
     );
     if (!channelToken) throw new Error("Channel token not found");
     expect(fromUnit(channelToken).name).toBe(s1PubKey);
@@ -89,7 +89,7 @@ describe("Open channel happy path tests", () => {
     const groupId = 10n;
     const initialDeposit = 6n;
     const senderUtxos = await lucids1.wallet.getUtxos();
-    const channelId = await testOpenOperation(
+    const { channelId, openTx } = await testOpenOperation(
       {
         lucid: lucids1,
         scriptRef,
@@ -101,11 +101,11 @@ describe("Open channel happy path tests", () => {
         initialDeposit,
       },
       s1PrivKey,
-      true,
+      false
     );
-    const { scriptAddress } = validatorDetails(lucids1);
-    const utxosAtScript = await lucids1.utxosAt(scriptAddress);
-    const channelUtxo = utxosAtScript[0]; // Should we find it or assume its the fist one?
+    const [channelUtxo] = await lucids1.utxosByOutRef([
+      { txHash: openTx, outputIndex: 0 },
+    ]);
     const datumStr = channelUtxo.datum!;
     const datum: ChannelDatum = fromChannelDatum(datumStr);
 
@@ -136,7 +136,7 @@ describe("Open channel happy path tests", () => {
         initialDeposit,
       },
       s1PrivKey,
-      false,
+      false
     );
     const { scriptAddress } = validatorDetails(lucids1);
     const utxosAtScript = await lucids1.utxosAt(scriptAddress);
