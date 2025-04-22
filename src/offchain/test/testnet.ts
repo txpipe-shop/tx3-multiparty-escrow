@@ -58,7 +58,7 @@ const actions: Record<ActionKey, () => Promise<void>> = {
     console.log("\n[Updating a channel]");
     const channelId = prompt("Channel ID: ");
     const addDeposit = prompt("New deposit: ");
-    const expirationDate = prompt("New expiration date (in ms): ");
+    let expirationDate = prompt("New expiration date (in ms): ");
     console.log("Updating a channel...");
     await testUpdateOperation(
       {
@@ -67,8 +67,8 @@ const actions: Record<ActionKey, () => Promise<void>> = {
         userAddress: address,
         senderAddress: address,
         channelId,
-        addDeposit: BigInt(addDeposit),
-        expirationDate: BigInt(expirationDate),
+        addDeposit: addDeposit ? BigInt(addDeposit) : undefined,
+        expirationDate: expirationDate ? BigInt(expirationDate) : undefined,
         currentTime: BigInt(Date.now()),
       },
       privateKey,
