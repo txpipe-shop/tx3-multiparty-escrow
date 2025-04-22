@@ -14,6 +14,7 @@ import {
 import { generateMnemonic, mnemonicToEntropy } from "bip39";
 import { deployScript } from "../builders/deploy-script.ts";
 import { ChannelInfo } from "../types/types.ts";
+import { config } from "../../config.ts";
 
 const pad = (text = "", length = 120, padChar = "-") => {
   const padLength = Math.max(0, (length - text.length) / 2);
@@ -24,7 +25,7 @@ const pad = (text = "", length = 120, padChar = "-") => {
 export const printUtxos = async (
   lucid: Lucid,
   address?: string,
-  utxos?: Utxo[],
+  utxos?: Utxo[]
 ) => {
   if (address) lucid.selectReadOnlyWallet({ address });
   const walletUtxos = utxos ?? (await lucid.wallet.getUtxos());
@@ -36,7 +37,7 @@ export const printUtxos = async (
 
 export const printChannels = (
   header: string,
-  channels: ChannelInfo[] | ChannelInfo,
+  channels: ChannelInfo[] | ChannelInfo
 ) => {
   console.log("\x1b[34m%s\x1b[0m", pad(header));
   console.dir(channels, { depth: null });
@@ -45,7 +46,7 @@ export const printChannels = (
 
 export const signMessage = async (
   privKey: PrivateKey,
-  message: string,
+  message: string
 ): Promise<string> => {
   const msg = Buffer.from(message, "hex");
   const signedMessage = privKey.sign(msg).to_raw_bytes();
@@ -59,7 +60,7 @@ export const getCMLPrivateKey = (
     addressType?: "Base" | "Enterprise";
     accountIndex?: number;
     network?: Network;
-  } = { addressType: "Base", accountIndex: 0, network: "Mainnet" },
+  } = { addressType: "Base", accountIndex: 0, network: "Mainnet" }
 ): PrivateKey => {
   function harden(num: number): number {
     if (typeof num !== "number") throw new Error("Type number required here!");
@@ -71,7 +72,7 @@ export const getCMLPrivateKey = (
     fromHex(entropy),
     options.password
       ? new TextEncoder().encode(options.password)
-      : new Uint8Array(),
+      : new Uint8Array()
   );
 
   const accountKey = rootKey
@@ -86,7 +87,7 @@ export const getCMLPrivateKey = (
 export const signAndSubmit = async (
   lucid: Lucid,
   privKey: string,
-  cbor: string,
+  cbor: string
 ) => {
   lucid.selectWalletFromPrivateKey(privKey);
   const txToSign = await lucid.fromTx(cbor);
@@ -97,15 +98,21 @@ export const signAndSubmit = async (
 };
 
 export const getScriptRef = async (lucid: Lucid, privKey: string) => {
-  const { cbor } = await deployScript(lucid);
-  lucid.selectWalletFromPrivateKey(privKey);
-  const txDeployHash = await lucid
-    .fromTx(cbor)
-    .then((txComp) => txComp.sign().commit())
-    .then((txSigned) => txSigned.submit());
-  await lucid.awaitTx(txDeployHash);
+  let deployHash = "";
+  const { txHash } = config.ref_script;
+  if (txHash === "") {
+    const { cbor } = await deployScript(lucid);
+    lucid.selectWalletFromPrivateKey(privKey);
+    deployHash = await lucid
+      .fromTx(cbor)
+      .then((txComp) => txComp.sign().commit())
+      .then((txSigned) => txSigned.submit());
+    await lucid.awaitTx(deployHash);
+  } else {
+    deployHash = txHash;
+  }
   const [scriptRef] = await lucid.utxosByOutRef([
-    { txHash: txDeployHash, outputIndex: 0 },
+    { txHash: deployHash, outputIndex: 0 },
   ]);
   return scriptRef;
 };
@@ -115,7 +122,7 @@ export const getRandomUser = () => {
   const { privateKey, publicKey, credential } = Crypto.seedToDetails(
     seed,
     0,
-    "Payment",
+    "Payment"
   );
   const address = Addresses.credentialToAddress({ Emulator: 0 }, credential);
   return { privateKey, publicKey, address, pubKeyHash: credential.hash, seed };

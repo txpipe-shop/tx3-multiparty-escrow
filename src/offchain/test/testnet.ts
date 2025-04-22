@@ -132,7 +132,7 @@ const actions: Record<ActionKey, () => Promise<void>> = {
         console.log("Invalid option. Please try again.");
       }
     }
-    console.log("Closing a channel...");
+    console.log("Claiming a channel...");
     await testClaimOperation(
       {
         lucid,

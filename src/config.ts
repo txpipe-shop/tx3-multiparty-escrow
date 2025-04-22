@@ -27,6 +27,9 @@ const env = envSchema.parse(process.env);
 const configFile = JSON.parse(fs.readFileSync(env.CONFIG_FILE, "utf-8"));
 const configFileSchema = z.object({
   token: z.string(),
+  ref_script: z.object({
+    txHash: z.string(),
+  })
 });
 const config = configFileSchema.parse(configFile);
 export { config, env };
