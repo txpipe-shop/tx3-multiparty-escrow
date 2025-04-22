@@ -127,3 +127,38 @@ export const getRandomUser = () => {
   const address = Addresses.credentialToAddress({ Emulator: 0 }, credential);
   return { privateKey, publicKey, address, pubKeyHash: credential.hash, seed };
 };
+
+export const setupTestEnv = async () => {
+  const sender = getRandomUser();
+  const signer = getRandomUser();
+  const receiver = getRandomUser();
+
+  const emulator = new Emulator([
+    {
+      address: sender.address,
+      assets: { lovelace: 300_000_000n, [config.token]: 50000000n },
+    },
+    {
+      address: signer.address,
+      assets: { lovelace: 600_000_000n, [config.token]: 100000000n },
+    },
+    {
+      address: receiver.address,
+      assets: { lovelace: 600_000_000n, [config.token]: 100000000n },
+    },
+  ]);
+
+  const lucid = new Lucid({
+    provider: emulator,
+    wallet: { PrivateKey: sender.privateKey },
+  });
+
+  const scriptRef = await getScriptRef(lucid, sender.privateKey);
+  return {
+    sender,
+    signer,
+    receiver,
+    lucid,
+    scriptRef,
+  };
+};

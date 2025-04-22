@@ -7,31 +7,8 @@ import { ChannelDatum } from "../../types/types.ts";
 import { testOpenOperation } from "../operations.ts";
 import { setupTestEnv } from "../utils.ts";
 
-<<<<<<<< HEAD:src/offchain/test/__tests__/open-channel.ts
-const {
-  privateKey: s1PrivKey,
-  pubKeyHash: s1PubKey,
-  address: s1Addr,
-} = getRandomUser();
-const { pubKeyHash: rPubKey, address: rAddr } = getRandomUser();
-
-const emulator = new Emulator([
-  { address: s1Addr, assets: { lovelace: 30_000_000n, [config.token]: 50n } },
-]);
-
-const lucid = new Lucid({
-  provider: emulator,
-  wallet: { PrivateKey: s1PrivKey },
-});
-
-describe("Open channel happy path tests", () => {
-  it("Has an output with the token [scriptHash][senderAddress]", async () => {
-    const scriptRef = await getScriptRef(lucid, s1PrivKey);
-    await testOpenOperation(
-      {
-        lucid,
-========
-const { sender, signer, receiver, lucid, scriptRef } = await setupTestEnv();
+const { sender, signer, receiver, lucid, emulator, scriptRef } =
+  await setupTestEnv();
 
 //
 // TESTS
@@ -47,7 +24,7 @@ describe("Attack tests", () => {
           receiverAddress: receiver.address,
           signerPubKey: signer.publicKey,
           groupId: 10n,
-          expirationDate: BigInt(Date.now() - 50 * 1000),
+          expirationDate: BigInt(emulator.now() - 50 * 1000),
           initialDeposit: 6n,
         },
         sender.privateKey,
@@ -67,23 +44,14 @@ describe("Open channel happy path tests", () => {
     const { openTx } = await testOpenOperation(
       {
         lucid: lucid,
->>>>>>>> 7dba44c (implement claim test for correct output):src/offchain/test/__tests__/open.ts
         scriptRef,
         senderAddress: sender.address,
         receiverAddress: receiver.address,
         signerPubKey: signer.publicKey,
         groupId: 10n,
-        expirationDate: BigInt(Date.now() + 50 * 1000),
+        expirationDate: BigInt(emulator.now() + 50 * 1000),
         initialDeposit: 6n,
       },
-<<<<<<<< HEAD:src/offchain/test/__tests__/open-channel.ts
-      s1PrivKey,
-      false,
-    );
-    const { scriptAddress, scriptHash } = validatorDetails(lucid);
-    const utxosAtScript = await lucid.utxosAt(scriptAddress);
-    const channelUtxo = utxosAtScript[0];
-========
       sender.privateKey,
       false,
     );
@@ -91,7 +59,6 @@ describe("Open channel happy path tests", () => {
     const [channelUtxo] = await lucid.utxosByOutRef([
       { txHash: openTx, outputIndex: 0 },
     ]);
->>>>>>>> 7dba44c (implement claim test for correct output):src/offchain/test/__tests__/open.ts
     const channelToken = Object.keys(channelUtxo.assets).find(
       (asset) => fromUnit(asset).policyId == scriptHash,
     );
@@ -99,12 +66,7 @@ describe("Open channel happy path tests", () => {
     expect(fromUnit(channelToken).name).toBe(sender.pubKeyHash);
   });
   it("Has an output with the correct datum", async () => {
-<<<<<<<< HEAD:src/offchain/test/__tests__/open-channel.ts
-    const scriptRef = await getScriptRef(lucid, s1PrivKey);
-
-========
->>>>>>>> 7dba44c (implement claim test for correct output):src/offchain/test/__tests__/open.ts
-    const expirationDate = BigInt(Date.now() + 10 * 60 * 1000);
+    const expirationDate = BigInt(emulator.now() + 10 * 60 * 1000);
     const groupId = 10n;
     const initialDeposit = 6n;
     const senderUtxos = await lucid.wallet.getUtxos();
@@ -119,11 +81,7 @@ describe("Open channel happy path tests", () => {
         expirationDate,
         initialDeposit,
       },
-<<<<<<<< HEAD:src/offchain/test/__tests__/open-channel.ts
-      s1PrivKey,
-========
       sender.privateKey,
->>>>>>>> 7dba44c (implement claim test for correct output):src/offchain/test/__tests__/open.ts
       false,
     );
     const [channelUtxo] = await lucid.utxosByOutRef([
@@ -143,12 +101,7 @@ describe("Open channel happy path tests", () => {
     expect(datum.expirationDate).toBe(expirationDate);
   });
   it("Has an correct amount of tokens", async () => {
-<<<<<<<< HEAD:src/offchain/test/__tests__/open-channel.ts
-    const scriptRef = await getScriptRef(lucid, s1PrivKey);
-
-========
->>>>>>>> 7dba44c (implement claim test for correct output):src/offchain/test/__tests__/open.ts
-    const expirationDate = BigInt(Date.now() + 10 * 60 * 1000);
+    const expirationDate = BigInt(emulator.now() + 10 * 60 * 1000);
     const initialDeposit = 6n;
     const { openTx } = await testOpenOperation(
       {
@@ -161,11 +114,7 @@ describe("Open channel happy path tests", () => {
         expirationDate,
         initialDeposit,
       },
-<<<<<<<< HEAD:src/offchain/test/__tests__/open-channel.ts
-      s1PrivKey,
-========
       sender.privateKey,
->>>>>>>> 7dba44c (implement claim test for correct output):src/offchain/test/__tests__/open.ts
       false,
     );
     const [channelUtxo] = await lucid.utxosByOutRef([
