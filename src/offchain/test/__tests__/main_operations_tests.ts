@@ -124,7 +124,7 @@ describe("Open channel happy path tests", () => {
 
     const expirationDate = BigInt(Date.now() + 10 * 60 * 1000);
     const initialDeposit = 6n;
-    await testOpenOperation(
+    const { openTx } = await testOpenOperation(
       {
         lucid: lucids1,
         scriptRef,
@@ -138,9 +138,9 @@ describe("Open channel happy path tests", () => {
       s1PrivKey,
       false
     );
-    const { scriptAddress } = validatorDetails(lucids1);
-    const utxosAtScript = await lucids1.utxosAt(scriptAddress);
-    const channelUtxo = utxosAtScript[0]; // Should we find it or assume its the fist one?
+    const [channelUtxo] = await lucids1.utxosByOutRef([
+      { txHash: openTx, outputIndex: 0 },
+    ]);
     const tokenAmount = channelUtxo.assets[config.token];
     expect(tokenAmount).toBe(6n);
   });
