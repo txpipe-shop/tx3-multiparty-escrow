@@ -14,6 +14,7 @@ import {
 import { generateMnemonic, mnemonicToEntropy } from "bip39";
 import { deployScript } from "../builders/deploy-script.ts";
 import { ChannelInfo } from "../types/types.ts";
+import { config } from "../../config.ts";
 
 const pad = (text = "", length = 120, padChar = "-") => {
   const padLength = Math.max(0, (length - text.length) / 2);
@@ -97,15 +98,21 @@ export const signAndSubmit = async (
 };
 
 export const getScriptRef = async (lucid: Lucid, privKey: string) => {
-  const { cbor } = await deployScript(lucid);
-  lucid.selectWalletFromPrivateKey(privKey);
-  const txDeployHash = await lucid
-    .fromTx(cbor)
-    .then((txComp) => txComp.sign().commit())
-    .then((txSigned) => txSigned.submit());
-  await lucid.awaitTx(txDeployHash);
+  let deployHash = "";
+  const { txHash } = config.ref_script;
+  if (txHash === "") {
+    const { cbor } = await deployScript(lucid);
+    lucid.selectWalletFromPrivateKey(privKey);
+    deployHash = await lucid
+      .fromTx(cbor)
+      .then((txComp) => txComp.sign().commit())
+      .then((txSigned) => txSigned.submit());
+    await lucid.awaitTx(deployHash);
+  } else {
+    deployHash = txHash;
+  }
   const [scriptRef] = await lucid.utxosByOutRef([
-    { txHash: txDeployHash, outputIndex: 0 },
+    { txHash: deployHash, outputIndex: 0 },
   ]);
   return scriptRef;
 };
