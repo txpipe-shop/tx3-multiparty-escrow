@@ -101,7 +101,7 @@ describe("Open channel happy path tests", () => {
         initialDeposit,
       },
       s1PrivKey,
-      false,
+      true,
     );
     const { scriptAddress } = validatorDetails(lucids1);
     const utxosAtScript = await lucids1.utxosAt(scriptAddress);
