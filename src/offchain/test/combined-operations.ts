@@ -46,7 +46,7 @@ const { channelId } = await testOpenOperation(
     expirationDate: BigInt(Date.now() + 80 * 1000),
     initialDeposit: 6n,
   },
-  senderPrivKey
+  senderPrivKey,
 );
 
 await testUpdateOperation(
@@ -59,7 +59,7 @@ await testUpdateOperation(
     addDeposit: 3n,
     currentTime: BigInt(Date.now() + 20 * 1000),
   },
-  senderPrivKey
+  senderPrivKey,
 );
 
 const { payload } = await buildMessage(lucid, {
@@ -90,7 +90,7 @@ await testClaimOperation(
     currentTime: BigInt(Date.now() + 40 * 1000),
     receiverAddress,
   },
-  senderPrivKey
+  senderPrivKey,
 );
 await printUtxos(lucid, senderAddress);
 
@@ -102,5 +102,5 @@ await testCloseChannel(
     channelId,
     currentTime: BigInt(Date.now() + 85 * 1000),
   },
-  senderPrivKey
+  senderPrivKey,
 );

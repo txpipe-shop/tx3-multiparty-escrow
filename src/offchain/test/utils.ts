@@ -4,6 +4,7 @@ import {
 } from "@dcspark/cardano-multiplatform-lib-nodejs";
 import {
   Addresses,
+  Assets,
   Crypto,
   fromHex,
   Lucid,
@@ -159,6 +160,17 @@ export const setupTestEnv = async () => {
     signer,
     receiver,
     lucid,
+    emulator,
     scriptRef,
   };
+};
+
+export const normalizeAssets = (assets: Assets): Assets => {
+  const keys = Object.keys(assets);
+  for (let k = 0; k < keys.length; k++) {
+    if (assets[keys[k]] === BigInt(0)) {
+      delete assets[keys[k]];
+    }
+  }
+  return assets;
 };

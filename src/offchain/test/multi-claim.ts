@@ -41,7 +41,7 @@ const { channelId: channelId1 } = await testOpenOperation(
     expirationDate: BigInt(Date.now() + 2 * 24 * 60 * 60 * 1000),
     initialDeposit: 100n,
   },
-  senderPrivKey
+  senderPrivKey,
 );
 
 const { channelId: channelId2 } = await testOpenOperation(
@@ -55,7 +55,7 @@ const { channelId: channelId2 } = await testOpenOperation(
     expirationDate: BigInt(Date.now() + 2 * 24 * 60 * 60 * 1000),
     initialDeposit: 20n,
   },
-  senderPrivKey
+  senderPrivKey,
 );
 
 const { payload: payload1ofcId1 } = await buildMessage(lucid, {
@@ -96,7 +96,7 @@ await testClaimOperation(
     currentTime: BigInt(Date.now()),
     receiverAddress,
   },
-  senderPrivKey
+  senderPrivKey,
 );
 
 // Claim and close
@@ -124,5 +124,5 @@ await testClaimOperation(
     currentTime: BigInt(Date.now()),
     receiverAddress,
   },
-  senderPrivKey
+  senderPrivKey,
 );
