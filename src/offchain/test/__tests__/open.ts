@@ -100,7 +100,7 @@ describe("Open channel happy path tests", () => {
     expect(datum.groupId).toBe(groupId);
     expect(datum.expirationDate).toBe(expirationDate);
   });
-  it("Has an correct amount of tokens", async () => {
+  it("Has a correct amount of tokens", async () => {
     const expirationDate = BigInt(emulator.now() + 10 * 60 * 1000);
     const initialDeposit = 6n;
     const { openTx } = await testOpenOperation(

@@ -6,6 +6,7 @@ import {
   Addresses,
   Assets,
   Crypto,
+  Emulator,
   fromHex,
   Lucid,
   Network,
