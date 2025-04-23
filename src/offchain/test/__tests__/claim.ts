@@ -55,7 +55,7 @@ describe("Single claim: happy path tests", () => {
       amount,
       senderAddress: sender.address,
     });
-    const signature = await signMessage(getCMLPrivateKey(sender.seed), payload);
+    const signature = await signMessage(getCMLPrivateKey(signer.seed), payload);
     const claims: ClaimChannelParams = [
       {
         senderAddress: sender.address,
@@ -73,7 +73,7 @@ describe("Single claim: happy path tests", () => {
         currentTime: BigInt(emulator.now()),
         receiverAddress: receiver.address,
       },
-      sender.privateKey,
+      receiver.privateKey,
       false,
     );
     const [claimUtxo] = await lucid.utxosByOutRef([
@@ -104,7 +104,7 @@ describe("Single claim: happy path tests", () => {
       (asset) => fromUnit(asset).policyId == scriptHash,
     );
     if (!channelToken) throw new Error("Channel token not found");
-    const signature = await signMessage(getCMLPrivateKey(sender.seed), payload);
+    const signature = await signMessage(getCMLPrivateKey(signer.seed), payload);
     const claims: ClaimChannelParams = [
       {
         senderAddress: sender.address,
@@ -123,7 +123,7 @@ describe("Single claim: happy path tests", () => {
         currentTime: BigInt(emulator.now()),
         receiverAddress: receiver.address,
       },
-      sender.privateKey,
+      receiver.privateKey,
       false,
     );
     await lucid.awaitTx(claimTx);
@@ -175,8 +175,8 @@ describe("Multiple claims: happy path tests", () => {
       amount,
       senderAddress: sender.address,
     });
-    const signature = await signMessage(getCMLPrivateKey(sender.seed), p1);
-    const signature2 = await signMessage(getCMLPrivateKey(sender.seed), p2);
+    const signature = await signMessage(getCMLPrivateKey(signer.seed), p1);
+    const signature2 = await signMessage(getCMLPrivateKey(signer.seed), p2);
     const claims: ClaimChannelParams = [
       {
         senderAddress: sender.address,
@@ -201,7 +201,7 @@ describe("Multiple claims: happy path tests", () => {
         currentTime: BigInt(emulator.now()),
         receiverAddress: receiver.address,
       },
-      sender.privateKey,
+      receiver.privateKey,
       false,
     );
     const [claimUtxo, userUtxo] = await lucid.utxosByOutRef([

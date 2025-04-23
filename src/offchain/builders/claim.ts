@@ -24,6 +24,7 @@ export const claim = async (
   receiverAddress: string,
 ): Promise<{ claimChannelCbor: string }> => {
   const { scriptHash } = validatorDetails(lucid);
+  lucid.selectReadOnlyWallet({address: receiverAddress});
 
   // Get all channel utxos
   const channels = [];
