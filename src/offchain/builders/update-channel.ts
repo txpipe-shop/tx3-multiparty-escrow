@@ -23,9 +23,8 @@ export const updateChannel = async (
   currentTime: bigint,
 ) => {
   const { scriptAddress, scriptHash } = validatorDetails(lucid);
-
+  lucid.selectReadOnlyWallet({ address: userAddress });
   const senderPubKeyHash = Addresses.addressToCredential(senderAddress).hash;
-
   const userPubKeyHash = Addresses.addressToCredential(userAddress).hash;
 
   const channelToken = toUnit(scriptHash, senderPubKeyHash);
