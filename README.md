@@ -22,7 +22,10 @@ Where CONFIG_FILE is the name of a file inside the project, with the following f
 ```js
 {
    // "token": "[policyId][hexaName]"
-    "token": "640d27b6d2e02539d21bcee5cea36688b7c93f1a97ca03a5990e16dd7441676978"
+   "token": "fa3eff2047fdf9293c5feef4dc85ce58097ea1c6da4845a35153518374494e4459",
+   "ref_script": {
+      "txHash": "7e92e7c52605d5beb83ccae335a49bcc894d56bf240f7aaee651491c8eb174b8"
+   }
 }
 ```
 
@@ -100,3 +103,9 @@ Then run:
    $> npm run cli-preview
 ```
 And input as appropiate.
+
+### Test with jest
+To test the operations with jest, try:
+```shell
+   $> npm run test
+```
