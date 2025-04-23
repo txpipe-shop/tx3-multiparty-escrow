@@ -24,7 +24,7 @@ export const testOpenOperation = async (
     initialDeposit,
   }: OpenChannelParams & { lucid: Lucid; scriptRef: Utxo },
   senderPrivKey: string,
-  printLogs: boolean = true,
+  printLogs: boolean = true
 ) => {
   const { openChannelCbor, channelId } = await openChannel(
     lucid,
@@ -36,7 +36,7 @@ export const testOpenOperation = async (
       expirationDate,
       groupId,
     },
-    scriptRef,
+    scriptRef
   );
   const openTx = await signAndSubmit(lucid, senderPrivKey, openChannelCbor);
 
@@ -69,13 +69,13 @@ export const testCloseChannel = async (
     currentTime: bigint;
   },
   senderPrivKey: string,
-  printLogs: boolean = true,
+  printLogs: boolean = true
 ) => {
   const { closedChannelCbor } = await closeChannel(
     lucid,
     { senderAddress, channelId },
     scriptRef,
-    currentTime,
+    currentTime
   );
   const closedTx = await signAndSubmit(lucid, senderPrivKey, closedChannelCbor);
 
@@ -110,7 +110,7 @@ export const testUpdateOperation = async (
     currentTime: bigint;
   },
   userPrivKey: string,
-  printLogs: boolean = true,
+  printLogs: boolean = true
 ) => {
   const { updatedChannelCbor } = await updateChannel(
     lucid,
@@ -122,7 +122,7 @@ export const testUpdateOperation = async (
       expirationDate,
     },
     scriptRef,
-    currentTime,
+    currentTime
   );
   const updatedTx = await signAndSubmit(lucid, userPrivKey, updatedChannelCbor);
 
@@ -158,14 +158,14 @@ export const testClaimOperation = async (
     receiverAddress: string;
   },
   userPrivKey: string,
-  printLogs: boolean = true,
+  printLogs: boolean = true
 ) => {
   const { claimChannelCbor: claimCbor } = await claim(
     lucid,
     listOfClaims,
     scriptRef,
     currentTime,
-    receiverAddress,
+    receiverAddress
   );
 
   lucid.selectWalletFromPrivateKey(userPrivKey);
@@ -183,7 +183,7 @@ export const testClaimOperation = async (
     console.log(`
       > ID: ${channelId}
       > Claimed amount: ${amount}
-    `),
+    `)
   );
 
   if (printLogs) {

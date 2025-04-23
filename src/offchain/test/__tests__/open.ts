@@ -28,7 +28,7 @@ describe("Attack tests", () => {
           initialDeposit: 6n,
         },
         sender.privateKey,
-        false,
+        false
       );
       expect(channelId).toBeUndefined();
     } catch (e) {
@@ -39,7 +39,7 @@ describe("Attack tests", () => {
   });
 });
 
-describe("Open channel happy path tests", () => {
+describe("Open channel tests", () => {
   it("Has an output with the token [scriptHash][senderAddress]", async () => {
     const { openTx } = await testOpenOperation(
       {
@@ -53,14 +53,13 @@ describe("Open channel happy path tests", () => {
         initialDeposit: 6n,
       },
       sender.privateKey,
-      false,
+      false
     );
-    const { scriptHash } = validatorDetails(lucid);
     const [channelUtxo] = await lucid.utxosByOutRef([
       { txHash: openTx, outputIndex: 0 },
     ]);
     const channelToken = Object.keys(channelUtxo.assets).find(
-      (asset) => fromUnit(asset).policyId == scriptHash,
+      (asset) => fromUnit(asset).policyId == validatorDetails(lucid).scriptHash
     );
     if (!channelToken) throw new Error("Channel token not found");
     expect(fromUnit(channelToken).name).toBe(sender.pubKeyHash);
@@ -82,7 +81,7 @@ describe("Open channel happy path tests", () => {
         initialDeposit,
       },
       sender.privateKey,
-      false,
+      false
     );
     const [channelUtxo] = await lucid.utxosByOutRef([
       { txHash: openTx, outputIndex: 0 },
@@ -115,7 +114,7 @@ describe("Open channel happy path tests", () => {
         initialDeposit,
       },
       sender.privateKey,
-      false,
+      false
     );
     const [channelUtxo] = await lucid.utxosByOutRef([
       { txHash: openTx, outputIndex: 0 },

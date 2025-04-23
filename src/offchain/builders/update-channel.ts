@@ -49,6 +49,7 @@ export const updateChannel = async (
 
   const updateExpiration = newExpirationDate != datum.expirationDate;
   const updateBalance = !!addDeposit;
+  if (!updateExpiration && !updateBalance) throw new Error("Nothing to update");
   const msg =
     updateExpiration && updateBalance
       ? "Update Channel Expiration and Balance"
