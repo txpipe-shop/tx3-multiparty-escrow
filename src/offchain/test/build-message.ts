@@ -21,7 +21,7 @@ const emulator = new Emulator([
 const lucid = new Lucid({ provider: emulator });
 lucid.selectReadOnlyWallet({ address: senderAddress });
 const scriptRef = await getScriptRef(lucid, senderPrivKey);
-const channelId = await testOpenOperation(
+const { channelId } = await testOpenOperation(
   {
     lucid,
     scriptRef,

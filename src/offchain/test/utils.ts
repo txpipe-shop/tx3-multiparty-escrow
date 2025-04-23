@@ -12,9 +12,9 @@ import {
   Utxo,
 } from "@spacebudz/lucid";
 import { generateMnemonic, mnemonicToEntropy } from "bip39";
+import { config } from "../../config.ts";
 import { deployScript } from "../builders/deploy-script.ts";
 import { ChannelInfo } from "../types/types.ts";
-import { config } from "../../config.ts";
 
 const pad = (text = "", length = 120, padChar = "-") => {
   const padLength = Math.max(0, (length - text.length) / 2);
@@ -100,7 +100,7 @@ export const signAndSubmit = async (
 export const getScriptRef = async (lucid: Lucid, privKey: string) => {
   let deployHash = "";
   const { txHash } = config.ref_script;
-  if (txHash === "") {
+  if (typeof lucid.provider.network === "object" || !txHash) {
     const { cbor } = await deployScript(lucid);
     lucid.selectWalletFromPrivateKey(privKey);
     deployHash = await lucid

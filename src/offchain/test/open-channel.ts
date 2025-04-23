@@ -33,7 +33,7 @@ await printUtxos(lucid, senderAddress);
 printChannels("GET ALL CHANNELS BEFORE TX", await getAllChannels(lucid));
 const scriptRef = await getScriptRef(lucid, senderPrivKey);
 
-const channelId = await testOpenOperation(
+const { channelId } = await testOpenOperation(
   {
     lucid,
     scriptRef,

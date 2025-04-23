@@ -11,6 +11,8 @@
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "skipLibCheck": true,
+    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
     "typeRoots": ["./types", "./node_modules/@types"]
   },
   "ts-node": {
