@@ -134,6 +134,7 @@ export const setupTestEnv = async () => {
   const sender = getRandomUser();
   const signer = getRandomUser();
   const receiver = getRandomUser();
+  const user = getRandomUser();
 
   const emulator = new Emulator([
     {
@@ -148,6 +149,10 @@ export const setupTestEnv = async () => {
       address: receiver.address,
       assets: { lovelace: 600_000_000n, [config.token]: 100000000n },
     },
+    {
+      address: user.address,
+      assets: { lovelace: 600_000_000n, [config.token]: 100000000n },
+    },
   ]);
 
   const lucid = new Lucid({
@@ -160,6 +165,7 @@ export const setupTestEnv = async () => {
     sender,
     signer,
     receiver,
+    user,
     lucid,
     emulator,
     scriptRef,

@@ -1,36 +1,20 @@
 // deno-lint-ignore-file no-explicit-any
 import { describe, expect, it } from "@jest/globals";
-import { Emulator, fromUnit, Lucid } from "@spacebudz/lucid";
+import { fromUnit } from "@spacebudz/lucid";
 import { config } from "../../../config.ts";
 import { fromChannelDatum, validatorDetails } from "../../lib/utils.ts";
 import { ChannelDatum } from "../../types/types.ts";
 import { testOpenOperation, testUpdateOperation } from "../operations.ts";
-import { getRandomUser, getScriptRef } from "../utils.ts";
+import { setupTestEnv } from "../utils.ts";
 
-const {
-  privateKey: s1PrivKey,
-  pubKeyHash: s1PubKey,
-  address: s1Addr,
-} = getRandomUser();
-const { privateKey: s2PrivKey, address: s2Addr } = getRandomUser();
-const { address: rAddr } = getRandomUser();
+const { sender, signer, receiver, user, lucid, emulator, scriptRef } =
+  await setupTestEnv();
 
-const emulator = new Emulator([
-  { address: s1Addr, assets: { lovelace: 30_000_000n, [config.token]: 70n } },
-  { address: s2Addr, assets: { lovelace: 60_000_000n, [config.token]: 50n } },
-]);
-
-const lucid = new Lucid({
-  provider: emulator,
-  wallet: { PrivateKey: s1PrivKey },
-});
-
-const expirationDate = BigInt(Date.now() + 10 * 60 * 1000);
+const expirationDate = BigInt(emulator.now() + 10 * 60 * 1000);
 const initialDeposit = 6n;
 const groupId = 10n;
-const newExpirationDate = BigInt(Date.now() + 20 * 60 * 1000);
+const newExpirationDate = BigInt(emulator.now() + 20 * 60 * 1000);
 const newDeposit = 10n;
-const scriptRef = await getScriptRef(lucid, s1PrivKey);
 
 const openAndUpdate = async (
   updateExpiration: boolean = true,
@@ -40,14 +24,14 @@ const openAndUpdate = async (
     {
       lucid,
       scriptRef,
-      senderAddress: s1Addr,
-      receiverAddress: rAddr,
-      signerPubKey: s1PubKey,
+      senderAddress: sender.address,
+      receiverAddress: receiver.address,
+      signerPubKey: signer.publicKey,
       groupId,
       expirationDate,
       initialDeposit,
     },
-    s1PrivKey,
+    sender.privateKey,
     false,
   );
   const [openChannelUtxo] = await lucid.utxosByOutRef([
@@ -57,14 +41,14 @@ const openAndUpdate = async (
     {
       lucid,
       scriptRef,
-      userAddress: updateExpiration ? s1Addr : s2Addr,
-      senderAddress: s1Addr,
+      userAddress: updateExpiration ? sender.address : user.address,
+      senderAddress: sender.address,
       channelId,
       addDeposit: updateAmount ? newDeposit : undefined,
       expirationDate: updateExpiration ? newExpirationDate : undefined,
-      currentTime: BigInt(Date.now()),
+      currentTime: BigInt(emulator.now()),
     },
-    updateExpiration ? s1PrivKey : s2PrivKey,
+    updateExpiration ? sender.privateKey : user.privateKey,
     false,
   );
   const [updateChannelUtxo] = await lucid.utxosByOutRef([
@@ -72,6 +56,10 @@ const openAndUpdate = async (
   ]);
   return { openChannelUtxo, updateChannelUtxo };
 };
+
+//
+// TESTS
+//
 
 describe("Update channel tests", () => {
   it("Channel utxo has the token [scriptHash][senderAddress]", async () => {
@@ -81,7 +69,7 @@ describe("Update channel tests", () => {
       (asset) => fromUnit(asset).policyId == validatorDetails(lucid).scriptHash,
     );
     if (!channelToken) throw new Error("Channel token not found");
-    expect(fromUnit(channelToken).name).toBe(s1PubKey);
+    expect(fromUnit(channelToken).name).toBe(sender.pubKeyHash);
   });
   it("Channel utxo only updates datum's expiration date when expiration date changes", async () => {
     const { openChannelUtxo, updateChannelUtxo } = await openAndUpdate();
