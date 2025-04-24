@@ -90,6 +90,8 @@ export const testCloseChannel = async (
     const utxosAtScript = await lucid.utxosAt(scriptAddress);
     printUtxos(lucid, undefined, utxosAtScript);
   }
+
+  return { closedTx };
 };
 
 export const testUpdateOperation = async (
@@ -137,6 +139,8 @@ export const testUpdateOperation = async (
     const utxosAtScript = await lucid.utxosAt(scriptAddress);
     printUtxos(lucid, undefined, utxosAtScript);
   }
+
+  return { updatedTx };
 };
 
 export const testClaimOperation = async (
@@ -187,4 +191,6 @@ export const testClaimOperation = async (
     const finalUtxosAtScript = await lucid.utxosAt(scriptAddress);
     printUtxos(lucid, undefined, finalUtxosAtScript);
   }
+
+  return { claimTx };
 };
