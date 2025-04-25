@@ -23,9 +23,8 @@ export const updateChannel = async (
   currentTime: bigint,
 ) => {
   const { scriptAddress, scriptHash } = validatorDetails(lucid);
-
+  lucid.selectReadOnlyWallet({ address: userAddress });
   const senderPubKeyHash = Addresses.addressToCredential(senderAddress).hash;
-
   const userPubKeyHash = Addresses.addressToCredential(userAddress).hash;
 
   const channelToken = toUnit(scriptHash, senderPubKeyHash);
@@ -49,6 +48,7 @@ export const updateChannel = async (
 
   const updateExpiration = newExpirationDate != datum.expirationDate;
   const updateBalance = !!addDeposit;
+  if (!updateExpiration && !updateBalance) throw new Error("Nothing to update");
   const msg =
     updateExpiration && updateBalance
       ? "Update Channel Expiration and Balance"
