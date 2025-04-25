@@ -40,7 +40,10 @@ const openAndClose = async () => {
   const [senderUtxo] = await lucid.utxosByOutRef([
     { txHash: closedTx, outputIndex: 0 },
   ]);
-  return { senderUtxo };
+  const utxosWithChannelToken = await lucid.utxoByUnit(
+    validatorDetails(lucid).scriptHash + sender.pubKeyHash,
+  );
+  return { senderUtxo, utxosWithChannelToken };
 };
 
 //
@@ -49,12 +52,9 @@ const openAndClose = async () => {
 
 describe("Close channel tests", () => {
   it("Utxo does not have the channel token", async () => {
-    const { senderUtxo } = await openAndClose();
+    const { utxosWithChannelToken } = await openAndClose();
 
-    const channelTokenExists = Object.keys(senderUtxo.assets).includes(
-      validatorDetails(lucid).scriptHash + sender.pubKeyHash,
-    );
-    expect(channelTokenExists).toBe(false);
+    expect(utxosWithChannelToken).toBe(undefined);
   });
   it("Sender has remaining tokens from channel", async () => {
     const { senderUtxo } = await openAndClose();
