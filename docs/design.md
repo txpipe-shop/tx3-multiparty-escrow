@@ -105,6 +105,9 @@ All channels share the same address, so there is no parameter for the validator.
 * Minting checks:
     * No tokens with this policy are minted nor burned
 
+* Transaction checks:
+    * Signed by the receiver
+
 * Check withdraw validator is running
 
 ##### Close
@@ -120,3 +123,21 @@ All channels share the same address, so there is no parameter for the validator.
       * expiration date > validity range upper bound
 
 #### <u>_Withdraw validator_</u>
+Only used for claim transactions.
+
+The way to validate this is by mapping each input to its corresponding output, that is, the output at index 1 corresponds to the input at index 1, the output at index 2 to the input at index 2, and so on.
+
+
+For each script input:
+* If the redeemer for this input indicates to Close the channel, validate:
+    * corresponding output address = sender address
+    * corresponding output value = Input value - claimed amount - channel token
+    * channel token is burned
+* If the redeemer indicates not to Close the channel, validate over the corresponding output:
+    * Address = input address
+    * Value = input value - claimed amount
+    * Datum:
+        * Output nonce = input nonce + 1
+        * Rest of the datum remains unchanged
+    * Reference script = None
+* Verify signature in the redeemer
