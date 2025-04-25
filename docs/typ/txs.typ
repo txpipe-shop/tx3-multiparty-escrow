@@ -182,6 +182,102 @@ ChannelDatum : (
 #tx_claim_channel
 #v(2cm)
 
+#let tx_multiclaim_channel = [
+  #vanilla_transaction("Claim Channel",
+  inputs: (
+    (
+      name: "Channel UTxO (Sender1)",
+      address: "channel script + _",
+      value: (
+        "channel_token_1": "1",
+        AGIX: "M"
+      ),
+      datum: (
+        ChannelDatum : (
+          "Nonce_1": "",
+          "ChannelId_1":"",
+          "Signer_1":"",
+          "Receiver_1":"",
+          "GroupId_1":"",
+          "Expiration_1":"",
+        ),
+      ),
+      redeemer: "Claim(msg)",
+    ),
+    (
+      name: "Channel UTxO (Sender2)",
+      address: "channel script + _",
+      value: (
+        "channel_token_2": "1",
+        AGIX: "N"
+      ),
+      datum: (
+        ChannelDatum : (
+          "Nonce_2": "",
+          "ChannelId_2":"",
+          "Signer_2":"",
+          "Receiver_2":"",
+          "GroupId_2":"",
+          "Expiration_2":"",
+        ),
+      ),
+      redeemer: "Claim(msg_2)",
+    )
+  ),
+  outputs: (
+    (
+      name: "Channel UTxO (Sender1)",
+      address: "channel script + _",
+      value: (
+        "channel_token": "1",
+        AGIX: "M - K1"
+      ),
+      datum: (
+        ChannelDatum : (
+          "Nonce_1'": "",
+          "ChannelId_1":"",
+          "Signer_1":"",
+          "Receiver_1":"",
+          "GroupId_1":"",
+          "Expiration_1":"",
+        ),
+      ),
+    ),
+    (
+      name: "Sender2 UTxO",
+      address: "sender2 address + _",
+      value: (
+        AGIX: "N - K2"
+      ),
+    ),
+    (
+      name: "Receiver UTxO",
+      value: (
+        AGIX: "K1 + K2"
+      ),
+    ),
+  ),
+  mint: (
+    "channel_token_2": (qty: 0, variables: (("1":-1))),
+  ),
+  signatures: ((`receiver`), ),
+  notes: [
+    #v(0.1pt)
+    `msg` is signed by the signer_1
+    #v(0.1pt)
+    `msg_2` is signed by the signer_2
+    #v(0.1pt)
+    `Nonce_1'` $=$ `Nonce_1` + 1
+  ]
+)
+]
+
+#pagebreak()
+= Claim Multiple Channels
+#tx_multiclaim_channel
+#v(2cm)
+
+
 #let tx_close_channel = [
   #vanilla_transaction("Claim Channel",
   inputs: (
