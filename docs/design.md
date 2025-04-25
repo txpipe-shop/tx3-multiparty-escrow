@@ -1,4 +1,4 @@
-# MulitParty Escrow Design
+# MultiParty Escrow Design
 
 ## Overview
 A **channel** represents a “payment relationship” between a sender and a service-provider. There can be many channels between the two. The only token involved is always `AGIX`.
@@ -13,12 +13,12 @@ Every transaction interacting with the script will be transparently identified b
 - staking part: _
 
 #### Datum
-- ChannelId, represented by some UTxO-Ref from the inputs of the sender
-- Nonce, used to distinguish claim transactions
-- Signer Public Key
-- Receiver PubkeyHash
+- ChannelId **--txHash+outputIndex of some UTxO reference from an inputs of the open transaction--**
+- Nonce **--used to give uniqueness to each signature on claim transactions--**
+- Signer Public Key **--used to verify the signatures on claim transactions--**
+- Receiver PubkeyHash **--used to verify receiving address--**
 - GroupId
-- Expiration Date
+- Expiration Date **--used to verify valid ttl of the channel--**
 
 #### Value
 - Channel Token
@@ -47,4 +47,76 @@ A channel can be closed either by the service provider after making a claim or a
 
 ![closeChannel](imgs/close.png)
 
-### Validator Script
+### Validator
+Multivalidator with a minting policy, a spend validator and a withdraw validator.
+
+All channels share the same address, so there is no parameter for the validator.
+
+#### <u>_Minting policy_</u>
+##### Mint
+* Minting checks:
+    * Mints 1 token of this policy, with the sender pub key hash as it's token name.
+
+* Output checks:
+    * Enforce channel to be the first output
+    * Address:
+        * Check output has self script address
+        * Stake credential = None
+    * Value:
+        * Only has only lovelace, AGIX and the minted control token.
+    * Datum:
+        * ChannelId = txHash + outputIndex of the first input
+        * Nonce = 0
+        * Expiration date > validity range upper bound
+        * Sender = name of the control token
+    * Reference script = None
+
+* Other: A positive non-zero amount of AGIX?
+
+
+##### Burn
+* Minting checks:
+    * If amount burned == -1, True
+    * Else if amount < -1, check Withdraw validator running.
+
+
+#### <u>_Spend validator_</u>
+##### Update
+* Minting checks:
+    * No tokens with this policy are minted nor burned
+
+* Transaction checks:
+    * Only one script input of self address
+    * Check channel is still valid (expiration date > validity range upper bound)
+    * Sender signing the tx IF the expiration date is updated
+
+* Output checks:
+    * Enforce channel to be the first output
+    * Address:
+        * Output preserves script address
+    * Value:
+        * without_lovelace(Output value) = without_lovelace(Input value) + K AGIX, where K >= 0
+    * Datum:
+        * output expiration date >= input expiration date
+        * rest of the datum remains unchanged
+    * Reference script = None
+
+##### Claim
+* Minting checks:
+    * No tokens with this policy are minted nor burned
+
+* Check withdraw validator is running
+
+##### Close
+* Minting checks:
+    * Burns exactly -1 token of self policy.
+
+* Transaction checks:
+    * Only one script input of self address.
+    * Signer by the sender
+
+* Input Checks:
+  * Datum:
+      * expiration date > validity range upper bound
+
+#### <u>_Withdraw validator_</u>
