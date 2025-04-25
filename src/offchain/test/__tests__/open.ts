@@ -71,3 +71,29 @@ describe("Open channel tests", () => {
     expect(tokenAmount).toBe(6n);
   });
 });
+
+describe("Attack tests", () => {
+  it("Fails to open an expired channel", async () => {
+    try {
+      const channelId = await testOpenOperation(
+        {
+          lucid,
+          scriptRef,
+          senderAddress: sender.address,
+          receiverAddress: receiver.address,
+          signerPubKey: signer.publicKey,
+          groupId: 10n,
+          expirationDate: BigInt(emulator.now() - 50 * 1000),
+          initialDeposit: 6n,
+        },
+        sender.privateKey,
+        false,
+      );
+      expect(channelId).toBeUndefined();
+    } catch (e) {
+      console.log("\x1b[32m%s\x1b[0m", "Test: Open channel already expired.\n");
+      console.log("\x1b[31m%s\x1b[0m", String(e));
+      expect(String(e)).toContain("Expiration date is in the past");
+    }
+  });
+});

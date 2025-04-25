@@ -1,6 +1,11 @@
 // deno-lint-ignore-file no-explicit-any
 import { describe, expect, it } from "@jest/globals";
+import { addAssets, fromUnit } from "@spacebudz/lucid";
+import { config } from "../../../config.ts";
+import { ClaimChannelParams } from "../../../shared/api-types.ts";
+import { buildMessage } from "../../builders/build-message.ts";
 import { fromChannelDatum, validatorDetails } from "../../lib/utils.ts";
+import { getChannelById } from "../../queries/channel-by-id.ts";
 import { testClaimOperation, testOpenOperation } from "../operations.ts";
 import {
   getCMLPrivateKey,
@@ -8,14 +13,11 @@ import {
   setupTestEnv,
   signMessage,
 } from "../utils.ts";
-import { ClaimChannelParams } from "../../../shared/api-types.ts";
-import { buildMessage } from "../../builders/build-message.ts";
-import { addAssets, fromUnit } from "@spacebudz/lucid";
-import { config } from "../../../config.ts";
-import { getChannelById } from "../../queries/channel-by-id.ts";
 
 const { sender, signer, receiver, lucid, emulator, scriptRef } =
   await setupTestEnv();
+
+const amount = 100n;
 
 const openChannel = async () => {
   const { openTx, channelId } = await testOpenOperation(
@@ -27,7 +29,7 @@ const openChannel = async () => {
       signerPubKey: signer.publicKey,
       groupId: 10n,
       expirationDate: BigInt(emulator.now() + 50 * 1000),
-      initialDeposit: 600000n,
+      initialDeposit: amount,
     },
     sender.privateKey,
     false,
@@ -35,19 +37,16 @@ const openChannel = async () => {
   const [openChannelUtxo] = await lucid.utxosByOutRef([
     { txHash: openTx, outputIndex: 0 },
   ]);
-  return {
-    utxo: openChannelUtxo,
-    channelId,
-  };
+  return { utxo: openChannelUtxo, channelId };
 };
 const { scriptHash, scriptAddress } = validatorDetails(lucid);
 
 //
 // TESTS
 //
+
 describe("Single claim: happy path tests", () => {
   it("Output is correct", async () => {
-    const amount = 100n;
     const { utxo: openChannelUtxo, channelId } = await openChannel();
     const oldDatum = fromChannelDatum(openChannelUtxo.datum!);
     const { payload } = await buildMessage(lucid, {
@@ -89,7 +88,6 @@ describe("Single claim: happy path tests", () => {
   });
 
   it("Claim and close channel", async () => {
-    const amount = 100n;
     const { channelId } = await openChannel();
     const { payload } = await buildMessage(lucid, {
       channelId,
@@ -164,7 +162,6 @@ describe("Multiple claims: happy path tests", () => {
     const in2Datum = fromChannelDatum(in2.datum!);
 
     // Claim both channels
-    const amount = 100n;
     const { payload: p1 } = await buildMessage(lucid, {
       channelId: in1Datum.channelId,
       amount,
@@ -232,5 +229,46 @@ describe("Multiple claims: happy path tests", () => {
         ),
       ),
     );
+  });
+});
+
+describe("Attack tests", () => {
+  it("Fails to claim an expired channel", async () => {
+    try {
+      const { channelId } = await openChannel();
+      const { payload } = await buildMessage(lucid, {
+        channelId,
+        amount,
+        senderAddress: sender.address,
+      });
+      const signature = await signMessage(
+        getCMLPrivateKey(signer.seed),
+        payload,
+      );
+      const claims: ClaimChannelParams = [
+        {
+          senderAddress: sender.address,
+          channelId,
+          amount,
+          signature,
+          finalize: false,
+        },
+      ];
+      const { claimTx } = await testClaimOperation(
+        {
+          lucid,
+          scriptRef,
+          listOfClaims: claims,
+          currentTime: BigInt(emulator.now() + 60 * 1000),
+          receiverAddress: receiver.address,
+        },
+        receiver.privateKey,
+        false,
+      );
+      expect(claimTx).toBeUndefined();
+    } catch (e) {
+      console.log("\x1b[31m%s\x1b[0m", String(e));
+      expect(String(e)).toContain("No channels available to claim");
+    }
   });
 });
