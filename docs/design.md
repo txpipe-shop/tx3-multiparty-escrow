@@ -38,9 +38,10 @@ Users can add funds to any non-expired channel, but only the sender can extend i
 ![updateChannel](imgs/update.png)
 
 #### Claim
-Service providers can claim their funds providing the corresponding signed message.
+Service providers can claim their funds providing the corresponding signed message. Multiple channels could be claimed in the same transaction.
 
 ![claimChannel](imgs/claim.png)
+![multiClaim](imgs/multi-claim.png)
 
 #### Close
 A channel can be closed either by the service provider after making a claim or automatically when it expires. After a channel has closed, the sender can reclaim the remaining AGIX in the channel, withdrawing the funds to their wallets.
@@ -52,10 +53,14 @@ Multivalidator with a minting policy, a spend validator and a withdraw validator
 
 All channels share the same address, so there is no parameter for the validator.
 
+<u>_Notation_</u>: In datum validations, we'll use *any* to indicate that no validation will be performed on that field, besides the type check. For example:
+ * group_id: any ByteArray
+
 #### <u>_Minting policy_</u>
 ##### Mint
 * Minting checks:
-    * Mints 1 token of this policy, with the sender pub key hash as it's token name.
+    * Mints 1 token of this policy, with the sender's public key hash as its token name.
+    * Check length of token name is 28 bytes long
 
 * Output checks:
     * Enforce channel to be the first output
@@ -63,21 +68,22 @@ All channels share the same address, so there is no parameter for the validator.
         * Check output has self script address
         * Stake credential = None
     * Value:
-        * Only has only lovelace, AGIX and the minted control token.
+        * Has only Lovelace, the minted control token, and an amount ≥ 0 of AGIX.
+
     * Datum:
         * ChannelId = txHash + outputIndex of the first input
         * Nonce = 0
         * Expiration date > validity range upper bound
-        * Sender = name of the control token
+        * Check Receiver field is 28 bytes long
+        * Check Signer field is 32 bytes long
+        * Group Id: any ByteArray
     * Reference script = None
-
-* Other: A positive non-zero amount of AGIX?
-
 
 ##### Burn
 * Minting checks:
-    * If amount burned == -1, True
-    * Else if amount < -1, check Withdraw validator running.
+    * Either:
+        * Check there is a script input with a "Close" redeemer and the amount burned is exactly -1
+        * Check a Withdraw validator is running.
 
 
 #### <u>_Spend validator_</u>
@@ -97,18 +103,15 @@ All channels share the same address, so there is no parameter for the validator.
     * Value:
         * without_lovelace(Output value) = without_lovelace(Input value) + K AGIX, where K >= 0
     * Datum:
-        * output expiration date >= input expiration date
+        * output Expiration date >= input Expiration date
         * rest of the datum remains unchanged
     * Reference script = None
 
 ##### Claim
-* Minting checks:
-    * No tokens with this policy are minted nor burned
-
 * Transaction checks:
     * Signed by the receiver
 
-* Check withdraw validator is running
+* Check Withdraw validator is running
 
 ##### Close
 * Minting checks:
