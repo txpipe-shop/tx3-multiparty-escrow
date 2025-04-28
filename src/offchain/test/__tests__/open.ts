@@ -10,7 +10,7 @@ import { setupTestEnv } from "../utils.ts";
 const { sender, signer, receiver, lucid, emulator, scriptRef } =
   await setupTestEnv();
 
-const expirationDate = BigInt(emulator.now() + 10 * 60 * 1000);
+const expirationDate = BigInt(emulator.now() + 60 * 60 * 1000);
 const initialDeposit = 6n;
 const groupId = 10n;
 const open = async () => {
@@ -24,6 +24,7 @@ const open = async () => {
       groupId,
       expirationDate,
       initialDeposit,
+      currentTime: BigInt(emulator.now()),
     },
     sender.privateKey,
     false,
@@ -85,6 +86,7 @@ describe("Attack tests", () => {
           groupId: 10n,
           expirationDate: BigInt(emulator.now() - 50 * 1000),
           initialDeposit: 6n,
+          currentTime: BigInt(emulator.now()),
         },
         sender.privateKey,
         false,
