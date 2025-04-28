@@ -12,7 +12,7 @@ const { sender, signer, receiver, lucid, emulator, scriptRef } =
 
 const expirationDate = BigInt(emulator.now() + 10 * 60 * 1000);
 const initialDeposit = 6n;
-const groupId = 10n;
+const groupId = "group1";
 const open = async () => {
   const { channelId, openTx } = await testOpenOperation(
     {
@@ -38,6 +38,31 @@ const open = async () => {
 //
 // TESTS
 //
+describe("Attack tests", () => {
+  it("Fails to open an expired channel", async () => {
+    try {
+      const channelId = await testOpenOperation(
+        {
+          lucid: lucid,
+          scriptRef,
+          senderAddress: sender.address,
+          receiverAddress: receiver.address,
+          signerPubKey: signer.publicKey,
+          groupId: "group1",
+          expirationDate: BigInt(emulator.now() - 50 * 1000),
+          initialDeposit: 6n,
+        },
+        sender.privateKey,
+        false,
+      );
+      expect(channelId).toBeUndefined();
+    } catch (e) {
+      console.log("\x1b[32m%s\x1b[0m", "Test: Open channel already expired.\n");
+      console.log("\x1b[31m%s\x1b[0m", String(e));
+      expect(String(e)).toContain("Expiration date is in the past");
+    }
+  });
+});
 
 describe("Open channel tests", () => {
   it("Has an output with the token [scriptHash][senderAddress]", async () => {
@@ -62,7 +87,7 @@ describe("Open channel tests", () => {
     expect(datum.nonce).toBe(0n);
     expect(datum.signer).toBe(signer.publicKey);
     expect(datum.receiver).toBe(receiver.pubKeyHash);
-    expect(datum.groupId).toBe(groupId);
+    expect(datum.groupId).toBe(fromText(groupId));
     expect(datum.expirationDate).toBe(expirationDate);
   });
   it("Has a correct amount of tokens", async () => {

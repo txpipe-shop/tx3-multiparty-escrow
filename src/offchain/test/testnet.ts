@@ -46,7 +46,7 @@ const actions: Record<ActionKey, () => Promise<void>> = {
         senderAddress: address,
         receiverAddress,
         signerPubKey: publicKey,
-        groupId: BigInt(groupId),
+        groupId: groupId,
         expirationDate: BigInt(expirationDate),
         initialDeposit: BigInt(initialDeposit),
       },
