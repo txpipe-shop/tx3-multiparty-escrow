@@ -38,7 +38,9 @@ Users can add funds to any non-expired channel, but only the sender can extend i
 ![updateChannel](imgs/update.png)
 
 #### Claim
-Service providers can claim their funds providing the corresponding signed message. Multiple channels could be claimed in the same transaction.
+Service providers can claim their funds providing the corresponding signed message.
+
+Multiple channels could be claimed in the same transaction. Some of them could be also closed in that tx.
 
 ![claimChannel](imgs/claim.png)
 ![multiClaim](imgs/multi-claim.png)

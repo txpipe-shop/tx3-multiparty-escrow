@@ -186,88 +186,125 @@ ChannelDatum : (
   #vanilla_transaction("Claim Channel",
   inputs: (
     (
-      name: "Channel UTxO (Sender1)",
+      name: "Channel UTxO₁",
       address: "channel script + _",
       value: (
-        "channel_token_1": "1",
-        AGIX: "M"
+        "channel_token₁": "1",
+        AGIX: "M₁"
       ),
       datum: (
         ChannelDatum : (
-          "Nonce_1": "",
-          "ChannelId_1":"",
-          "Signer_1":"",
-          "Receiver_1":"",
-          "GroupId_1":"",
-          "Expiration_1":"",
+          "Nonce₁": "",
+          "ChannelId₁":"",
+          "Signer₁":"",
+          "Receiver₁":"",
+          "GroupId₁":"",
+          "Expiration₁":"",
         ),
       ),
-      redeemer: "Claim(msg)",
+      redeemer: [#h(-6pt) "Claim(msg₁)"],
     ),
     (
-      name: "Channel UTxO (Sender2)",
+      name: "Channel UTxO₂",
       address: "channel script + _",
       value: (
-        "channel_token_2": "1",
-        AGIX: "N"
+        "channel_token₂": "1",
+        AGIX: "M₂"
       ),
       datum: (
         ChannelDatum : (
-          "Nonce_2": "",
-          "ChannelId_2":"",
-          "Signer_2":"",
-          "Receiver_2":"",
-          "GroupId_2":"",
-          "Expiration_2":"",
+          "Nonce₂": "",
+          "ChannelId₂":"",
+          "Signer₂":"",
+          "Receiver₂":"",
+          "GroupId₂":"",
+          "Expiration₂":"",
         ),
       ),
-      redeemer: "Claim(msg_2)",
-    )
+      redeemer: [#h(-6pt) "Claim(msg₂)"],
+    ),
+    (dots: ""),
+        (
+      name: "Channel UTxOₙ",
+      address: "channel script + _",
+      value: (
+        "channel_tokenₙ": "1",
+        AGIX: "Mₙ"
+      ),
+      datum: (
+        ChannelDatum : (
+          "Nonceₙ": "",
+          "ChannelIdₙ":"",
+          "Signerₙ":"",
+          "Receiverₙ":"",
+          "GroupIdₙ":"",
+          "Expirationₙ":"",
+        ),
+      ),
+      redeemer: [#h(-6pt) "Claim(msgₙ)"],
+    ),
   ),
   outputs: (
     (
-      name: "Channel UTxO (Sender1)",
+      name: "Channel UTxO₁",
       address: "channel script + _",
       value: (
-        "channel_token": "1",
-        AGIX: "M - K1"
+        "channel_token₁": "1",
+        AGIX: "M₁ - K₁"
       ),
       datum: (
         ChannelDatum : (
-          "Nonce_1'": "",
-          "ChannelId_1":"",
-          "Signer_1":"",
-          "Receiver_1":"",
-          "GroupId_1":"",
-          "Expiration_1":"",
+          "Nonce₁'": "",
+          "ChannelId₁":"",
+          "Signer₁":"",
+          "Receiver₁":"",
+          "GroupId₁":"",
+          "Expiration₁":"",
         ),
       ),
     ),
     (
-      name: "Sender2 UTxO",
-      address: "sender2 address + _",
+      name: "Sender₂ UTxO",
+      address: "sender₂ address + _",
       value: (
-        AGIX: "N - K2"
+        AGIX: "M₂ - K₂"
+      ),
+    ),
+    (dots:""),
+    (
+      name: "Channel UTxOₙ",
+      address: "channel script + _",
+      value: (
+        "channel_tokenₙ": "1",
+        AGIX: "Mₙ - Kₙ"
+      ),
+      datum: (
+        ChannelDatum : (
+          "Nonceₙ'": "",
+          "ChannelIdₙ":"",
+          "Signerₙ":"",
+          "Receiverₙ":"",
+          "GroupIdₙ":"",
+          "Expirationₙ":"",
+        ),
       ),
     ),
     (
       name: "Receiver UTxO",
       value: (
-        AGIX: "K1 + K2"
+        AGIX: "K₁ + ... + Kₙ"
       ),
     ),
   ),
   mint: (
-    "channel_token_2": (qty: 0, variables: (("1":-1))),
+    "channel_token₂": (qty: 0, variables: (("1":-1))),
   ),
   signatures: ((`receiver`), ),
   notes: [
     #v(0.1pt)
-    `msg` is signed by the signer_1
+    `msgᵢ` is signed by the signerᵢ
     #v(0.1pt)
-    `msg_2` is signed by the signer_2
-    #v(0.1pt)
-    `Nonce_1'` $=$ `Nonce_1` + 1
+    `Nonceᵢ'` $=$ `Nonceᵢ` + 1
   ]
 )
 ]
