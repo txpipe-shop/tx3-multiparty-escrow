@@ -38,7 +38,7 @@ export const openChannel = async (
     nonce: 0n,
     signer: signerPubKey,
     receiver: receiverPubKeyHash,
-    groupId,
+    groupId: fromText(groupId),
     expirationDate,
   };
   const { scriptAddress, scriptHash: mintingPolicyId } =

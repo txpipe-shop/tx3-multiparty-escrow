@@ -105,7 +105,7 @@ export const OpenChannelSchema = z.object({
   receiverAddress: addressSchema,
   initialDeposit: z.bigint(),
   expirationDate: z.bigint(),
-  groupId: z.bigint(),
+  groupId: z.string(),
 });
 
 export const UpdateChannelSchema = z.object({

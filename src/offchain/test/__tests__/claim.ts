@@ -25,7 +25,7 @@ const openChannel = async () => {
       senderAddress: sender.address,
       receiverAddress: receiver.address,
       signerPubKey: signer.publicKey,
-      groupId: 10n,
+      groupId: "group1",
       expirationDate: BigInt(emulator.now() + 50 * 1000),
       initialDeposit: 600000n,
     },

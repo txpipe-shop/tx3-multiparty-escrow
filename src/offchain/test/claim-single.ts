@@ -37,7 +37,7 @@ const { channelId } = await testOpenOperation(
     senderAddress,
     receiverAddress,
     signerPubKey: senderPubKey,
-    groupId: 10n,
+    groupId: "group1",
     expirationDate: BigInt(Date.now() + 2 * 24 * 60 * 60 * 1000),
     initialDeposit: 600n,
   },

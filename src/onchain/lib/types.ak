@@ -5,7 +5,7 @@ pub type Datum {
   nonce: Int,
   signer: ByteArray,
   receiver: VerificationKey,
-  group_id: Int,
+  group_id: ByteArray,
   expiration_date: Int,
 }
 
