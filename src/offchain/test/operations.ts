@@ -130,8 +130,8 @@ export const testUpdateOperation = async (
 
   console.log(`\n
       > Channel updated with ID: ${channelId}
-      > Add Deposit: ${addDeposit}
-      > New Expiration Date: ${new Date(Number(expirationDate))}
+      > Add Deposit: ${addDeposit ?? 0}
+      > New Expiration Date: ${new Date(Number(expirationDate)) ?? "N/A"}
       > Tx ID: ${updatedTx}
       > CBOR: ${updatedChannelCbor}\n\n`);
 
@@ -182,8 +182,7 @@ export const testClaimOperation = async (
     > CBOR: ${claimCbor}
     > Channels claimed with`);
   listOfClaims.map(({ amount, channelId }) =>
-    console.log(`
-      > ID: ${channelId}
+    console.log(`\t\t> ID: ${channelId}
       > Claimed amount: ${amount}
     `),
   );

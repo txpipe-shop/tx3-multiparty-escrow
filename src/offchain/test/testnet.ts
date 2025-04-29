@@ -4,6 +4,7 @@ import { env } from "../../config.ts";
 import { ClaimChannelParams } from "../../shared/api-types.ts";
 import { buildMessage } from "../builders/build-message.ts";
 import { getChannelById } from "../queries/channel-by-id.ts";
+import { getChannelsFromReceiver } from "../queries/channels-from-receiver.ts";
 import { getChannelsFromSender } from "../queries/channels-from-sender.ts";
 import {
   testClaimOperation,
@@ -28,7 +29,7 @@ lucid.selectWalletFromSeed(seed);
 const { privateKey, publicKey } = Crypto.seedToDetails(seed, 0, "Payment");
 const address = await lucid.wallet.address();
 
-type ActionKey = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+type ActionKey = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 const scriptRef = await getScriptRef(lucid, privateKey);
 
 const actions: Record<ActionKey, () => Promise<void>> = {
@@ -49,6 +50,7 @@ const actions: Record<ActionKey, () => Promise<void>> = {
         groupId: groupId,
         expirationDate: BigInt(expirationDate),
         initialDeposit: BigInt(initialDeposit),
+        currentTime: BigInt(Date.now()),
       },
       privateKey,
       false,
@@ -76,13 +78,14 @@ const actions: Record<ActionKey, () => Promise<void>> = {
     );
   },
   3: async () => {
-    console.log("\n[Building a message]");
+    console.log("\n[Building a message (as Receiver)]");
     const channelId = prompt("Channel ID: ");
     const amount = prompt("Amount: ");
+    const senderAddress = prompt("Sender Address: ");
     const { payload } = await buildMessage(lucid, {
       channelId,
       amount: BigInt(amount),
-      senderAddress: address,
+      senderAddress,
     });
     lucid.selectWalletFromPrivateKey(privateKey);
     const message = await lucid.wallet.signMessage(address, payload);
@@ -112,25 +115,24 @@ const actions: Record<ActionKey, () => Promise<void>> = {
     let listOfClaims: ClaimChannelParams = [];
     while (claimAction !== 2) {
       console.log(
-        "\nOPTIONS:\n1: Add a channel to claim\n2: Claim Added channels",
+        "\nOPTIONS:\n1: Add a channel to claim\n2: Claim added channels",
       );
       claimAction = Number(prompt("Select an option (1-2): "));
       if (claimAction === 1) {
         const senderAddress = prompt("Sender Address: ");
         const channelId = prompt("Channel ID: ");
-        const finalize = prompt("Finalize (y/n): ");
+        const close = prompt("Close channel (y/n): ");
         const amount = prompt("Amount: ");
         const signature = prompt("Signature: ");
         listOfClaims.push({
           senderAddress,
           channelId,
-          finalize: finalize === "y",
+          finalize: close === "y",
           amount: BigInt(amount),
           signature,
         });
-      } else if (claimAction !== 2) {
+      } else if (claimAction !== 2)
         console.log("Invalid option. Please try again.");
-      }
     }
     console.log("Claiming a channel...");
     await testClaimOperation(
@@ -154,21 +156,28 @@ const actions: Record<ActionKey, () => Promise<void>> = {
     );
   },
   7: async () => {
-    console.log("\n[Get Own Channels]");
+    console.log("\n[Get Own Channels (as Sender)]");
     printChannels("OWN CHANNELS", await getChannelsFromSender(lucid, address));
   },
   8: async () => {
+    console.log("\n[Get Own Channels (as Receiver)]");
+    printChannels(
+      "OWN CHANNELS",
+      await getChannelsFromReceiver(lucid, address),
+    );
+  },
+  9: async () => {
     console.log("\n[EXIT]");
   },
 };
 
 async function main() {
   let action = 0;
-  while (action !== 8) {
+  while (action !== 9) {
     console.log(
-      "\nOPTIONS:\n1: create a channel\n2: update a channel\n3: build a message\n4: close channel\n5: claim a channel\n6: get channel by ID\n7: get own channels\n8: exit",
+      "\nOPTIONS:\n1: create a channel\n2: update a channel\n3: build a message\n4: close channel\n5: claim a channel\n6: get channel by ID\n7: get own channels (as a sender)\n8: get own channels (as a receiver)\n9: exit",
     );
-    action = Number(prompt("Select an option (1-8): "));
+    action = Number(prompt("Select an option (1-9): "));
     if (action && actions.hasOwnProperty(action))
       try {
         await actions[action as ActionKey]();
