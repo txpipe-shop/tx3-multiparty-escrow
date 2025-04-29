@@ -30,6 +30,7 @@ const openAndUpdate = async (
       groupId,
       expirationDate,
       initialDeposit,
+      currentTime: BigInt(emulator.now()),
     },
     sender.privateKey,
     false,
@@ -55,6 +56,25 @@ const openAndUpdate = async (
     { txHash: updatedTx, outputIndex: 0 },
   ]);
   return { openChannelUtxo, updateChannelUtxo };
+};
+
+const open = async () => {
+  const { channelId } = await testOpenOperation(
+    {
+      lucid,
+      scriptRef,
+      senderAddress: sender.address,
+      receiverAddress: receiver.address,
+      signerPubKey: signer.publicKey,
+      groupId,
+      expirationDate,
+      initialDeposit,
+      currentTime: BigInt(emulator.now()),
+    },
+    sender.privateKey,
+    false,
+  );
+  return channelId;
 };
 
 //
@@ -98,5 +118,74 @@ describe("Update channel tests", () => {
     const { updateChannelUtxo } = await openAndUpdate(false);
     const tokenAmount = updateChannelUtxo.assets[config.token];
     expect(tokenAmount).toBe(initialDeposit + newDeposit);
+  });
+});
+
+describe("Attack tests", () => {
+  it("Fails to update expiration date to a previous date", async () => {
+    try {
+      const channelId = await open();
+      const { updatedTx } = await testUpdateOperation(
+        {
+          lucid,
+          scriptRef,
+          userAddress: sender.address,
+          senderAddress: sender.address,
+          channelId,
+          expirationDate: BigInt(emulator.now() + 50 * 1000),
+          currentTime: BigInt(emulator.now()),
+        },
+        sender.privateKey,
+        false,
+      );
+      expect(updatedTx).toBeUndefined();
+    } catch (e) {
+      console.log("\x1b[31m%s\x1b[0m", String(e));
+      expect(String(e)).toContain(
+        "New expiration date must be greater than current",
+      );
+    }
+  });
+  it("Fails to update without new expiration date or additional amount", async () => {
+    try {
+      const channelId = await open();
+      const { updatedTx } = await testUpdateOperation(
+        {
+          lucid,
+          scriptRef,
+          userAddress: sender.address,
+          senderAddress: sender.address,
+          channelId,
+          currentTime: BigInt(emulator.now()),
+        },
+        sender.privateKey,
+        false,
+      );
+      expect(updatedTx).toBeUndefined();
+    } catch (e) {
+      console.log("\x1b[31m%s\x1b[0m", String(e));
+      expect(String(e)).toContain("Nothing to update");
+    }
+  });
+  it("Fails to update expired channel", async () => {
+    try {
+      const channelId = await open();
+      const { updatedTx } = await testUpdateOperation(
+        {
+          lucid,
+          scriptRef,
+          userAddress: sender.address,
+          senderAddress: sender.address,
+          channelId,
+          currentTime: newExpirationDate,
+        },
+        sender.privateKey,
+        false,
+      );
+      expect(updatedTx).toBeUndefined();
+    } catch (e) {
+      console.log("\x1b[31m%s\x1b[0m", String(e));
+      expect(String(e)).toContain("Channel expired");
+    }
   });
 });

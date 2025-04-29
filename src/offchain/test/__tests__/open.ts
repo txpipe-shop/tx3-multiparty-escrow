@@ -10,7 +10,7 @@ import { setupTestEnv } from "../utils.ts";
 const { sender, signer, receiver, lucid, emulator, scriptRef } =
   await setupTestEnv();
 
-const expirationDate = BigInt(emulator.now() + 10 * 60 * 1000);
+const expirationDate = BigInt(emulator.now() + 60 * 60 * 1000);
 const initialDeposit = 6n;
 const groupId = "group1";
 const open = async () => {
@@ -24,6 +24,7 @@ const open = async () => {
       groupId,
       expirationDate,
       initialDeposit,
+      currentTime: BigInt(emulator.now()),
     },
     sender.privateKey,
     false,
@@ -94,5 +95,32 @@ describe("Open channel tests", () => {
     const { channelUtxo } = await open();
     const tokenAmount = channelUtxo.assets[config.token];
     expect(tokenAmount).toBe(6n);
+  });
+});
+
+describe("Attack tests", () => {
+  it("Fails to open an expired channel", async () => {
+    try {
+      const channelId = await testOpenOperation(
+        {
+          lucid,
+          scriptRef,
+          senderAddress: sender.address,
+          receiverAddress: receiver.address,
+          signerPubKey: signer.publicKey,
+          groupId: 10n,
+          expirationDate: BigInt(emulator.now() - 50 * 1000),
+          initialDeposit: 6n,
+          currentTime: BigInt(emulator.now()),
+        },
+        sender.privateKey,
+        false,
+      );
+      expect(channelId).toBeUndefined();
+    } catch (e) {
+      console.log("\x1b[32m%s\x1b[0m", "Test: Open channel already expired.\n");
+      console.log("\x1b[31m%s\x1b[0m", String(e));
+      expect(String(e)).toContain("Expiration date is in the past");
+    }
   });
 });

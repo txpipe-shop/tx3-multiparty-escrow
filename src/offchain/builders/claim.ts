@@ -112,6 +112,7 @@ export const claim = async (
     throw new Error("No channels available to claim");
   }
 
+  if (receiverAmount === 0n) throw new Error("No channels available to claim");
   // Build metadata, receiver payout and finalize tx
   const msg =
     channels.length == 1

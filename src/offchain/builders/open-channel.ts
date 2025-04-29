@@ -22,8 +22,9 @@ export const openChannel = async (
     initialDeposit,
   }: OpenChannelParams,
   scriptRef: Utxo,
+  currentTime: bigint,
 ) => {
-  if (expirationDate < Date.now())
+  if (expirationDate < currentTime)
     throw new Error("Expiration date is in the past");
   lucid.selectReadOnlyWallet({ address: senderAddress });
   const utxos = await lucid.wallet.getUtxos();

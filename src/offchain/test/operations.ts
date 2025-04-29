@@ -22,7 +22,8 @@ export const testOpenOperation = async (
     groupId,
     expirationDate,
     initialDeposit,
-  }: OpenChannelParams & { lucid: Lucid; scriptRef: Utxo },
+    currentTime,
+  }: OpenChannelParams & { lucid: Lucid; scriptRef: Utxo; currentTime: bigint },
   senderPrivKey: string,
   printLogs: boolean = true,
 ) => {
@@ -37,6 +38,7 @@ export const testOpenOperation = async (
       groupId,
     },
     scriptRef,
+    currentTime,
   );
   const openTx = await signAndSubmit(lucid, senderPrivKey, openChannelCbor);
 

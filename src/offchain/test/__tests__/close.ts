@@ -22,6 +22,7 @@ const openAndClose = async () => {
       groupId,
       expirationDate: BigInt(emulator.now() + 1000),
       initialDeposit,
+      currentTime: BigInt(emulator.now()),
     },
     sender.privateKey,
     false,
@@ -46,6 +47,25 @@ const openAndClose = async () => {
   return { senderUtxo, utxosWithChannelToken };
 };
 
+const open = async () => {
+  const { channelId } = await testOpenOperation(
+    {
+      lucid,
+      scriptRef,
+      senderAddress: sender.address,
+      receiverAddress: receiver.address,
+      signerPubKey: signer.publicKey,
+      groupId,
+      expirationDate: BigInt(emulator.now() + 10 * 60 * 1000),
+      initialDeposit,
+      currentTime: BigInt(emulator.now()),
+    },
+    sender.privateKey,
+    false,
+  );
+  return channelId;
+};
+
 //
 // TESTS
 //
@@ -53,12 +73,34 @@ const openAndClose = async () => {
 describe("Close channel tests", () => {
   it("Utxo does not have the channel token", async () => {
     const { utxosWithChannelToken } = await openAndClose();
-
     expect(utxosWithChannelToken).toBe(undefined);
   });
   it("Sender has remaining tokens from channel", async () => {
     const { senderUtxo } = await openAndClose();
     const tokenAmount = senderUtxo.assets[config.token];
     expect(tokenAmount).toBe(initialDeposit);
+  });
+});
+
+describe("Attack tests", () => {
+  it("Fails to close an active channel", async () => {
+    try {
+      const channelId = await open();
+      const { closedTx } = await testCloseChannel(
+        {
+          lucid,
+          scriptRef,
+          senderAddress: sender.address,
+          channelId,
+          currentTime: BigInt(emulator.now()),
+        },
+        sender.privateKey,
+        false,
+      );
+      expect(closedTx).toBeUndefined();
+    } catch (e) {
+      console.log("\x1b[31m%s\x1b[0m", String(e));
+      expect(String(e)).toContain("Channel has not expired yet");
+    }
   });
 });
