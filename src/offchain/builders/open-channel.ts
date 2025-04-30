@@ -29,8 +29,10 @@ export const openChannel = async (
   lucid.selectReadOnlyWallet({ address: senderAddress });
   const utxos = await lucid.wallet.getUtxos();
   const utxo = utxos[0];
-  const channelId: string = utxo.txHash + fromText(String(utxo.outputIndex));
-
+  const channelId: string = Buffer.from(
+    utxo.txHash + Data.to<bigint>(BigInt(utxo.outputIndex)),
+    "hex",
+  ).toString("hex");
   const receiverPubKeyHash =
     Addresses.addressToCredential(receiverAddress).hash;
 
