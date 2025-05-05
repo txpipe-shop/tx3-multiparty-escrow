@@ -1,6 +1,7 @@
+use aiken/cbor.{serialise}
 use aiken/collection/list
 use aiken/interval.{is_entirely_before}
-use aiken/primitive/bytearray.{compare, drop, take, to_int_big_endian}
+use aiken/primitive/bytearray.{compare, concat, drop, take, to_int_big_endian}
 use cardano/address.{Address, Script}
 use cardano/assets.{PolicyId, flatten, lovelace_of, quantity_of}
 use cardano/transaction.{
@@ -60,10 +61,8 @@ validator channel {
       } = dat
 
       // ChannelId = txHash + outputIndex of the first input
-      let channel_id_is_correct = and {
-          (compare(transaction_id, take(channel_id, 32)) == Equal)?,
-          (to_int_big_endian(drop(channel_id, 32)) == output_index)?,
-        }
+      let channel_id_is_correct =
+        compare(channel_id, concat(transaction_id, serialise(output_index))) == Equal
 
       // Expiration date > validity range upper bound
       let expiration_date_is_correct =
