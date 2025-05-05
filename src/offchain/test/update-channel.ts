@@ -1,50 +1,35 @@
-import { Emulator, Lucid } from "@spacebudz/lucid";
-import { config } from "../../config.ts";
 import { testOpenOperation, testUpdateOperation } from "./operations.ts";
-import { getRandomUser, getScriptRef, printUtxos } from "./utils.ts";
+import { printUtxos, setupTestEnv } from "./utils.ts";
 
-const {
-  privateKey: senderPrivKey,
-  publicKey: senderPubKey,
-  address: senderAddress,
-} = getRandomUser();
-
-const { address: receiverAddress } = getRandomUser();
-
-const emulator = new Emulator([
-  {
-    address: senderAddress,
-    assets: { lovelace: 30_000_000n, [config.token]: 12n },
-  },
-]);
-const lucid = new Lucid({ provider: emulator });
-await printUtxos(lucid, senderAddress);
-const scriptRef = await getScriptRef(lucid, senderPrivKey);
+const { sender, signer, receiver, lucid, emulator, scriptRef } =
+  await setupTestEnv();
+await printUtxos(lucid, sender.address);
 
 const { channelId } = await testOpenOperation(
   {
     lucid,
     scriptRef,
-    senderAddress,
-    receiverAddress,
-    signerPubKey: senderPubKey,
+    senderAddress: sender.address,
+    receiverAddress: receiver.address,
+    signerPubKey: signer.publicKey,
     groupId: "group1",
-    expirationDate: BigInt(Date.now() + 2 * 24 * 60 * 60 * 1000),
+    expirationDate: BigInt(emulator.now() + 2 * 24 * 60 * 60 * 1000),
     initialDeposit: 6n,
+    currentTime: BigInt(emulator.now()),
   },
-  senderPrivKey,
+  sender.privateKey,
 );
 
 await testUpdateOperation(
   {
     lucid,
     scriptRef,
-    userAddress: senderAddress,
-    senderAddress,
+    userAddress: sender.address,
+    senderAddress: sender.address,
     channelId,
     addDeposit: 3n,
-    expirationDate: BigInt(Date.now() + 5 * 24 * 60 * 60 * 1000),
-    currentTime: BigInt(Date.now() + 4 * 60 * 60 * 1000),
+    expirationDate: BigInt(emulator.now() + 5 * 24 * 60 * 60 * 1000),
+    currentTime: BigInt(emulator.now() + 4 * 60 * 60 * 1000),
   },
-  senderPrivKey,
+  sender.privateKey,
 );

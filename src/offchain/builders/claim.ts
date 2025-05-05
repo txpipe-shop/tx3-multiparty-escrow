@@ -74,26 +74,24 @@ export const claim = async (
       const datum = fromChannelDatum(utxo.datum);
       const hasExpired = currentTime > datum.expirationDate;
       if (hasExpired) throw new Error("Channel already expired");
-      if (datum.expirationDate < lowestExpDate) {
+      if (datum.expirationDate < lowestExpDate)
         lowestExpDate = datum.expirationDate;
-      }
 
+      const valueResult = addAssets(utxo.assets, { [config.token]: -amount });
       // Check whether it's a normal claim or claim & close
-      const valueResult = addAssets(utxo.assets, {
-        [config.token]: -amount,
-      });
-      if (finalize) {
+      if (finalize)
         // Return to sender
-        const returnAssets = addAssets(valueResult, { [channelToken]: -1n });
         tx.mint({ [channelToken]: -1n }, Data.void()).payTo(
           senderAddress,
-          returnAssets,
+          addAssets(valueResult, { [channelToken]: -1n }),
         );
-      } else {
-        // Build continuing output
-        const newDatum = toChannelDatum({ ...datum, nonce: datum.nonce + 1n });
-        tx.payToContract(utxo.address, { Inline: newDatum }, valueResult);
-      }
+      // Build continuing output
+      else
+        tx.payToContract(
+          utxo.address,
+          { Inline: toChannelDatum({ ...datum, nonce: datum.nonce + 1n }) },
+          valueResult,
+        );
 
       // Collect channel utxo and accumulate receiver payout
       tx.collectFrom(
@@ -108,19 +106,14 @@ export const claim = async (
       console.error(e);
     }
   }
-  if (receiverAmount === 0n) {
-    throw new Error("No channels available to claim");
-  }
-
   if (receiverAmount === 0n) throw new Error("No channels available to claim");
+
   // Build metadata, receiver payout and finalize tx
   const msg =
     channels.length == 1
       ? ["Claim single channel"]
       : ["Claim multiple channels"];
-  const receiverPayout = {
-    [config.token]: receiverAmount,
-  };
+  const receiverPayout = { [config.token]: receiverAmount };
   const txComplete = await tx
     .payTo(receiverAddress, receiverPayout)
     .validTo(Number(lowestExpDate))

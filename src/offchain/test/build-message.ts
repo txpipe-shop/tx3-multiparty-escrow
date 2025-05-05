@@ -1,52 +1,34 @@
-import { Emulator, Lucid } from "@spacebudz/lucid";
-import { config } from "../../config.ts";
 import { buildMessage } from "../builders/build-message.ts";
 import { testOpenOperation } from "./operations.ts";
-import { getRandomUser, getScriptRef } from "./utils.ts";
+import { getCMLPrivateKey, setupTestEnv, signMessage } from "./utils.ts";
 
-const {
-  privateKey: senderPrivKey,
-  publicKey: senderPubKey,
-  address: senderAddress,
-} = getRandomUser();
-
-const { address: receiverAddress } = getRandomUser();
-
-const emulator = new Emulator([
-  {
-    address: senderAddress,
-    assets: { lovelace: 30_000_000n, [config.token]: 12n },
-  },
-]);
-const lucid = new Lucid({ provider: emulator });
-lucid.selectReadOnlyWallet({ address: senderAddress });
-const scriptRef = await getScriptRef(lucid, senderPrivKey);
+const { sender, signer, receiver, lucid, emulator, scriptRef } =
+  await setupTestEnv();
 const { channelId } = await testOpenOperation(
   {
     lucid,
     scriptRef,
-    senderAddress,
-    receiverAddress,
-    signerPubKey: senderPubKey,
-    groupId: 10n,
-    expirationDate: BigInt(Date.now() + 2 * 24 * 60 * 60 * 1000),
+    senderAddress: sender.address,
+    receiverAddress: receiver.address,
+    signerPubKey: signer.publicKey,
+    groupId: "group1",
+    expirationDate: BigInt(emulator.now() + 2 * 24 * 60 * 60 * 1000),
     initialDeposit: 6n,
+    currentTime: BigInt(emulator.now()),
   },
-  senderPrivKey,
+  sender.privateKey,
   false,
 );
 
 const { payload } = await buildMessage(lucid, {
   channelId,
   amount: 3n,
-  senderAddress,
+  senderAddress: sender.address,
 });
 
-lucid.selectWalletFromPrivateKey(senderPrivKey);
-const message = await lucid.wallet.signMessage(senderAddress, payload);
+lucid.selectWalletFromPrivateKey(signer.privateKey);
+const privKey = getCMLPrivateKey(signer.seed);
+const signature = await signMessage(privKey, payload);
 
 console.log("\n\nSigned Message:");
-console.log(message);
-
-const verification = lucid.verifyMessage(senderAddress, payload, message);
-console.log("\nVerification: ", verification);
+console.log(signature);

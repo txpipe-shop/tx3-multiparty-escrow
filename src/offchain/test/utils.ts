@@ -119,7 +119,7 @@ export const getScriptRef = async (lucid: Lucid, privKey: string) => {
   return scriptRef;
 };
 
-export const getRandomUser = () => {
+const getRandomUser = () => {
   const seed = generateMnemonic(256);
   const { privateKey, publicKey, credential } = Crypto.seedToDetails(
     seed,
@@ -161,23 +161,12 @@ export const setupTestEnv = async () => {
   });
 
   const scriptRef = await getScriptRef(lucid, sender.privateKey);
-  return {
-    sender,
-    signer,
-    receiver,
-    user,
-    lucid,
-    emulator,
-    scriptRef,
-  };
+  return { sender, signer, receiver, user, lucid, emulator, scriptRef };
 };
 
 export const normalizeAssets = (assets: Assets): Assets => {
   const keys = Object.keys(assets);
-  for (let k = 0; k < keys.length; k++) {
-    if (assets[keys[k]] === BigInt(0)) {
-      delete assets[keys[k]];
-    }
-  }
+  for (let k = 0; k < keys.length; k++)
+    if (assets[keys[k]] === BigInt(0)) delete assets[keys[k]];
   return assets;
 };

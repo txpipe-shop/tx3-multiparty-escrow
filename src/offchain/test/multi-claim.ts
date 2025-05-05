@@ -1,75 +1,58 @@
-import { Emulator, Lucid } from "@spacebudz/lucid";
-import { config } from "../../config.ts";
 import { buildMessage } from "../builders/build-message.ts";
 import { testClaimOperation, testOpenOperation } from "./operations.ts";
 import {
   getCMLPrivateKey,
-  getRandomUser,
-  getScriptRef,
   printUtxos,
+  setupTestEnv,
   signMessage,
 } from "./utils.ts";
 
-const {
-  privateKey: senderPrivKey,
-  publicKey: senderPubKey,
-  seed: senderSeed,
-  address: senderAddress,
-} = getRandomUser();
-
-const { address: receiverAddress } = getRandomUser();
-
-const emulator = new Emulator([
-  {
-    address: senderAddress,
-    assets: { lovelace: 30_000_000n, [config.token]: 120000n },
-  },
-]);
-const lucid = new Lucid({ provider: emulator });
-await printUtxos(lucid, senderAddress);
-
-const scriptRef = await getScriptRef(lucid, senderPrivKey);
+const { sender, signer, receiver, lucid, emulator, scriptRef } =
+  await setupTestEnv();
+await printUtxos(lucid, sender.address);
 
 const { channelId: channelId1 } = await testOpenOperation(
   {
     lucid,
     scriptRef,
-    senderAddress,
-    receiverAddress,
-    signerPubKey: senderPubKey,
+    senderAddress: sender.address,
+    receiverAddress: receiver.address,
+    signerPubKey: signer.publicKey,
     groupId: "group1",
-    expirationDate: BigInt(Date.now() + 2 * 24 * 60 * 60 * 1000),
+    expirationDate: BigInt(emulator.now() + 2 * 24 * 60 * 60 * 1000),
     initialDeposit: 100n,
+    currentTime: BigInt(emulator.now()),
   },
-  senderPrivKey,
+  sender.privateKey,
 );
 
 const { channelId: channelId2 } = await testOpenOperation(
   {
     lucid,
     scriptRef,
-    senderAddress,
-    receiverAddress,
-    signerPubKey: senderPubKey,
+    senderAddress: sender.address,
+    receiverAddress: receiver.address,
+    signerPubKey: signer.publicKey,
     groupId: "group1",
-    expirationDate: BigInt(Date.now() + 2 * 24 * 60 * 60 * 1000),
+    expirationDate: BigInt(emulator.now() + 2 * 24 * 60 * 60 * 1000),
     initialDeposit: 20n,
+    currentTime: BigInt(emulator.now()),
   },
-  senderPrivKey,
+  sender.privateKey,
 );
 
 const { payload: payload1ofcId1 } = await buildMessage(lucid, {
   channelId: channelId1,
   amount: 20n,
-  senderAddress,
+  senderAddress: sender.address,
 });
 const { payload: payload1ofcId2 } = await buildMessage(lucid, {
   channelId: channelId2,
   amount: 20n,
-  senderAddress,
+  senderAddress: sender.address,
 });
-lucid.selectWalletFromPrivateKey(senderPrivKey);
-const privKey = getCMLPrivateKey(senderSeed);
+lucid.selectWalletFromPrivateKey(signer.privateKey);
+const privKey = getCMLPrivateKey(signer.seed);
 const signature1 = await signMessage(privKey, payload1ofcId1);
 const signature2 = await signMessage(privKey, payload1ofcId2);
 
@@ -78,14 +61,14 @@ await testClaimOperation(
     lucid,
     listOfClaims: [
       {
-        senderAddress,
+        senderAddress: sender.address,
         channelId: channelId1,
         finalize: false,
         amount: 20n,
         signature: signature1,
       },
       {
-        senderAddress,
+        senderAddress: sender.address,
         channelId: channelId2,
         finalize: true,
         amount: 10n,
@@ -93,19 +76,19 @@ await testClaimOperation(
       },
     ],
     scriptRef,
-    currentTime: BigInt(Date.now()),
-    receiverAddress,
+    currentTime: BigInt(emulator.now()),
+    receiverAddress: receiver.address,
   },
-  senderPrivKey,
+  receiver.privateKey,
 );
 
 // Claim and close
 const { payload: payload2ofcId1 } = await buildMessage(lucid, {
   channelId: channelId1,
   amount: 60n,
-  senderAddress,
+  senderAddress: sender.address,
 });
-lucid.selectWalletFromPrivateKey(senderPrivKey);
+lucid.selectWalletFromPrivateKey(signer.privateKey);
 
 const signature3 = await signMessage(privKey, payload2ofcId1);
 await testClaimOperation(
@@ -113,7 +96,7 @@ await testClaimOperation(
     lucid,
     listOfClaims: [
       {
-        senderAddress,
+        senderAddress: sender.address,
         channelId: channelId1,
         finalize: true,
         amount: 60n,
@@ -121,8 +104,8 @@ await testClaimOperation(
       },
     ],
     scriptRef,
-    currentTime: BigInt(Date.now()),
-    receiverAddress,
+    currentTime: BigInt(emulator.now()),
+    receiverAddress: receiver.address,
   },
-  senderPrivKey,
+  receiver.privateKey,
 );

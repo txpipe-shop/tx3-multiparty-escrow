@@ -1,5 +1,3 @@
-import { Emulator, Lucid } from "@spacebudz/lucid";
-import { config } from "../../config.ts";
 import { buildMessage } from "../builders/build-message.ts";
 import {
   testClaimOperation,
@@ -9,66 +7,50 @@ import {
 } from "./operations.ts";
 import {
   getCMLPrivateKey,
-  getRandomUser,
-  getScriptRef,
   printUtxos,
+  setupTestEnv,
   signMessage,
 } from "./utils.ts";
 
-const {
-  privateKey: senderPrivKey,
-  publicKey: senderPubKey,
-  address: senderAddress,
-  seed: senderSeed,
-} = getRandomUser();
-
-const { address: receiverAddress } = getRandomUser();
-
-const emulator = new Emulator([
-  {
-    address: senderAddress,
-    assets: { lovelace: 30_000_000n, [config.token]: 12n },
-  },
-]);
-const lucid = new Lucid({ provider: emulator });
-await printUtxos(lucid, senderAddress);
-
-const scriptRef = await getScriptRef(lucid, senderPrivKey);
+const { sender, signer, receiver, lucid, emulator, scriptRef } =
+  await setupTestEnv();
+await printUtxos(lucid, sender.address);
 
 const { channelId } = await testOpenOperation(
   {
     lucid,
     scriptRef,
-    senderAddress,
-    receiverAddress,
-    signerPubKey: senderPubKey,
+    senderAddress: sender.address,
+    receiverAddress: receiver.address,
+    signerPubKey: signer.publicKey,
     groupId: "group1",
-    expirationDate: BigInt(Date.now() + 80 * 1000),
+    expirationDate: BigInt(emulator.now() + 40 * 1000),
     initialDeposit: 6n,
+    currentTime: BigInt(emulator.now()),
   },
-  senderPrivKey,
+  sender.privateKey,
 );
 
 await testUpdateOperation(
   {
     lucid,
     scriptRef,
-    userAddress: senderAddress,
-    senderAddress,
+    userAddress: sender.address,
+    senderAddress: sender.address,
     channelId,
     addDeposit: 3n,
-    currentTime: BigInt(Date.now() + 20 * 1000),
+    currentTime: BigInt(emulator.now()),
   },
-  senderPrivKey,
+  sender.privateKey,
 );
 
 const { payload } = await buildMessage(lucid, {
   channelId,
   amount: 20n,
-  senderAddress,
+  senderAddress: sender.address,
 });
-lucid.selectWalletFromPrivateKey(senderPrivKey);
-const privKey = getCMLPrivateKey(senderSeed);
+lucid.selectWalletFromPrivateKey(signer.privateKey);
+const privKey = getCMLPrivateKey(signer.seed);
 const signature = await signMessage(privKey, payload);
 
 console.log("\n\nSigned Message:");
@@ -79,7 +61,7 @@ await testClaimOperation(
     lucid,
     listOfClaims: [
       {
-        senderAddress,
+        senderAddress: sender.address,
         channelId,
         finalize: false,
         amount: 7n,
@@ -87,20 +69,20 @@ await testClaimOperation(
       },
     ],
     scriptRef,
-    currentTime: BigInt(Date.now() + 40 * 1000),
-    receiverAddress,
+    currentTime: BigInt(emulator.now()),
+    receiverAddress: receiver.address,
   },
-  senderPrivKey,
+  receiver.privateKey,
 );
-await printUtxos(lucid, senderAddress);
+await printUtxos(lucid, sender.address);
 
 await testCloseChannel(
   {
     lucid,
     scriptRef,
-    senderAddress,
+    senderAddress: sender.address,
     channelId,
-    currentTime: BigInt(Date.now() + 85 * 1000),
+    currentTime: BigInt(emulator.now() + 41 * 1000),
   },
-  senderPrivKey,
+  sender.privateKey,
 );
