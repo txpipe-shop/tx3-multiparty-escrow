@@ -14,7 +14,7 @@
     {
       "title": "singularity.channel.mint",
       "redeemer": {
-        "title": "redeemer",
+        "title": "_redeemer",
         "schema": {
           "$ref": "#/definitions/Data"
         }

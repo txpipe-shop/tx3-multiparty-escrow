@@ -11,7 +11,7 @@ use config
 use types.{Action, Datum}
 
 validator channel {
-  mint(redeemer: Data, policy_id: PolicyId, self: Transaction) {
+  mint(_redeemer: Data, policy_id: PolicyId, self: Transaction) {
     let Transaction { inputs, mint, outputs, validity_range, .. } = self
     expect [(_, minted_name, minted_quantity)] = mint |> flatten
 
