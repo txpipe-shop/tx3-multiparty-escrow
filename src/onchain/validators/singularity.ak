@@ -1,9 +1,9 @@
 use aiken/cbor.{serialise}
 use aiken/collection/list
 use aiken/interval.{is_entirely_before}
-use aiken/primitive/bytearray.{compare, concat, drop, take, to_int_big_endian}
+use aiken/primitive/bytearray.{compare, concat}
 use cardano/address.{Address, Script}
-use cardano/assets.{PolicyId, flatten, lovelace_of, quantity_of}
+use cardano/assets.{PolicyId, flatten, quantity_of}
 use cardano/transaction.{
   InlineDatum, Input, Output, OutputReference, Transaction,
 }
@@ -15,8 +15,9 @@ validator channel {
     let Transaction { inputs, mint, outputs, validity_range, .. } = self
     expect [(_, minted_name, minted_quantity)] = mint |> flatten
 
-    // Mints 1 token of this policy
-    if minted_quantity == 1 {
+    if minted_quantity > 0 {
+      // Mints 1 token of this policy
+      let one_token_minted = minted_quantity == 1
       // Enforce channel to be the first output
       expect [channel_output, ..] = outputs
       expect Output {
@@ -37,9 +38,8 @@ validator channel {
       // Has only Lovelace, the minted control token, and an amount ≥ 0 of AGIX
       let channel_utxo_has_correct_value = and {
           (list.length(flatten(val)) == 3)?,
-          (lovelace_of(val) > 0)?,
           (quantity_of(val, policy_id, minted_name) == 1)?,
-          (quantity_of(val, config.agix_policy, config.agix_hexa) > 0)?,
+          (quantity_of(val, config.agix_policy, config.agix_hexa) >= 0)?,
         }
 
       // Check length of token name is 28 bytes long
@@ -71,7 +71,6 @@ validator channel {
       // Check Receiver field is 28 bytes long
       let length_of_receiver = bytearray.length(receiver) == 28
 
-      trace bytearray.length(signer)
       // Check Signer field is 32 bytes long
       let length_of_signer = bytearray.length(signer) == 32
 
@@ -79,6 +78,7 @@ validator channel {
       let group_id_is_bytearray = bytearray.length(group_id) > 0
 
       and {
+        one_token_minted?,
         has_script_addr?,
         length_of_name?,
         channel_utxo_has_correct_value?,
@@ -88,10 +88,8 @@ validator channel {
         length_of_signer?,
         group_id_is_bytearray?,
       }
-    } else if minted_quantity < 0 {
-      True
     } else {
-      fail
+      True
     }
   }
 
