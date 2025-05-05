@@ -9,7 +9,7 @@ const { sender, signer, receiver, lucid, emulator, scriptRef } =
   await setupTestEnv();
 
 const initialDeposit = 6n;
-const groupId = 10n;
+const groupId = "group1";
 
 const openAndClose = async () => {
   const { channelId } = await testOpenOperation(

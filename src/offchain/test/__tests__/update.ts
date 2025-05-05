@@ -12,7 +12,7 @@ const { sender, signer, receiver, user, lucid, emulator, scriptRef } =
 
 const expirationDate = BigInt(emulator.now() + 10 * 60 * 1000);
 const initialDeposit = 6n;
-const groupId = 10n;
+const groupId = "group1";
 const newExpirationDate = BigInt(emulator.now() + 20 * 60 * 1000);
 const newDeposit = 10n;
 
