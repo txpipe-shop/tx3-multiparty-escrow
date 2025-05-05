@@ -7,7 +7,8 @@ use aiken/primitive/bytearray.{compare, concat}
 use cardano/address.{Address, Credential, Script}
 use cardano/assets.{PolicyId, flatten, quantity_of}
 use cardano/transaction.{
-  InlineDatum, Input, Output, OutputReference, Spend, Transaction, Withdraw, find_input,
+  InlineDatum, Input, Output, OutputReference, Spend, Transaction, Withdraw,
+  find_input,
 }
 use checks.{check_claims}
 use config
@@ -120,7 +121,8 @@ validator channel {
   }
 
   withdraw(_redeemer: Data, account: Credential, self: Transaction) {
-    let Transaction { inputs, outputs, redeemers, validity_range, .. } = self
+    let Transaction { inputs, outputs, redeemers, validity_range, mint, .. } =
+      self
     let own_inputs =
       filter(
         inputs,
@@ -131,16 +133,26 @@ validator channel {
           }
         },
       )
+    let own_outputs =
+      filter(
+        outputs,
+        fn(o) {
+          o.address == Address {
+            payment_credential: account,
+            stake_credential: None,
+          }
+        },
+      )
     let inputs_with_redeemers =
       map(
-        inputs,
+        own_inputs,
         fn(i) {
           expect Some(red) = get_first(redeemers, Spend(i.output_reference))
           (i, red)
         },
       )
 
-    check_claims(inputs_with_redeemers, outputs)
+    check_claims(inputs_with_redeemers, own_outputs, mint)
   }
 
   else(_) {
