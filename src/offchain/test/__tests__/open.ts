@@ -27,7 +27,7 @@ const open = async () => {
       currentTime: BigInt(emulator.now()),
     },
     sender.privateKey,
-    false
+    false,
   );
   const [channelUtxo] = await lucid.utxosByOutRef([
     { txHash: openTx, outputIndex: 0 },
@@ -55,7 +55,7 @@ describe("Attack tests", () => {
           currentTime: BigInt(emulator.now()),
         },
         sender.privateKey,
-        false
+        false,
       );
       expect(channelId).toBeUndefined();
     } catch (e) {
@@ -71,7 +71,7 @@ describe("Open channel tests", () => {
     const { channelUtxo } = await open();
 
     const channelToken = Object.keys(channelUtxo.assets).find(
-      (asset) => fromUnit(asset).policyId == validatorDetails(lucid).scriptHash
+      (asset) => fromUnit(asset).policyId == validatorDetails(lucid).scriptHash,
     );
     if (!channelToken) throw new Error("Channel token not found");
     expect(fromUnit(channelToken).name).toBe(sender.pubKeyHash);
@@ -85,7 +85,7 @@ describe("Open channel tests", () => {
     const expectedChannelId = Buffer.from(
       senderUtxos[0].txHash +
         Data.to<bigint>(BigInt(senderUtxos[0].outputIndex)),
-      "hex"
+      "hex",
     ).toString("hex");
     const channelIdIsValid = expectedChannelId == channelId;
     expect(channelIdIsValid).toBe(true);
@@ -118,7 +118,7 @@ describe("Attack tests", () => {
           currentTime: BigInt(emulator.now()),
         },
         sender.privateKey,
-        false
+        false,
       );
       expect(channelId).toBeUndefined();
     } catch (e) {
