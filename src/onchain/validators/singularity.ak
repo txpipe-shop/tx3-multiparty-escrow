@@ -121,38 +121,21 @@ validator channel {
   }
 
   withdraw(_redeemer: Data, account: Credential, self: Transaction) {
-    let Transaction { inputs, outputs, redeemers, validity_range, mint, .. } =
-      self
-    let own_inputs =
-      filter(
-        inputs,
-        fn(i) {
-          i.output.address == Address {
-            payment_credential: account,
-            stake_credential: None,
-          }
-        },
-      )
-    let own_outputs =
-      filter(
-        outputs,
-        fn(o) {
-          o.address == Address {
-            payment_credential: account,
-            stake_credential: None,
-          }
-        },
-      )
-    let inputs_with_redeemers =
+    let Transaction { inputs, outputs, redeemers, mint, .. } = self
+    let own_address =
+      Address { payment_credential: account, stake_credential: None }
+    let own_inputs = filter(inputs, fn(i) { i.output.address == own_address })
+    let own_outputs = filter(outputs, fn(o) { o.address == own_address })
+    let resolved_inputs_with_redeemers =
       map(
         own_inputs,
         fn(i) {
           expect Some(red) = get_first(redeemers, Spend(i.output_reference))
-          (i, red)
+          (i.output, red)
         },
       )
 
-    check_claims(inputs_with_redeemers, own_outputs, mint)
+    check_claims(resolved_inputs_with_redeemers, own_outputs, mint)
   }
 
   else(_) {
