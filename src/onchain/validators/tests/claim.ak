@@ -130,10 +130,10 @@ fn claim(options: ClaimOptions) {
       |> add_redeemer(True, Pair(Spend(mocks.channel_1_out_ref), redeemer_1))
       |> add_redeemer(True, Pair(Spend(mocks.channel_2_out_ref), redeemer_2))
       |> add_redeemer(
-          True,
+          !options.no_withdraw_redeemer,
           Pair(Withdraw(Script(mocks.own_hash)), withdraw_redeemer),
         )
-      |> add_extra_signatory(True, mocks.receiver_1)
+      |> add_extra_signatory(!options.edit_signatories, mocks.receiver_1)
 
   and {
     singularity.channel.spend(
@@ -154,5 +154,15 @@ fn claim(options: ClaimOptions) {
 
 test claim_ok() {
   let options = default_claim_options()
+  claim(options)
+}
+
+test not_signed_by_receiver() fail {
+  let options = ClaimOptions {..default_claim_options(), edit_signatories: True}
+  claim(options)
+}
+
+test no_withdraw_redeemer() fail {
+  let options = ClaimOptions {..default_claim_options(), no_withdraw_redeemer: True}
   claim(options)
 }
