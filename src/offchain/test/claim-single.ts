@@ -1,3 +1,4 @@
+import { toHex } from "@spacebudz/lucid";
 import { buildMessage } from "../builders/build-message.ts";
 import { testClaimOperation, testOpenOperation } from "./operations.ts";
 import {
@@ -34,6 +35,9 @@ const { payload } = await buildMessage(lucid, {
 lucid.selectWalletFromPrivateKey(signer.privateKey);
 const privKey = getCMLPrivateKey(signer.seed);
 const signature = await signMessage(privKey, payload);
+console.log(`let signature = #"${signature}"`)
+console.log(`let payload = #"${payload}"`)
+console.log(`let pubkey = #"${toHex(privKey.to_public().to_raw_bytes())}"`)
 
 await testClaimOperation(
   {

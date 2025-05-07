@@ -71,7 +71,7 @@ await testClaimOperation(
         senderAddress: sender.address,
         channelId: channelId2,
         finalize: true,
-        amount: 10n,
+        amount: 20n,
         signature: signature2,
       },
     ],

@@ -6,7 +6,7 @@ import {
   toUnit,
   Utxo,
 } from "@spacebudz/lucid";
-import { config } from "../../config.ts";
+import { config, env } from "../../config.ts";
 import { ClaimChannelParams } from "../../shared/api-types.ts";
 import {
   fromChannelDatum,
@@ -21,9 +21,9 @@ export const claim = async (
   params: ClaimChannelParams,
   scriptRef: Utxo,
   currentTime: bigint,
-  receiverAddress: string,
+  receiverAddress: string
 ): Promise<{ claimChannelCbor: string }> => {
-  const { scriptHash } = validatorDetails(lucid);
+  const { scriptHash, scriptRewardAddress } = validatorDetails(lucid);
   lucid.selectReadOnlyWallet({ address: receiverAddress });
 
   // Get all channel utxos
@@ -79,29 +79,30 @@ export const claim = async (
 
       const valueResult = addAssets(utxo.assets, { [config.token]: -amount });
       // Check whether it's a normal claim or claim & close
-      if (finalize)
+      if (finalize) {
         // Return to sender
-        tx.mint({ [channelToken]: -1n }, Data.void()).payTo(
+        tx.mint({ [channelToken]: -1n }, Data.void());
+        tx.payTo(
           senderAddress,
-          addAssets(valueResult, { [channelToken]: -1n }),
+          addAssets(valueResult, { [channelToken]: -1n })
         );
-      // Build continuing output
-      else
+      } else {
+        // Build continuing output
         tx.payToContract(
           utxo.address,
           { Inline: toChannelDatum({ ...datum, nonce: datum.nonce + 1n }) },
-          valueResult,
+          valueResult
         );
-
+      }
       // Collect channel utxo and accumulate receiver payout
       tx.collectFrom(
         [utxo],
-        toChannelRedeemer({ Claim: { amount, signature, finalize } }),
+        toChannelRedeemer({ Claim: { amount, signature, finalize } })
       );
       receiverAmount += amount;
     } catch (e) {
       console.error(
-        `Error claiming channel with id: ${channelId}, skipping...`,
+        `Error claiming channel with id: ${channelId}, skipping...`
       );
       console.error(e);
     }
@@ -115,6 +116,8 @@ export const claim = async (
       : ["Claim multiple channels"];
   const receiverPayout = { [config.token]: receiverAmount };
   const txComplete = await tx
+    .withdraw(scriptRewardAddress, 0n, Data.void())
+    .addSigner(Addresses.addressToCredential(receiverAddress).hash)
     .payTo(receiverAddress, receiverPayout)
     .validTo(Number(lowestExpDate))
     .attachMetadata(674, { msg })

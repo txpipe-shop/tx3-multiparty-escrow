@@ -12,7 +12,7 @@ export type ChannelDatum = TypesDatum;
 export type ChannelAction = TypesAction;
 export const ChannelDatumSchema: ChannelDatum = ChannelValidator.datum;
 export const ChannelRedeemerSchema: ChannelAction = ChannelValidator.redeemer;
-export const MintRedeemerSchema = SingularityChannelMint.redeemer;
+export const MintRedeemerSchema = SingularityChannelMint._redeemer;
 
 export type ChannelInfo = OutRef &
   ChannelDatum & { balance: Assets; active: boolean; sender: string };
