@@ -16,7 +16,7 @@ async function deployScript(lucid: Lucid): Promise<{ cbor: string }> {
   );
 
   const validator = new SingularityChannelSpend();
-  const { scriptRewardAddress }= validatorDetails(lucid);
+  const { scriptRewardAddress } = validatorDetails(lucid);
   const tx = await lucid
     .newTx()
     .payToContract(
