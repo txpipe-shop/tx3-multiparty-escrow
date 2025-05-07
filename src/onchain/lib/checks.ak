@@ -40,10 +40,7 @@ pub fn check_claims(
 
       // Check the signature provided by redeemer allows for claiming "amount" on this channel with "channelId"
       // only once, ensured by the "nonce"
-      let payload =
-        serialise(
-          [serialise(in_datum.nonce), in_datum.channel_id, serialise(amount)],
-        )
+      let payload = serialise((in_datum.nonce, in_datum.channel_id, amount))
       let check_signature =
         verify_ed25519_signature(in_datum.signer, payload, signature)
 
@@ -54,12 +51,10 @@ pub fn check_claims(
       let check_output =
         if finalize {
           // Channel is closed, pay remaining funds to the sender
-          // Output address is the sender's address
-          let check_address =
+          let check_sender_address =
             out_address.payment_credential == VerificationKey(sender_pkh)
 
-          // Output value equals the input value minus the AGIX amount and the channel token
-          let check_value = {
+          let check_sender_value = {
             let expected_out_val =
               in_value
                 |> add(own_hash, sender_pkh, -1)
@@ -67,29 +62,28 @@ pub fn check_claims(
             match(out_value, expected_out_val, >=)
           }
 
-          // The channel token is burned
           let check_mint = ( mint |> quantity_of(own_hash, sender_pkh) ) == -1
 
           and {
-            check_address?,
-            check_value?,
+            // Output address is the sender's address
+            check_sender_address?,
+            // Output value equals the input value minus the AGIX amount and the channel token
+            check_sender_value?,
+            // The channel token is burned
             check_mint?,
           }
         } else {
           // Channel is still open, check continuing output
-          // Output preserves address
-          let check_address = out_address == in_address
+          let check_channel_address = out_address == in_address
 
-          // Output value only reduces by the AGIX amount
-          let check_value = {
+          let check_channel_value = {
             let expected_value =
               in_value
                 |> add(config.agix_policy, config.agix_hexa, -amount)
             match(out_value, expected_value, >=)
           }
 
-          // Nonce is incremented by 1, and the rest of the datum remains unchanged
-          let check_datum = {
+          let check_channel_datum = {
             expect InlineDatum(d) = out_datum
             expect out_channel_datum: ChannelDatum = d
             out_channel_datum == ChannelDatum {
@@ -99,9 +93,12 @@ pub fn check_claims(
           }
 
           and {
-            check_address?,
-            check_value?,
-            check_datum?,
+            // Output preserves address
+            check_channel_address?,
+            // Output value only reduces by the AGIX amount
+            check_channel_value?,
+            // Nonce is incremented by 1, and the rest of the datum remains unchanged
+            check_channel_datum?,
           }
         }
 

@@ -1,5 +1,5 @@
 use aiken/cbor.{serialise}
-use aiken/collection/list.{any, filter, map}
+use aiken/collection/list.{any, filter, length, map, take}
 use aiken/collection/pairs.{get_first}
 use aiken/interval.{is_entirely_before}
 use aiken/option.{is_some}
@@ -105,14 +105,16 @@ validator channel {
 
     when redeemer is {
       Claim { .. } -> {
+        trace cbor.diagnostic(Withdraw(script_hash))
+        trace cbor.diagnostic(redeemers)
         let signed_by_receiver =
           any(extra_signatories, fn(signatory) { signatory == receiver })
         // The withdraw purpose of the script is being run
         let withdraw_running =
           get_first(redeemers, Withdraw(script_hash)) |> is_some()
         and {
-          signed_by_receiver?,
           withdraw_running?,
+          signed_by_receiver?,
         }
       }
 
@@ -125,7 +127,7 @@ validator channel {
     let own_address =
       Address { payment_credential: account, stake_credential: None }
     let own_inputs = filter(inputs, fn(i) { i.output.address == own_address })
-    let own_outputs = filter(outputs, fn(o) { o.address == own_address })
+    let payment_outputs = outputs |> take(length(own_inputs))
     let resolved_inputs_with_redeemers =
       map(
         own_inputs,
@@ -135,7 +137,7 @@ validator channel {
         },
       )
 
-    check_claims(resolved_inputs_with_redeemers, own_outputs, mint)
+    check_claims(resolved_inputs_with_redeemers, payment_outputs, mint)
   }
 
   else(_) {
