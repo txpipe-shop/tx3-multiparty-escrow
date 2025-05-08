@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { describe, expect, it } from "@jest/globals";
-import { fromText, fromUnit } from "@spacebudz/lucid";
+import { Data, fromText, fromUnit } from "@spacebudz/lucid";
 import { config } from "../../../config.ts";
 import { fromChannelDatum, validatorDetails } from "../../lib/utils.ts";
 import { ChannelDatum } from "../../types/types.ts";
@@ -82,9 +82,12 @@ describe("Open channel tests", () => {
     const datumStr = channelUtxo.datum!;
     const datum: ChannelDatum = fromChannelDatum(datumStr);
 
-    const channelIdIsValid =
-      senderUtxos[0].txHash + fromText(String(senderUtxos[0].outputIndex)) ==
-      channelId;
+    const expectedChannelId = Buffer.from(
+      senderUtxos[0].txHash +
+        Data.to<bigint>(BigInt(senderUtxos[0].outputIndex)),
+      "hex",
+    ).toString("hex");
+    const channelIdIsValid = expectedChannelId == channelId;
     expect(channelIdIsValid).toBe(true);
     expect(datum.nonce).toBe(0n);
     expect(datum.signer).toBe(signer.publicKey);
