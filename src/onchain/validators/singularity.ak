@@ -1,18 +1,22 @@
 use aiken/cbor.{serialise}
+use aiken/collection/dict.{to_pairs}
 use aiken/collection/list.{any, filter, length, map, take}
 use aiken/collection/pairs.{get_first}
 use aiken/interval.{is_entirely_before}
 use aiken/option.{is_some}
 use aiken/primitive/bytearray.{compare, concat}
+use aiken/primitive/int
 use cardano/address.{Address, Credential, Script}
-use cardano/assets.{PolicyId, flatten, quantity_of, restricted_to}
+use cardano/assets.{
+  PolicyId, flatten, merge, negate, quantity_of, restricted_to, tokens, zero,
+}
 use cardano/transaction.{
   InlineDatum, Input, Output, OutputReference, Spend, Transaction, Withdraw,
   find_input,
 }
 use checks.{check_claims}
 use config
-use types.{Action, Claim, Datum}
+use types.{Action, Claim, Datum, Update}
 
 validator channel {
   mint(_redeemer: Data, policy_id: PolicyId, self: Transaction) {
@@ -93,7 +97,15 @@ validator channel {
     utxo: OutputReference,
     self: Transaction,
   ) {
-    let Transaction { inputs, redeemers, extra_signatories, .. } = self
+    let Transaction {
+      mint,
+      redeemers,
+      outputs,
+      validity_range,
+      extra_signatories,
+      inputs,
+      ..
+    } = self
     expect Some(Input {
       output: Output {
         address: Address { payment_credential: script_hash, .. },
@@ -113,6 +125,108 @@ validator channel {
         and {
           withdraw_running?,
           signed_by_receiver?,
+        }
+      }
+
+      Update -> {
+        expect Some(Datum {
+          channel_id,
+          nonce,
+          signer,
+          receiver,
+          group_id,
+          expiration_date,
+        }) = datum
+
+        let channel_is_still_valid =
+          is_entirely_before(validity_range, expiration_date)
+
+        // Enforce channel to be the first output
+        expect [channel_output, ..] = outputs
+
+        expect Output {
+          address: o_address,
+          value: o_val,
+          datum: InlineDatum(o_datum),
+          reference_script: None,
+        } = channel_output
+
+        expect Address {
+          payment_credential: Script(script_hash),
+          stake_credential: None,
+        } = o_address
+
+        // No tokens with this policy are minted nor burned
+        let no_tokens_minted_or_burned =
+          restricted_to(mint, [script_hash]) == zero
+
+        // Only one script input of self address
+        expect [script_input] =
+          filter(inputs, fn(i) { i.output.address == o_address })
+
+        expect Input {
+          output: Output {
+            address: i_address,
+            value: i_value,
+            reference_script: None,
+            ..
+          },
+          ..
+        } = script_input
+
+        expect Datum {
+          channel_id: o_channel_id,
+          nonce: o_nonce,
+          signer: o_signer,
+          receiver: o_receiver,
+          group_id: o_group_id,
+          expiration_date: o_expiration_date,
+        } = o_datum
+
+        expect [Pair(sender_pk, 1)] = o_val |> tokens(script_hash) |> to_pairs
+        // Sender signing the tx IF the expiration date is updated
+        let correct_signer =
+          if o_expiration_date != expiration_date {
+            list.has(extra_signatories, sender_pk)?
+          } else {
+            True
+          }
+
+        // Output preserves script address
+        let has_script_addr = o_address == i_address
+
+        // AGIX amount on output value >= AGIX amount on input value && remaining values are unchanged
+        let o_vals_are_correct =
+          (quantity_of(i_value, config.agix_policy, config.agix_hexa) <= quantity_of(
+            o_val,
+            config.agix_policy,
+            config.agix_hexa,
+          ))? && ((
+            i_value
+              |> negate
+              |> merge(o_val)
+              |> restricted_to(["", script_hash])
+          ) == zero)?
+
+        let channel_is_valid =
+          is_entirely_before(validity_range, o_expiration_date)
+
+        let rest_of_datum_is_unchanged = and {
+            (compare(o_channel_id, channel_id) == Equal)?,
+            (int.compare(o_nonce, nonce) == Equal)?,
+            (compare(o_signer, signer) == Equal)?,
+            (compare(o_receiver, receiver) == Equal)?,
+            (compare(o_group_id, group_id) == Equal)?,
+          }
+
+        and {
+          no_tokens_minted_or_burned?,
+          channel_is_still_valid?,
+          correct_signer?,
+          has_script_addr?,
+          o_vals_are_correct?,
+          channel_is_valid?,
+          rest_of_datum_is_unchanged?,
         }
       }
 
