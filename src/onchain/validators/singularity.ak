@@ -1,9 +1,10 @@
+use aiken/cbor.{serialise}
 use aiken/collection/dict.{to_pairs}
 use aiken/collection/list.{any, filter, length, map, take}
 use aiken/collection/pairs.{get_first}
 use aiken/interval.{is_entirely_before}
 use aiken/option.{is_some}
-use aiken/primitive/bytearray.{compare, compare, concat}
+use aiken/primitive/bytearray.{compare, concat}
 use aiken/primitive/int
 use cardano/address.{Address, Credential, Script}
 use cardano/assets.{
@@ -15,7 +16,7 @@ use cardano/transaction.{
 }
 use checks.{check_claims}
 use config
-use types.{Action, Claim, Close, Datum, Update}
+use types.{Action, Claim, Datum, Update}
 
 validator channel {
   mint(_redeemer: Data, policy_id: PolicyId, self: Transaction) {
