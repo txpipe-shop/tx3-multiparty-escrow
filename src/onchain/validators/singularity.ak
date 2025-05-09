@@ -5,7 +5,7 @@ use aiken/interval.{is_entirely_before}
 use aiken/option.{is_some}
 use aiken/primitive/bytearray.{compare, concat}
 use cardano/address.{Address, Credential, Script}
-use cardano/assets.{PolicyId, flatten, quantity_of}
+use cardano/assets.{PolicyId, flatten, quantity_of, restricted_to}
 use cardano/transaction.{
   InlineDatum, Input, Output, OutputReference, Spend, Transaction, Withdraw,
   find_input,
@@ -134,8 +134,14 @@ validator channel {
           (i.output, red)
         },
       )
+    expect Script(own_policy) = account
+    let own_policy_mints = restricted_to(mint, [own_policy])
 
-    check_claims(resolved_inputs_with_redeemers, payment_outputs, mint)
+    check_claims(
+      resolved_inputs_with_redeemers,
+      payment_outputs,
+      own_policy_mints,
+    )
   }
 
   else(_) {
