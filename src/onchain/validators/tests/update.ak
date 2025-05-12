@@ -161,13 +161,23 @@ fn update(options: UpdateOptions) -> Bool {
 
   let result =
     singularity.channel.spend(
-      OutputReference { transaction_id: transaction_id_2, output_index: 0 },
+      OutputReference { transaction_id: transaction_id_1, output_index: 0 },
       datum: Some(input_datum),
       redeemer: Update,
       self: Transaction {
         ..tx,
         validity_range: mock_interval(Some(0), Some(90)),
       },
+    ) && (
+      options.only_one_script_input || singularity.channel.spend(
+        OutputReference { transaction_id: transaction_id_3, output_index: 0 },
+        datum: Some(input_datum),
+        redeemer: Update,
+        self: Transaction {
+          ..tx,
+          validity_range: mock_interval(Some(0), Some(90)),
+        },
+      )
     )
   result
 }
