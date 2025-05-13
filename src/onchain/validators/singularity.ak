@@ -1,14 +1,18 @@
 use aiken/cbor.{serialise}
-use aiken/collection/list
+use aiken/collection/list.{any, filter, length, map, take}
+use aiken/collection/pairs.{get_first}
 use aiken/interval.{is_entirely_before}
+use aiken/option.{is_some}
 use aiken/primitive/bytearray.{compare, concat}
-use cardano/address.{Address, Script}
-use cardano/assets.{PolicyId, flatten, quantity_of}
+use cardano/address.{Address, Credential, Script}
+use cardano/assets.{PolicyId, flatten, quantity_of, restricted_to}
 use cardano/transaction.{
-  InlineDatum, Input, Output, OutputReference, Transaction,
+  InlineDatum, Input, Output, OutputReference, Spend, Transaction, Withdraw,
+  find_input,
 }
+use checks.{check_claims}
 use config
-use types.{Action, Datum}
+use types.{Action, Claim, Datum}
 
 validator channel {
   mint(_redeemer: Data, policy_id: PolicyId, self: Transaction) {
@@ -89,7 +93,55 @@ validator channel {
     utxo: OutputReference,
     self: Transaction,
   ) {
-    True
+    let Transaction { inputs, redeemers, extra_signatories, .. } = self
+    expect Some(Input {
+      output: Output {
+        address: Address { payment_credential: script_hash, .. },
+        ..
+      },
+      ..
+    }) = find_input(inputs, utxo)
+    expect Some(Datum { receiver, .. }) = datum
+
+    when redeemer is {
+      Claim { .. } -> {
+        let signed_by_receiver =
+          any(extra_signatories, fn(signatory) { signatory == receiver })
+        // The withdraw purpose of the script is being run
+        let withdraw_running =
+          get_first(redeemers, Withdraw(script_hash)) |> is_some()
+        and {
+          withdraw_running?,
+          signed_by_receiver?,
+        }
+      }
+
+      _ -> True
+    }
+  }
+
+  withdraw(_redeemer: Data, account: Credential, self: Transaction) {
+    let Transaction { inputs, outputs, redeemers, mint, .. } = self
+    let own_address =
+      Address { payment_credential: account, stake_credential: None }
+    let own_inputs = filter(inputs, fn(i) { i.output.address == own_address })
+    let payment_outputs = outputs |> take(length(own_inputs))
+    let resolved_inputs_with_redeemers =
+      map(
+        own_inputs,
+        fn(i) {
+          expect Some(red) = get_first(redeemers, Spend(i.output_reference))
+          (i.output, red)
+        },
+      )
+    expect Script(own_policy) = account
+    let own_policy_mints = restricted_to(mint, [own_policy])
+
+    check_claims(
+      resolved_inputs_with_redeemers,
+      payment_outputs,
+      own_policy_mints,
+    )
   }
 
   else(_) {

@@ -1,5 +1,6 @@
 import { Addresses, Data, Lucid, Utils } from "@spacebudz/lucid";
 import { SingularityChannelSpend } from "../types/plutus.ts";
+import { validatorDetails } from "../lib/utils.ts";
 
 async function deployScript(lucid: Lucid): Promise<{ cbor: string }> {
   const cred = Addresses.inspect(await lucid.wallet.address()).payment;
@@ -15,6 +16,7 @@ async function deployScript(lucid: Lucid): Promise<{ cbor: string }> {
   );
 
   const validator = new SingularityChannelSpend();
+  const { scriptRewardAddress } = validatorDetails(lucid);
   const tx = await lucid
     .newTx()
     .payToContract(
@@ -28,6 +30,7 @@ async function deployScript(lucid: Lucid): Promise<{ cbor: string }> {
       },
       {},
     )
+    .registerStake(scriptRewardAddress)
     .commit();
   return { cbor: tx.toString() };
 }

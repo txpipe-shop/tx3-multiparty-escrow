@@ -23,7 +23,7 @@ export const claim = async (
   currentTime: bigint,
   receiverAddress: string,
 ): Promise<{ claimChannelCbor: string }> => {
-  const { scriptHash } = validatorDetails(lucid);
+  const { scriptHash, scriptRewardAddress } = validatorDetails(lucid);
   lucid.selectReadOnlyWallet({ address: receiverAddress });
 
   // Get all channel utxos
@@ -79,20 +79,21 @@ export const claim = async (
 
       const valueResult = addAssets(utxo.assets, { [config.token]: -amount });
       // Check whether it's a normal claim or claim & close
-      if (finalize)
+      if (finalize) {
         // Return to sender
-        tx.mint({ [channelToken]: -1n }, Data.void()).payTo(
+        tx.mint({ [channelToken]: -1n }, Data.void());
+        tx.payTo(
           senderAddress,
           addAssets(valueResult, { [channelToken]: -1n }),
         );
-      // Build continuing output
-      else
+      } else {
+        // Build continuing output
         tx.payToContract(
           utxo.address,
           { Inline: toChannelDatum({ ...datum, nonce: datum.nonce + 1n }) },
           valueResult,
         );
-
+      }
       // Collect channel utxo and accumulate receiver payout
       tx.collectFrom(
         [utxo],
@@ -115,6 +116,8 @@ export const claim = async (
       : ["Claim multiple channels"];
   const receiverPayout = { [config.token]: receiverAmount };
   const txComplete = await tx
+    .withdraw(scriptRewardAddress, 0n, Data.void())
+    .addSigner(Addresses.addressToCredential(receiverAddress).hash)
     .payTo(receiverAddress, receiverPayout)
     .validTo(Number(lowestExpDate))
     .attachMetadata(674, { msg })
