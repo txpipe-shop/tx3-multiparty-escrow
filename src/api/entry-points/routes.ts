@@ -37,8 +37,13 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
     logger.info("handling request", Routes.OPEN);
     try {
       const params = OpenChannelSchema.parse(req.body);
-      const now = BigInt(Date.now());
-      const openResult = await openChannel(lucid, params, refScript, now);
+      const currentTime = BigInt(Date.now());
+      const openResult = await openChannel(
+        lucid,
+        params,
+        refScript,
+        currentTime
+      );
       res.status(200).json(openResult);
       logger.info(
         `open channel request completed; channelID: ${openResult.channelId}`,
