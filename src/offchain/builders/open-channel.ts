@@ -27,9 +27,12 @@ export const openChannel = async (
   if (expirationDate < currentTime)
     throw new Error("Expiration date is in the past");
   lucid.selectReadOnlyWallet({ address: senderAddress });
-  const selectedUtxos = await lucid.wallet
-    .getUtxos()
-    .then((utxos) => selectUTxOs(utxos, { lovelace: 20_000_000n }));
+  const selectedUtxos = await lucid.wallet.getUtxos().then((utxos) =>
+    selectUTxOs(utxos, {
+      lovelace: 20_000_000n,
+      [config.token]: initialDeposit,
+    }),
+  );
 
   const utxos = selectedUtxos.sort((a, b) => {
     const aLex = `${a.txHash}${a.outputIndex}`;
