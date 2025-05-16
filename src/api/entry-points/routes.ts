@@ -1,11 +1,10 @@
 import { Lucid } from "@spacebudz/lucid";
-import e from "express";
-import { OpenChannelSchema } from "../../shared/api-types.ts";
-import { openChannel } from "../../offchain/builders/open-channel.ts";
-import { logger } from "../../shared/logger.ts";
+import e, { Request, Response } from "express";
 import { z } from "zod";
-import { Request, Response } from "express";
 import { config } from "../../config.ts";
+import { openChannel } from "../../offchain/builders/open-channel.ts";
+import { OpenChannelSchema } from "../../shared/api-types.ts";
+import { logger } from "../../shared/logger.ts";
 
 enum Routes {
   OPEN = "/open",
@@ -39,12 +38,12 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         lucid,
         params,
         refScript,
-        currentTime,
+        currentTime
       );
       res.status(200).json(openResult);
       logger.info(
         `open channel request completed; channelID: ${openResult.channelId}`,
-        Routes.OPEN,
+        Routes.OPEN
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
