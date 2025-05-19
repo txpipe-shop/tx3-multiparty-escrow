@@ -96,7 +96,6 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         }`,
         Routes.UPDATE
       );
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         res.status(400).json({ error: error.errors });
