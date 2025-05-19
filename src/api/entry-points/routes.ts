@@ -90,10 +90,10 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         res.status(400).json({ error: error.errors });
-        logger.error(`bad request: ${error}`, Routes.OPEN);
+        logger.error(`bad request: ${error}`, Routes.UPDATE);
       } else {
         res.status(500).json({ error: "Internal server error" });
-        logger.error(`internal server error: ${error.stack}`, Routes.OPEN);
+        logger.error(`internal server error: ${error.stack}`, Routes.UPDATE);
       }
     }
   });
