@@ -52,6 +52,19 @@ paths:
   /update:
     post:
       summary: Update an existing channel
+      description: |
+        Example `curl` command:
+
+        ```bash
+        curl -X POST http://localhost:3000/update \
+          -H "Content-Type: application/json" \
+          -d "{
+            \"channelId\": \"b126f76547103204f62432999bcc2b5cb126f76547103204f62432999bcc2b5c0\",
+            \"userAddress\": \"addr_test1vzwlx094fypzcfsz53n5gufc6h84tawp9pdyklm05pr385gl956ej\",
+            \"senderAddress\": \"addr_test1vzwlx094fypzcfsz53n5gufc6h84tawp9pdyklm05pr385gl956ej\",
+            \"addDeposit\": 5
+          }"
+
       requestBody:
         required: true
         content:
