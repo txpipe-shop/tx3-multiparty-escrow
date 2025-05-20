@@ -33,6 +33,8 @@ export const openChannel = async (
       [config.token]: initialDeposit,
     }),
   );
+  if (selectedUtxos.length === 0)
+    throw new Error("Not enough funds to open channel");
 
   const utxos = selectedUtxos.sort((a, b) => {
     const aLex = `${a.txHash}${a.outputIndex}`;
