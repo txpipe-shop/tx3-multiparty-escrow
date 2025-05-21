@@ -11,6 +11,7 @@ import {
   UpdateChannelSchema,
 } from "../../shared/api-types.ts";
 import { logger } from "../../shared/logger.ts";
+import { getErrorString } from "../utils.ts";
 
 enum Routes {
   OPEN = "/open",
@@ -28,9 +29,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
   const [refScript] = await lucid.utxosByOutRef([
     { txHash: config.ref_script.txHash, outputIndex: 0 },
   ]);
-  if (!refScript) {
-    throw new Error("Failed to find reference script");
-  }
+  if (!refScript) throw new Error("Failed to find reference script");
 
   /**
    * Open a new channel
@@ -57,7 +56,9 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         res.status(400).json({ error: error.errors });
         logger.error(`bad request: ${error}`, Routes.OPEN);
       } else {
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({
+          error: `Internal server error${getErrorString(error.stack)}`,
+        });
         logger.error(`internal server error: ${error.stack}`, Routes.OPEN);
       }
     }
@@ -94,7 +95,9 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         res.status(400).json({ error: error.errors });
         logger.error(`bad request: ${error}`, Routes.UPDATE);
       } else {
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({
+          error: `Internal server error${getErrorString(error.stack)}`,
+        });
         logger.error(`internal server error: ${error.stack}`, Routes.UPDATE);
       }
     }
@@ -125,7 +128,9 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         res.status(400).json({ error: error.errors });
         logger.error(`bad request: ${error}`, Routes.CLOSE);
       } else {
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({
+          error: `Internal server error${getErrorString(error.stack)}`,
+        });
         logger.error(`internal server error: ${error.stack}`, Routes.CLOSE);
       }
     }
