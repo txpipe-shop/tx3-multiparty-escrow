@@ -57,7 +57,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         logger.error(`bad request: ${error}`, Routes.OPEN);
       } else {
         res.status(500).json({
-          error: `Internal server error${getErrorString(error.stack)}`,
+          error: `${getErrorString(error.stack)}`,
         });
         logger.error(`internal server error: ${error.stack}`, Routes.OPEN);
       }
@@ -96,7 +96,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         logger.error(`bad request: ${error}`, Routes.UPDATE);
       } else {
         res.status(500).json({
-          error: `Internal server error${getErrorString(error.stack)}`,
+          error: `${getErrorString(error.stack)}`,
         });
         logger.error(`internal server error: ${error.stack}`, Routes.UPDATE);
       }
@@ -129,7 +129,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         logger.error(`bad request: ${error}`, Routes.CLOSE);
       } else {
         res.status(500).json({
-          error: `Internal server error${getErrorString(error.stack)}`,
+          error: `${getErrorString(error.stack)}`,
         });
         logger.error(`internal server error: ${error.stack}`, Routes.CLOSE);
       }
