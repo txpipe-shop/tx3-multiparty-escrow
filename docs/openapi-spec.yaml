@@ -122,6 +122,16 @@ paths:
   /close:
     post:
       summary: Close an existing channel
+      description: |
+        Example `curl` command:
+
+        ```bash
+        curl -X POST http://localhost:3000/close \
+          -H "Content-Type: application/json" \
+          -d '{
+            "senderAddress": "addr_test1qz6fcx7lay9czf838z4m0ppkyzzgspp9kz5uwede3ry4fmxmkhwgrz8c7pyr8dmqvcmf7sa2dagvvtfmw5585w847jgqwrhsv8",
+            "channelId": "b126f76547103204f62432999bcc2b5cb126f76547103204f62432999bcc2b5c0"
+          }'
       requestBody:
         required: true
         content:

@@ -61,10 +61,10 @@ export const validatorDetails = (lucid: Lucid) => {
 };
 
 /**
-Returns a list of UTxOs whose total assets are equal to or greater than the asset value provided,
-@param utxos list of available utxos,
-@param totalAssets minimum total assets required,
-@param includeUTxOsWithScriptRef Whether to include UTxOs with scriptRef or not. default = false
+  Returns a list of UTxOs whose total assets are equal to or greater than the asset value provided,
+  @param utxos list of available utxos,
+  @param totalAssets minimum total assets required,
+  @param includeUTxOsWithScriptRef Whether to include UTxOs with scriptRef or not. default = false
 */
 export const selectUTxOs = (
   utxos: Utxo[],

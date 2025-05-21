@@ -2,13 +2,16 @@ import { Lucid } from "@spacebudz/lucid";
 import e, { Request, Response } from "express";
 import { z } from "zod";
 import { config } from "../../config.ts";
+import { closeChannel } from "../../offchain/builders/close-channel.ts";
 import { openChannel } from "../../offchain/builders/open-channel.ts";
 import { updateChannel } from "../../offchain/builders/update-channel.ts";
 import {
+  CloseChannelSchema,
   OpenChannelSchema,
   UpdateChannelSchema,
 } from "../../shared/api-types.ts";
 import { logger } from "../../shared/logger.ts";
+import { getErrorString } from "../utils.ts";
 
 enum Routes {
   OPEN = "/open",
@@ -26,9 +29,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
   const [refScript] = await lucid.utxosByOutRef([
     { txHash: config.ref_script.txHash, outputIndex: 0 },
   ]);
-  if (!refScript) {
-    throw new Error("Failed to find reference script");
-  }
+  if (!refScript) throw new Error("Failed to find reference script");
 
   /**
    * Open a new channel
@@ -55,7 +56,9 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         res.status(400).json({ error: error.errors });
         logger.error(`bad request: ${error}`, Routes.OPEN);
       } else {
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({
+          error: `${getErrorString(error.stack)}`,
+        });
         logger.error(`internal server error: ${error.stack}`, Routes.OPEN);
       }
     }
@@ -92,8 +95,43 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         res.status(400).json({ error: error.errors });
         logger.error(`bad request: ${error}`, Routes.UPDATE);
       } else {
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({
+          error: `${getErrorString(error.stack)}`,
+        });
         logger.error(`internal server error: ${error.stack}`, Routes.UPDATE);
+      }
+    }
+  });
+
+  /**
+   * Close a channel
+   */
+  app.post(Routes.CLOSE, async (req: Request, res: Response) => {
+    logger.info("handling request", Routes.CLOSE);
+    try {
+      const params = CloseChannelSchema.parse(req.body);
+      const currentTime = BigInt(Date.now());
+      const closeResult = await closeChannel(
+        lucid,
+        params,
+        refScript,
+        currentTime,
+      );
+      res.status(200).json(closeResult);
+      logger.info(
+        `closed channel; channelID: ${params.channelId}}`,
+        Routes.CLOSE,
+      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: error.errors });
+        logger.error(`bad request: ${error}`, Routes.CLOSE);
+      } else {
+        res.status(500).json({
+          error: `${getErrorString(error.stack)}`,
+        });
+        logger.error(`internal server error: ${error.stack}`, Routes.CLOSE);
       }
     }
   });
