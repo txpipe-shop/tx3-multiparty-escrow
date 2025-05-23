@@ -7,11 +7,13 @@ import { openChannel } from "../../offchain/builders/open-channel.ts";
 import { updateChannel } from "../../offchain/builders/update-channel.ts";
 import {
   CloseChannelSchema,
+  ClaimChannelSchema,
   OpenChannelSchema,
   UpdateChannelSchema,
 } from "../../shared/api-types.ts";
 import { logger } from "../../shared/logger.ts";
 import { getErrorString } from "../utils.ts";
+import { claim } from "../../offchain/builders/claim.ts";
 
 enum Routes {
   OPEN = "/open",
@@ -99,6 +101,31 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
           error: `${getErrorString(error.stack)}`,
         });
         logger.error(`internal server error: ${error.stack}`, Routes.UPDATE);
+      }
+    }
+  });
+
+  /**
+   *  Claim one or more channels.
+   */
+  app.post(Routes.CLAIM, async (req: Request, res: Response) => {
+    logger.info("handling request", Routes.CLAIM);
+    try {
+      const params = ClaimChannelSchema.parse(req.body);
+      const currentTime = BigInt(Date.now());
+      const claimResult = await claim(lucid, params, refScript, currentTime);
+      res.status(200).json(claimResult);
+      logger.info(`claim channel request completed.`, Routes.CLAIM);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: error.errors });
+        logger.error(`bad request: ${error}`, Routes.CLAIM);
+      } else {
+        res.status(500).json({
+          error: `${getErrorString(error.stack)}`,
+        });
+        logger.error(`internal server error: ${error.stack}`, Routes.CLAIM);
       }
     }
   });
