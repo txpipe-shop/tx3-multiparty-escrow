@@ -42,7 +42,7 @@ const seedSchema = z
       s.split("=").pop()?.split(" ").length === 24,
     {
       message:
-        "Invalid .test-env format. See the README file for the correct format."
+        "Invalid .test-env format. See the README file for the correct format.",
     },
   )
   .transform((s) => s.split("=").pop() as string);
