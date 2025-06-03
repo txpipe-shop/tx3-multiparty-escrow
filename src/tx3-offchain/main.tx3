@@ -15,16 +15,6 @@ type ChannelInfo {
     expirationDate: Int,
 }
 
-type Action {
-  Update,
-  Claim {
-    amount: Int,
-    signature: Bytes,
-    finalize: Bool,
-  },
-  Close,
-}
-
 tx open(
     initialDeposit: Int,
     channelId: Bytes,
@@ -37,11 +27,9 @@ tx open(
     receiverInput: Bytes,
     since: Int,
     until: Int,
-    validatorRef: UtxoRef,
-    collateralRef: UtxoRef,
 ) {
     reference validator {
-        ref: validatorRef,
+        ref: 0x82af870a1773a793127f34d55634fa6ad774988b301e4f8e1df04ca2724b98d8#0,
     }
 
     input source {
