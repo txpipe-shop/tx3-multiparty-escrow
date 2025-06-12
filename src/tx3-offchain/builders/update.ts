@@ -62,7 +62,7 @@ export const updateChannel = async (
   const channelUtxoId =
     channelUtxo.toCore()[0].txId + "#" + channelUtxo.toCore()[0].index;
 
-  const utxos = await provider.getUnspentOutputs(Address.fromBech32(sender));
+  const utxos = await provider.getUnspentOutputs(Address.fromBech32(user));
   const updateUtxo = utxos.filter((u) => {
     const value = u.toCore()[1].value;
     return (
@@ -73,6 +73,11 @@ export const updateChannel = async (
   });
   if (updateUtxo.length === 0)
     throw new Error("No sufficient amount of AGIX for update");
+
+  const [collateralUtxo] = utxos.filter((u) => {
+    const value = u.toCore()[1].value;
+    return value.coins && value.coins <= 5_000_000n;
+  });
 
   const utxo = updateUtxo[0];
   let hex_index = utxo.toCore()[0].index.toString(16);
@@ -87,6 +92,9 @@ export const updateChannel = async (
     user: Address.fromBech32(user).toBytes(),
     since: toPreviewBlockSlot(Date.now() - 1000 * 60),
     until: toPreviewBlockSlot(Date.now() + 1000 * 60),
+    collateralref:
+      collateralUtxo.toCore()[0].txId + "#" + collateralUtxo.toCore()[0].index,
+    validatorref: config.ref_script.txHash + "#0",
   });
 
   return { updateCbor: tx };
