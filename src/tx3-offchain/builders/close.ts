@@ -1,6 +1,7 @@
 import { Address, AssetId, HexBlob, PlutusData } from "@blaze-cardano/core";
 import { parse } from "@blaze-cardano/data";
 import { U5C } from "@utxorpc/blaze-provider";
+import { config } from "../../config.ts";
 import { Datum, SingularityChannelMint } from "../blueprint.ts";
 import { protocol } from "../gen/typescript/protocol.ts";
 import { bech32ToPubKeyHash } from "../utils/string.ts";
@@ -41,6 +42,12 @@ export const closeChannel = async (
   const channelUtxoId =
     channelUtxo.toCore()[0].txId + "#" + channelUtxo.toCore()[0].index;
 
+  const utxos = await provider.getUnspentOutputs(Address.fromBech32(sender));
+  const [collateralUtxo] = utxos.filter((u) => {
+    const value = u.toCore()[1].value;
+    return value.coins && value.coins <= 5_000_000n;
+  });
+
   const { tx } = await protocol.closeTx({
     channelutxo: channelUtxoId,
     sender: Address.fromBech32(sender).toBytes(),
@@ -48,6 +55,9 @@ export const closeChannel = async (
     tokenname: Buffer.from(bech32ToPubKeyHash(sender), "hex"),
     since: toPreviewBlockSlot(Date.now() - 1000 * 60),
     until: toPreviewBlockSlot(Date.now() + 1000 * 60),
+    collateralref:
+      collateralUtxo.toCore()[0].txId + "#" + collateralUtxo.toCore()[0].index,
+    validatorref: config.ref_script.txHash + "#0",
   });
 
   return { closeCbor: tx };

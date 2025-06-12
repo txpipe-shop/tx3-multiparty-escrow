@@ -1,8 +1,7 @@
-asset Agix = 0x921e27e15e2552a40515564ba10a26ecb1fe1a34ac6ccb58c1ce1320.AGIX;
+asset Agix = 0x921e27e15e2552a40515564ba10a26ecb1fe1a34ac6ccb58c1ce1320.0x41474958;
 policy Script = 0x7da6163888081e317f8567176057f0e9634932f85bc630657b1f8133;
 
 party Sender;
-
 
 type ChannelInfo {
     channel_id: Bytes,
@@ -32,9 +31,11 @@ tx open(
     receiverInput: Bytes,
     since: Int,
     until: Int,
+    validatorRef: UtxoRef,
+    collateralRef: UtxoRef,
 ) {
     reference validator {
-        ref: 0x82af870a1773a793127f34d55634fa6ad774988b301e4f8e1df04ca2724b98d8#0,
+        ref: validatorRef,
     }
 
     input source {
@@ -66,7 +67,7 @@ tx open(
     }
 
     collateral {
-        ref: 0x36f545ec1fd3c4c5141b342c5a7e0d5a7592a13e49d0ae61082e91d90303d524#5,
+        ref: collateralRef,
     }
 
     validity {
@@ -75,9 +76,9 @@ tx open(
     }
 }
 
-tx close(channelUtxo: UtxoRef, policyId: Bytes, tokenName: Bytes, since: Int, until: Int) {
+tx close(channelUtxo: UtxoRef, policyId: Bytes, tokenName: Bytes, since: Int, until: Int, validatorRef: UtxoRef, collateralRef: UtxoRef) {
     reference validator {
-        ref: 0x82af870a1773a793127f34d55634fa6ad774988b301e4f8e1df04ca2724b98d8#0,
+        ref: validatorRef,
     }
 
     input target {
@@ -102,7 +103,7 @@ tx close(channelUtxo: UtxoRef, policyId: Bytes, tokenName: Bytes, since: Int, un
     }
 
     collateral {
-        ref: 0x36f545ec1fd3c4c5141b342c5a7e0d5a7592a13e49d0ae61082e91d90303d524#5,
+        ref: collateralRef,
     }
 
     signers {
