@@ -74,6 +74,12 @@ export class Client {
       args,
     });
   }
+  async updateTx(args: UpdateParams): Promise<TxEnvelope> {
+    return await this.#client.resolve({
+      tir: UPDATE_IR,
+      args,
+    });
+  }
 }
 
 // Create a default client instance
