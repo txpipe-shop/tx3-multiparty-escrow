@@ -13,7 +13,6 @@ type ChannelInfo {
     expirationDate: Int,
 }
 
-
 type Action {
   Update,
   Claim,
@@ -151,11 +150,11 @@ tx update(
         to: Script,
         amount: current + Agix(addDeposit),
         datum: ChannelInfo {
-            channel_id: 0x90EC6E857D6F02B38CD902361963F68EA6CCEAB563E14DD29A2661B7B25912B501,
-            nonce: 0,
-            signer: 0x0A0B0BDDC14DE4B88BD3E9CC7D29886CE1BB637B81DBCC3A87D6992822DD1EAB,
-            receiver: 0x5FD3815155CA7CDAC6B64D66AB39886593DA2E56C47147E69AD0A9E4,
-            group_id: 0x67726F757031,
+            channel_id: current.channel_id,
+            nonce: current.nonce,
+            signer: current.signer,
+            receiver: current.receiver,
+            group_id: current.group_id,
             expirationDate: extendDate,
         },
     }

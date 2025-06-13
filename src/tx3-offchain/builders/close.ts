@@ -1,62 +1,36 @@
-import { Address, AssetId, HexBlob, PlutusData } from "@blaze-cardano/core";
-import { parse } from "@blaze-cardano/data";
+import { Address, HexBlob } from "@blaze-cardano/core";
 import { U5C } from "@utxorpc/blaze-provider";
 import { config } from "../../config.ts";
-import { Datum, SingularityChannelMint } from "../blueprint.ts";
+import { SingularityChannelMint } from "../blueprint.ts";
 import { protocol } from "../gen/typescript/protocol.ts";
-import { bech32ToPubKeyHash } from "../utils/string.ts";
+import { bech32ToPubKeyHash, UtxoToRef } from "../utils/string.ts";
 import { toPreviewBlockSlot } from "../utils/time.ts";
+import { getChannelUtxo } from "../utils/utxos.ts";
+import { getCollateralUtxo } from "./../utils/utxos.ts";
 
 export const closeChannel = async (
   provider: U5C,
   sender: string,
   channelId: string,
 ) => {
-  const senderPubKeyHash = String(
-    Address.fromBech32(sender).asBase()?.getPaymentCredential().hash,
-  );
   const scriptHash = new SingularityChannelMint().Script.hash();
-  const channelToken = scriptHash + senderPubKeyHash;
   const scriptUtxos = await provider.getUnspentOutputs(
     Address.fromBytes(HexBlob.fromBytes(Buffer.from("70" + scriptHash, "hex"))),
   );
 
-  const [channelUtxo] = scriptUtxos
-    .filter((u) => {
-      const value = u.toCore()[1].value;
-      return value.assets?.get(AssetId(channelToken));
-    })
-    .filter((u) => {
-      try {
-        const parsedDatum = parse(
-          Datum,
-          PlutusData.fromCore(u.toCore()[1].datum!),
-        );
-        return parsedDatum.channel_id === channelId;
-      } catch (e) {
-        console.warn(e);
-        return false;
-      }
-    });
-
-  const channelUtxoId =
-    channelUtxo.toCore()[0].txId + "#" + channelUtxo.toCore()[0].index;
+  const [channelUtxo] = getChannelUtxo(scriptUtxos, sender, channelId);
 
   const utxos = await provider.getUnspentOutputs(Address.fromBech32(sender));
-  const [collateralUtxo] = utxos.filter((u) => {
-    const value = u.toCore()[1].value;
-    return value.coins && value.coins <= 5_000_000n;
-  });
+  const collateralUtxo = getCollateralUtxo(utxos);
 
   const { tx } = await protocol.closeTx({
-    channelutxo: channelUtxoId,
+    channelutxo: UtxoToRef(channelUtxo),
     sender: Address.fromBech32(sender).toBytes(),
     policyid: Buffer.from(scriptHash, "hex"),
     tokenname: Buffer.from(bech32ToPubKeyHash(sender), "hex"),
     since: toPreviewBlockSlot(Date.now() - 1000 * 60),
     until: toPreviewBlockSlot(Date.now() + 1000 * 60),
-    collateralref:
-      collateralUtxo.toCore()[0].txId + "#" + collateralUtxo.toCore()[0].index,
+    collateralref: UtxoToRef(collateralUtxo),
     validatorref: config.ref_script.txHash + "#0",
   });
 
