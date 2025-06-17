@@ -19,11 +19,11 @@ export const updateChannel = async (
   channelId: string,
   addDeposit: number | undefined,
   extendExpiration: number | undefined,
-  user: string,
+  user: string
 ) => {
   if (!addDeposit && !extendExpiration)
     throw new Error(
-      "Nothing to update, provide addDeposit or extendExpiration",
+      "Nothing to update, provide addDeposit or extendExpiration"
     );
 
   const channelUtxo = await getChannelUtxo(provider, sender, channelId);
@@ -32,7 +32,7 @@ export const updateChannel = async (
 
   const datumExpirationDate = Number(
     parse(Datum, PlutusData.fromCore(channelUtxo.toCore()[1].datum!))
-      .expiration_date,
+      .expiration_date
   );
   if (extendExpiration! < datumExpirationDate)
     throw new Error("New expiration date must be greater than current");
@@ -55,7 +55,7 @@ export const updateChannel = async (
     signer: Buffer.from(bech32ToPubKeyHash(signer), "hex"),
     script: addressFromValidator(
       provider.network,
-      new SingularityChannelSpend().Script,
+      new SingularityChannelSpend().Script
     ).toBytes(),
     adddeposit: addDeposit ?? 0,
     extenddate: extendExpiration ?? datumExpirationDate,
