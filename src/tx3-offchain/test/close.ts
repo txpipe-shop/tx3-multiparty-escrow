@@ -8,7 +8,7 @@ const provider = new U5C({
 });
 const sender = config.sender;
 const channelId =
-  "e3f8c7dbc07f349bf1ebe763d5f2ea5fca464af113ce6203c0441d067977591e01";
+  "8be78554c9a8262d1b79961d974d18f94d3ba8de2140294d286c845ef244cf4b01";
 
 const { closeCbor } = await closeChannel(provider, sender, channelId);
 

@@ -1,14 +1,17 @@
-import { Address, HexBlob, PlutusData } from "@blaze-cardano/core";
+import { Address, PlutusData } from "@blaze-cardano/core";
 import { parse } from "@blaze-cardano/data";
 import { U5C } from "@utxorpc/blaze-provider";
 import { config } from "../../config.ts";
-import { Datum, SingularityChannelMint } from "../blueprint.ts";
+import { Datum } from "../blueprint.ts";
 import { protocol } from "../gen/typescript/protocol.ts";
-import { bech32ToPubKeyHash } from "../utils/string.ts";
-import { toPreviewBlockSlot } from "../utils/time.ts";
-import { getChannelUtxo, getSuitableUtxos } from "../utils/utxos.ts";
-import { UtxoToRef } from "./../utils/string.ts";
-import { getCollateralUtxo } from "./../utils/utxos.ts";
+import {
+  bech32ToPubKeyHash,
+  getChannelUtxo,
+  getCollateralUtxo,
+  getSuitableUtxos,
+  toPreviewBlockSlot,
+  UtxoToRef,
+} from "../utils/index.ts";
 
 export const updateChannel = async (
   provider: U5C,
@@ -23,15 +26,9 @@ export const updateChannel = async (
       "Nothing to update, provide addDeposit or extendExpiration",
     );
 
-  const scriptHash = new SingularityChannelMint().Script.hash();
-  const scriptUtxos = await provider.getUnspentOutputs(
-    Address.fromBytes(HexBlob.fromBytes(Buffer.from("70" + scriptHash, "hex"))),
-  );
-  const [channelUtxo] = getChannelUtxo(scriptUtxos, sender, channelId);
+  const channelUtxo = await getChannelUtxo(provider, sender, channelId);
   if (!channelUtxo)
-    throw new Error(
-      `Channel UTXO with id ${channelId} not found for sender ${sender}`,
-    );
+    throw new Error(`Channel id ${channelId} not found for sender ${sender}`);
 
   const datumExpirationDate = Number(
     parse(Datum, PlutusData.fromCore(channelUtxo.toCore()[1].datum!))
@@ -47,7 +44,7 @@ export const updateChannel = async (
   if (updateUtxo.length === 0)
     throw new Error("No sufficient amount of AGIX for update");
 
-  const collateralUtxo = getCollateralUtxo(utxos);
+  const collateralUtxo = await getCollateralUtxo(utxos);
 
   const utxo = updateUtxo[0];
   let hex_index = utxo.toCore()[0].index.toString(16);

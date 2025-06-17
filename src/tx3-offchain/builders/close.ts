@@ -1,12 +1,15 @@
-import { Address, HexBlob } from "@blaze-cardano/core";
+import { Address } from "@blaze-cardano/core";
 import { U5C } from "@utxorpc/blaze-provider";
 import { config } from "../../config.ts";
 import { SingularityChannelMint } from "../blueprint.ts";
 import { protocol } from "../gen/typescript/protocol.ts";
-import { bech32ToPubKeyHash, UtxoToRef } from "../utils/string.ts";
-import { toPreviewBlockSlot } from "../utils/time.ts";
-import { getChannelUtxo } from "../utils/utxos.ts";
-import { getCollateralUtxo } from "./../utils/utxos.ts";
+import {
+  bech32ToPubKeyHash,
+  getChannelUtxo,
+  getCollateralUtxo,
+  toPreviewBlockSlot,
+  UtxoToRef,
+} from "../utils/index.ts";
 
 export const closeChannel = async (
   provider: U5C,
@@ -14,14 +17,12 @@ export const closeChannel = async (
   channelId: string,
 ) => {
   const scriptHash = new SingularityChannelMint().Script.hash();
-  const scriptUtxos = await provider.getUnspentOutputs(
-    Address.fromBytes(HexBlob.fromBytes(Buffer.from("70" + scriptHash, "hex"))),
-  );
 
-  const [channelUtxo] = getChannelUtxo(scriptUtxos, sender, channelId);
+  const channelUtxo = await getChannelUtxo(provider, sender, channelId);
 
   const utxos = await provider.getUnspentOutputs(Address.fromBech32(sender));
-  const collateralUtxo = getCollateralUtxo(utxos);
+
+  const collateralUtxo = await getCollateralUtxo(utxos);
 
   const { tx } = await protocol.closeTx({
     channelutxo: UtxoToRef(channelUtxo),

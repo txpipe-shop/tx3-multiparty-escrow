@@ -3,10 +3,13 @@ import { U5C } from "@utxorpc/blaze-provider";
 import { config } from "../../config.ts";
 import { SingularityChannelMint } from "../blueprint.ts";
 import { protocol } from "../gen/typescript/protocol.ts";
-import { bech32ToPubKeyHash } from "../utils/string.ts";
-import { toPreviewBlockSlot } from "../utils/time.ts";
-import { UtxoToRef } from "./../utils/string.ts";
-import { getCollateralUtxo, getSuitableUtxos } from "./../utils/utxos.ts";
+import {
+  bech32ToPubKeyHash,
+  getCollateralUtxo,
+  getSuitableUtxos,
+  toPreviewBlockSlot,
+  UtxoToRef,
+} from "../utils/index.ts";
 
 export const openChannel = async (
   provider: U5C,
@@ -30,6 +33,7 @@ export const openChannel = async (
   const mintingPolicy = new SingularityChannelMint().Script.hash();
 
   const collateralUtxo = await getCollateralUtxo(utxos);
+
   const { tx } = await protocol.openTx({
     sender: Address.fromBech32(sender).toBytes(),
     receiverinput: Buffer.from(bech32ToPubKeyHash(receiver), "hex"),
