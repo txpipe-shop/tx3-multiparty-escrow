@@ -1,8 +1,10 @@
-asset Agix = 0x921e27e15e2552a40515564ba10a26ecb1fe1a34ac6ccb58c1ce1320.0x41474958;
-policy Script = 0x7da6163888081e317f8567176057f0e9634932f85bc630657b1f8133;
+asset Agix = 0x921e27e15e2552a40515564ba10a26ecb1fe1a34ac6ccb58c1ce1320."AGIX";
 
+party Script;
 party Sender;
+party Receiver;
 party User;
+party StakingAddress;
 
 type ChannelInfo {
     channel_id: Bytes,
@@ -15,7 +17,11 @@ type ChannelInfo {
 
 type Action {
   Update,
-  Claim,
+  Claim {
+    amount: Int,
+    signature: Bytes,
+    finalize: Bool,
+  },
   Close,
 }
 
@@ -175,5 +181,71 @@ tx update(
 
     signers {
         signer,
+    }
+}
+
+tx claim(
+    channelUtxo: UtxoRef,
+    amountInput: Int,
+    signatureInput: Bytes,
+    policyId: Bytes,
+    tokenName: Bytes,
+    since: Int,
+    until: Int,
+    validatorRef: UtxoRef,
+    collateralRef: UtxoRef,
+) {
+    reference validator {
+        ref: validatorRef,
+    }
+
+    input current {
+        from: Script,
+        ref: channelUtxo,
+        redeemer: Action::Claim {
+            amount: amountInput,
+            signature: signatureInput,
+            finalize: true,
+        },
+        datum_is: ChannelInfo,
+    }
+
+    input source {
+        from: Receiver,
+        min_amount: Ada(5000000),
+    }
+
+    mint {
+        amount: AnyAsset(policyId, tokenName, -1),
+        redeemer: (),
+    }
+
+    output {
+        to: Sender,
+        amount: current - Agix(amountInput) - AnyAsset(policyId, tokenName, 1) ,
+    }
+
+    output {
+        to: Receiver,
+        amount: source + Agix(amountInput) - fees,
+    }
+
+    validity {
+        until_slot: until,
+        since_slot: since,
+    }
+
+    collateral {
+        ref: collateralRef,
+    }
+
+    cardano::withdraw {
+        from: StakingAddress,
+        amount: 0,
+        redeemer: (),
+    }
+
+    signers {
+        Receiver,
     }
 }

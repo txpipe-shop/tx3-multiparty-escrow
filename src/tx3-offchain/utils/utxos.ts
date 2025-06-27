@@ -14,7 +14,7 @@ import { bech32ToPubKeyHash } from "./string.ts";
 export const getCollateralUtxo = async (utxos: TransactionUnspentOutput[]) => {
   return utxos.filter((u) => {
     const value = u.toCore()[1].value;
-    return value.coins && value.coins <= 5_000_000n && value.assets?.size === 0;
+    return value.coins && value.coins >= 5_000_000n && value.assets?.size === 0;
   })[0];
 };
 

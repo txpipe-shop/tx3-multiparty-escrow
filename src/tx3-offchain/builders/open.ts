@@ -1,4 +1,4 @@
-import { Address } from "@blaze-cardano/core";
+import { Address, addressFromValidator } from "@blaze-cardano/core";
 import { U5C } from "@utxorpc/blaze-provider";
 import { config } from "../../config.ts";
 import { SingularityChannelMint } from "../blueprint.ts";
@@ -36,6 +36,10 @@ export const openChannel = async (
 
   const { tx } = await protocol.openTx({
     sender: Address.fromBech32(sender).toBytes(),
+    script: addressFromValidator(
+      provider.network,
+      new SingularityChannelMint().Script,
+    ).toBytes(),
     receiverinput: Buffer.from(bech32ToPubKeyHash(receiver), "hex"),
     signerpubkey: Buffer.from(signerPubKey, "hex"),
     initialdeposit: initialDeposit,

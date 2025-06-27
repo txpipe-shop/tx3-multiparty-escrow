@@ -10,9 +10,9 @@ const provider = new U5C({
 const sender = config.sender;
 const receiver = config.receiver;
 const signerPubKey = config.signer_pub_key;
-const initialDeposit = 1;
+const initialDeposit = 5;
 const groupId = "group1";
-const expirationDate = Date.now() + 1000 * 60 * 60; // 1 hour from now
+const expirationDate = Date.now() + 1000 * 60 * 60 * 24; // 1 day from now
 
 const { openCbor, channelId } = await openChannel(
   provider,

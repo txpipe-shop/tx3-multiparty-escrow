@@ -111,6 +111,11 @@ export const claim = async (
   }
   if (receiverAmount === 0n) throw new Error("No channels available to claim");
 
+  const expiration =
+    Date.now() + 1000 * 60 * 3 <= lowestExpDate
+      ? Date.now() + 1000 * 60 * 3
+      : lowestExpDate;
+
   // Build metadata, receiver payout and finalize tx
   const msg =
     channels.length == 1
@@ -123,9 +128,8 @@ export const claim = async (
     .withdraw(scriptRewardAddress, 0n, Data.void())
     .addSigner(Addresses.addressToCredential(receiverAddress).hash)
     .payTo(receiverAddress, receiverPayout)
-    .validTo(Number(lowestExpDate))
+    .validTo(Number(expiration))
     .attachMetadata(674, { msg })
-    .addSigner(Addresses.addressToCredential(receiverAddress).hash)
     .commit();
 
   return { claimChannelCbor: txComplete.toString() };
