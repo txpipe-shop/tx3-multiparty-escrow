@@ -249,3 +249,72 @@ tx claim(
         Receiver,
     }
 }
+
+tx claimAndContinue(
+    channelUtxo: UtxoRef,
+    amountInput: Int,
+    signatureInput: Bytes,
+    policyId: Bytes,
+    tokenName: Bytes,
+    since: Int,
+    until: Int,
+    validatorRef: UtxoRef,
+    collateralRef: UtxoRef,
+) {
+    reference validator {
+        ref: validatorRef,
+    }
+
+    input current {
+        from: Script,
+        ref: channelUtxo,
+        redeemer: Action::Claim {
+            amount: amountInput,
+            signature: signatureInput,
+            finalize: false,
+        },
+        datum_is: ChannelInfo,
+    }
+
+    input source {
+        from: Receiver,
+        min_amount: Ada(5000000),
+    }
+
+    output {
+        to: Script,
+        amount: current - Agix(amountInput),
+        datum: ChannelInfo {
+            channel_id: current.channel_id,
+            nonce: current.nonce + 1,
+            signer: current.signer,
+            receiver: current.receiver,
+            group_id: current.group_id,
+            expirationDate: current.expirationDate,
+        },
+    }
+
+    output {
+        to: Receiver,
+        amount: source + Agix(amountInput) - fees,
+    }
+
+    validity {
+        until_slot: until,
+        since_slot: since,
+    }
+
+    collateral {
+        ref: collateralRef,
+    }
+
+    cardano::withdraw {
+        from: StakingAddress,
+        amount: 0,
+        redeemer: (),
+    }
+
+    signers {
+        Receiver,
+    }
+}
