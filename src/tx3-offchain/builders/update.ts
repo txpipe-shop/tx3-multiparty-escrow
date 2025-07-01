@@ -1,8 +1,8 @@
-import { Address, PlutusData } from "@blaze-cardano/core";
+import { Address, addressFromValidator, PlutusData } from "@blaze-cardano/core";
 import { parse } from "@blaze-cardano/data";
 import { U5C } from "@utxorpc/blaze-provider";
 import { config } from "../../config.ts";
-import { Datum } from "../blueprint.ts";
+import { Datum, SingularityChannelSpend } from "../blueprint.ts";
 import { protocol } from "../gen/typescript/protocol.ts";
 import {
   bech32ToPubKeyHash,
@@ -53,6 +53,10 @@ export const updateChannel = async (
   const { tx } = await protocol.updateTx({
     channelutxo: UtxoToRef(channelUtxo),
     signer: Buffer.from(bech32ToPubKeyHash(signer), "hex"),
+    script: addressFromValidator(
+      provider.network,
+      new SingularityChannelSpend().Script,
+    ).toBytes(),
     adddeposit: addDeposit ?? 0,
     extenddate: extendExpiration ?? datumExpirationDate,
     inputref: UtxoToRef(utxo),
