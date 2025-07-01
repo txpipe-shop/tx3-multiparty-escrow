@@ -1,0 +1,45 @@
+diff --git a/src/commands/bindgen.rs b/src/commands/bindgen.rs
+index 68132c8..6821813 100644
+--- a/src/commands/bindgen.rs
++++ b/src/commands/bindgen.rs
+@@ -310,7 +310,7 @@ pub fn run(_args: Args, config: &Config) -> miette::Result<()> {
+                         tx3_lang::ir::Type::List => "Vec<tx3_lang::ArgValue>".to_string(),
+                         tx3_lang::ir::Type::Custom(name) => name.clone(),
+                         tx3_lang::ir::Type::AnyAsset => "tx3_lang::ArgValue".to_string(),
+-                        tx3_lang::ir::Type::Undefined => unreachable!(),
++                        _ => unreachable!(),
+                     },
+                     &config.protocol.version,
+                 )?;
+@@ -331,6 +331,7 @@ pub fn run(_args: Args, config: &Config) -> miette::Result<()> {
+                         tx3_lang::ir::Type::Unit => "void".to_string(),
+                         tx3_lang::ir::Type::AnyAsset => "any".to_string(),
+                         tx3_lang::ir::Type::Custom(name) => name.clone(),
++                        _ => unreachable!(),
+                     },
+                     &config.protocol.version,
+                 )?;
+@@ -351,6 +352,7 @@ pub fn run(_args: Args, config: &Config) -> miette::Result<()> {
+                         tx3_lang::ir::Type::Custom(name) => name.clone(),
+                         tx3_lang::ir::Type::AnyAsset => "str".to_string(),
+                         tx3_lang::ir::Type::Undefined => "Any".to_string(),
++                        _ => unreachable!(),
+                     },
+                     &config.protocol.version,
+                 )?;
+@@ -371,6 +373,7 @@ pub fn run(_args: Args, config: &Config) -> miette::Result<()> {
+                         tx3_lang::ir::Type::Custom(name) => name.clone(),
+                         tx3_lang::ir::Type::AnyAsset => "string".to_string(),
+                         tx3_lang::ir::Type::Undefined => "interface{}".to_string(),
++                        _ => unreachable!(),
+                     },
+                     &config.protocol.version,
+                 )?;
+@@ -393,6 +396,7 @@ pub fn run(_args: Args, config: &Config) -> miette::Result<()> {
+                             tx3_lang::ir::Type::Custom(name) => name.clone(),
+                             tx3_lang::ir::Type::AnyAsset => "{str}".to_string(),
+                             tx3_lang::ir::Type::Undefined => "{undefined}".to_string(),
++                            _ => unreachable!(),
+                         }
+                     },
+                     &config.protocol.version,

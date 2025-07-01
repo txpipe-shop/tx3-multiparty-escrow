@@ -1,18 +1,41 @@
 import { NetworkId } from "@blaze-cardano/core";
 import { U5C } from "@utxorpc/blaze-provider";
+import assert from "assert";
 import { config } from "../../config.ts";
 import { claimChannelAndContinue } from "../builders/claimAndContinue.ts";
 
+const args = process.argv.slice(2);
+let payload, channelId, amount;
+
+for (let i = 0; i < args.length; i++) {
+  switch (args[i]) {
+    case "-c":
+    case "--channelId":
+      channelId = args[i + 1];
+      i++;
+      break;
+    case "-p":
+    case "--payload":
+      payload = args[i + 1];
+      i++;
+      break;
+    case "-a":
+    case "--amount":
+      amount = Number(args[i + 1]);
+      i++;
+      break;
+  }
+}
+
+assert(
+  channelId !== undefined && payload !== undefined && amount !== undefined,
+  "USAGE: npm run tx3-claim -- -c <channelId> -p <payload> -a <amount>",
+);
 const provider = new U5C({
   url: "http://localhost:50051",
   network: NetworkId.Testnet,
 });
 const sender = config.sender;
-const channelId =
-  "1097dc794871b6c1cca5ccca5d2d987dbd2b9e698d0294b29cdb1ce0d056a87301";
-const amount = 3;
-const payload =
-  "f94e85cf0f67becf4ecea16227e13f8775a91b2c32cb9050520e9e6e12c678921f9b2a66a365a8260346cbcf891c0f4b404c93004fce1c5df2c2107b5981e208";
 const receiver = config.receiver;
 
 const { claimCbor } = await claimChannelAndContinue(

@@ -1,7 +1,7 @@
 import { Data } from "@spacebudz/lucid";
-import { getCMLPrivateKey, signMessage } from "./utils.ts";
-import { testEnv } from "../../config.ts";
 import assert from "assert";
+import { testEnv } from "../../config.ts";
+import { getCMLPrivateKey, signMessage } from "./utils.ts";
 
 const args = process.argv.slice(2);
 let nonce, channelId, amount;
@@ -36,7 +36,7 @@ if (!testEnv.SEED) {
 }
 
 console.log(
-  signMessage(
+  await signMessage(
     getCMLPrivateKey(testEnv.SEED),
     Data.to(
       [nonce, channelId, amount] as [bigint, string, bigint],

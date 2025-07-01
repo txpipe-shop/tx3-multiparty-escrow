@@ -1,22 +1,57 @@
 import { NetworkId } from "@blaze-cardano/core";
 import { U5C } from "@utxorpc/blaze-provider";
+import assert from "assert";
 import { config } from "../../config.ts";
 import { updateChannel } from "../builders/update.ts";
+
+const args = process.argv.slice(2);
+let channelId, amount, expirationDate;
+
+for (let i = 0; i < args.length; i++) {
+  switch (args[i]) {
+    case "-c":
+    case "--channelId":
+      channelId = args[i + 1];
+      i++;
+      break;
+    case "-a":
+    case "--amount":
+      amount = Number(args[i + 1]);
+      i++;
+      break;
+    case "-e":
+    case "--expirationDate":
+      expirationDate = Number(args[i + 1]);
+      i++;
+      break;
+    case "-d":
+    case "--default":
+      amount = 1; // Default amount of 1 AGIX
+      expirationDate = Date.now() + 7 * 24 * 60 * 60 * 1000; // one week from now
+      i++;
+      break;
+  }
+}
+
+assert(
+  channelId !== undefined &&
+    expirationDate !== undefined &&
+    amount !== undefined,
+  "USAGE: npm run tx3-update -- -c <channelId> [-a <amount>] [-e <expirationDate>] or \n npm run update -- -c <channelId> -d",
+);
 
 const provider = new U5C({
   url: "http://localhost:50051",
   network: NetworkId.Testnet,
 });
 const sender = config.sender;
-const channelId =
-  "587ce494444201c310c4fe204c6f7de687d12184177ebd1adce34621cfa39b7f01";
 
 const { updateCbor } = await updateChannel(
   provider,
   sender,
   channelId,
-  2,
-  Date.now() + 1000 * 60 * 60 * 24 * 7, // Extend expiration by 7 days
+  amount,
+  expirationDate,
   sender,
 );
 

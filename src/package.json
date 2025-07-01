@@ -20,6 +20,10 @@
     "deploy": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/deploy.ts",
     "sign": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/sign-msg.ts",
     "tx3-open": "npx tsx tx3-offchain/test/open.ts",
+    "tx3-close": "npx tsx tx3-offchain/test/close.ts",
+    "tx3-update": "npx tsx tx3-offchain/test/update.ts",
+    "tx3-claim": "npx tsx tx3-offchain/test/claimAndContinue.ts",
+    "tx3-claim-and-close": "npx tsx tx3-offchain/test/claimAndClose.ts",
     "generate-blaze-blueprint": "npx txs tx3-offchain/generateBlueprint.ts"
   },
   "author": "",
