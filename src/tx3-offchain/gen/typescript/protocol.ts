@@ -55,6 +55,27 @@ export const CLOSE_IR = {
   version: "v1alpha5",
 };
 
+export type UpdateParams = {
+  adddeposit: number;
+  channelutxo: string;
+  collateralref: string;
+  extenddate: number;
+  inputref: string;
+  scriptScript: string;
+  signer: Uint8Array;
+  since: number;
+  until: number;
+  user: string;
+  validatorref: string;
+};
+
+export const UPDATE_IR = {
+  bytecode:
+    "12010d0c76616c696461746f7272656606020763757272656e740101091c7da6163888081e317f8567176057f0e9634932f85bc630657b1f813300010d0b6368616e6e656c7574786f0600010300000106536372697074091c7da6163888081e317f8567176057f0e9634932f85bc630657b1f81330006736f7572636501010d04757365720500010d08696e707574726566060000000201091c7da6163888081e317f8567176057f0e9634932f85bc630657b1f813301030006042190ec6e857d6f02b38cd902361963f68ea6cceab563e14dd29a2661b7b25912b501050004200a0b0bddc14de4b88bd3e9cc7d29886ce1bb637b81dbcc3a87d6992822dd1eab041c5fd3815155ca7cdac6b64d66ab39886593da2e56c47147e69ad0a9e4040667726f7570310d0a657874656e6464617465020111100763757272656e740c01041c921e27e15e2552a40515564ba10a26ecb1fe1a34ac6ccb58c1ce13200404414749580d0a6164646465706f7369740200010d047573657205000111111006736f757263650c01041c921e27e15e2552a40515564ba10a26ecb1fe1a34ac6ccb58c1ce13200404414749580d0a6164646465706f7369740201120101010d0573696e636502010d05756e74696c020000010000010d0d636f6c6c61746572616c7265660601010d067369676e65720400",
+  encoding: "hex",
+  version: "v1alpha5",
+};
+
 export class Client {
   readonly #client: TRPClient;
 
@@ -71,6 +92,12 @@ export class Client {
   async closeTx(args: CloseParams): Promise<TxEnvelope> {
     return await this.#client.resolve({
       tir: CLOSE_IR,
+      args,
+    });
+  }
+  async updateTx(args: UpdateParams): Promise<TxEnvelope> {
+    return await this.#client.resolve({
+      tir: UPDATE_IR,
       args,
     });
   }

@@ -2,6 +2,7 @@ asset Agix = 0x921e27e15e2552a40515564ba10a26ecb1fe1a34ac6ccb58c1ce1320.0x414749
 policy Script = 0x7da6163888081e317f8567176057f0e9634932f85bc630657b1f8133;
 
 party Sender;
+party User;
 
 type ChannelInfo {
     channel_id: Bytes,
@@ -11,7 +12,6 @@ type ChannelInfo {
     group_id: Bytes,
     expirationDate: Int,
 }
-
 
 type Action {
   Update,
@@ -76,7 +76,15 @@ tx open(
     }
 }
 
-tx close(channelUtxo: UtxoRef, policyId: Bytes, tokenName: Bytes, since: Int, until: Int, validatorRef: UtxoRef, collateralRef: UtxoRef) {
+tx close(
+    channelUtxo: UtxoRef,
+    policyId: Bytes,
+    tokenName: Bytes,
+    since: Int,
+    until: Int,
+    validatorRef: UtxoRef,
+    collateralRef: UtxoRef,
+) {
     reference validator {
         ref: validatorRef,
     }
@@ -108,5 +116,64 @@ tx close(channelUtxo: UtxoRef, policyId: Bytes, tokenName: Bytes, since: Int, un
 
     signers {
         Sender,
+    }
+}
+
+tx update(
+    channelUtxo: UtxoRef,
+    inputRef: UtxoRef,
+    addDeposit: Int,
+    extendDate: Int,
+    signer: Bytes,
+    since: Int,
+    until: Int,
+    validatorRef: UtxoRef,
+    collateralRef: UtxoRef,
+) {
+    reference validator {
+        ref: validatorRef,
+    }
+
+    input current {
+        from: Script,
+        ref: channelUtxo,
+        redeemer: Action::Update {},
+        datum_is: ChannelInfo,
+    }
+
+    input source {
+        from: User,
+        ref: inputRef,
+    }
+
+    output {
+        to: Script,
+        amount: current + Agix(addDeposit),
+        datum: ChannelInfo {
+            channel_id: current.channel_id,
+            nonce: current.nonce,
+            signer: current.signer,
+            receiver: current.receiver,
+            group_id: current.group_id,
+            expirationDate: extendDate,
+        },
+    }
+
+    output {
+        to: User,
+        amount: source - Agix(addDeposit) - fees,
+    }
+
+    validity {
+        until_slot: until,
+        since_slot: since,
+    }
+
+    collateral {
+        ref: collateralRef,
+    }
+
+    signers {
+        signer,
     }
 }
