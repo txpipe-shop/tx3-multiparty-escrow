@@ -21,7 +21,7 @@ const { openCbor, channelId } = await openChannel(
   signerPubKey,
   initialDeposit,
   groupId,
-  expirationDate
+  expirationDate,
 );
 
 console.log("Open channel cbor:", openCbor, "\nWith channelId:", channelId);

@@ -18,7 +18,7 @@ export const openChannel = async (
   signerPubKey: string,
   initialDeposit: number,
   groupId: string,
-  expirationDate: number
+  expirationDate: number,
 ) => {
   const utxos = await provider.getUnspentOutputs(Address.fromBech32(sender));
   const finalUtxos = getSuitableUtxos(utxos, initialDeposit);
@@ -38,7 +38,7 @@ export const openChannel = async (
     sender: Address.fromBech32(sender).toBytes(),
     script: addressFromValidator(
       provider.network,
-      new SingularityChannelMint().Script
+      new SingularityChannelMint().Script,
     ).toBytes(),
     receiverinput: Buffer.from(bech32ToPubKeyHash(receiver), "hex"),
     signerpubkey: Buffer.from(signerPubKey, "hex"),
