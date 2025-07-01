@@ -131,14 +131,39 @@ To test the operations with jest, try:
 
 ### Test using tx3
 
-To test the operations using tx3, first you need to set up the following tools:
-- [tx3](https://github.com/tx3-lang/tx3): Using the commit fe4795ec2e649200300f787e56a3e446b82458df and applying the patch `tx3-fix.diff`.
-- [dolos](https://github.com/txpipe/dolos):
-- [trix](https://github.com/tx3-lang/trix): Using the v0.10.0 release and applying the patch `trix-fix.diff`
-- [web-sdk](https://github.com/tx3-lang/web-sdk)
-- node: Using v20.11.1
+#### Setup
+1. Make a directory where we are going to clone all the needed repositories:
+```sh
+mkdir escrow-tx3
+cd escrow-tx3
+git clone git@github.com:txpipe-shop/tx3-multiparty-escrow.git
+```
+2. Set up [tx3](https://github.com/tx3-lang/tx3) repository:
+```sh
+git clone git@github.com:tx3-lang/tx3.git
+cd tx3
+git checkout fe4795ec2e649200300f787e56a3e446b82458df
+git apply ../tx3-multiparty-escrow/tx3-setup-utils/tx3.diff
+cd ..
+```
+3. Set up [trix](https://github.com/tx3-lang/trix):
+```sh
+git clone git@github.com:tx3-lang/trix.git
+cd trix
+git checkout v0.10.0
+git apply ../tx3-multiparty-escrow/tx3-setup-utils/trix.diff
+cd ..
+```
+4. Set up [dolos](https://github.com/txpipe/dolos):
+```sh
+git clone git@github.com:txpipe/dolos.git
+cd dolos
+git checkout 6b18701e08644679458bf9686ea28de356601fcb
+git apply ../tx3-multiparty-escrow/tx3-setup-utils/dolos.diff
+cd ..
+```
 
-You will also need to complete the CONFIG_FILE  with:
+5. Complete the CONFIG_FILE  with:
 ```js
 {
    // sender's address
@@ -149,15 +174,17 @@ You will also need to complete the CONFIG_FILE  with:
    "signer_pub_key": "0a0b..."
 }
 ```
-Then, inside the `src/tx3-offchain` run:
-```shell
-   $> trix bindgen
+7. Make sure to use node `v20.11.1`:
+```sh
+cd tx3-multiparty-escrow
+nvm use v20.11.1
 ```
-Afterwards generate the blaze-blueprint:
+8. Generate the blaze blueprint:
 ```shell
-   $> npm run generate-blueprint
+cd src
+npm run generate-blaze-blueprint
+cd ../..
 ```
-
 And fix the generated `blueprint.ts` by changing the imports section the following way:
 ```ts
 /* eslint-disable */
@@ -165,16 +192,33 @@ And fix the generated `blueprint.ts` by changing the imports section the followi
 import { Type } from "@blaze-cardano/data";
 import { applyParamsToScript, cborToScript, Core } from "@blaze-cardano/sdk";
 ```
-
-Run inside your `dolos` folder:
+9. Run inside your `dolos` folder:
 ```shell
-   $> cargo run --bin dolos daemon
+cd dolos
+# Within the options this command shows, select the network to use
+# Make sure you enable the trp server and the utxo-rpc endpoint (See the image below)
+cargo run init
+# To enable
+cargo run daemon
 ```
+Here's what the `init` command looks like:
+![Dolos init configuration](image.png)
+
+**Note**: Keep this terminal and don't close it.
+
+10. Generate the proto tx. Create a new terminal and run from the `tx3-multiparty-escrow` folder:
+```shell
+cd src/tx3-offchain
+cargo run --manifest-path "../../../trix/Cargo.toml" --quiet --bin trix -- bindgen
+cd ..
+```
+
+#### Operations
 
 **Open a channel**
 To open a channel, try inside the `src` folder:
 ```shell
-   $> npm run tx3-open
+npm run tx3-open
 ```
 
 This will return a CBOR and a channelID. The CBOR specifies a transaction that opens a channel with:
@@ -188,37 +232,37 @@ It is possible to change this operation in the file `src/tx3-offchain/test/open.
 **Update a channel**
 Given a `channel ID` an `amount` and an `expiration date`, you can obtain a CBOR to update a channel by running:
 ```shell
-   $> npm run tx3-update -- -c <channelId> -a <amount> -e <expirationDate>
+npm run tx3-update -- -c <channelId> -a <amount> -e <expirationDate>
 ```
 The amount and the expiration date are optional fields, but if none of them is completed an error will arise. By using:
 ```shell
-   $> npm run tx3-update -- -c <channelId> -d
+npm run tx3-update -- -c <channelId> -d
 ```
 A default amount of `1 AGIX` and an expiration date to one week from now will be set.
 
 **Build a message**
 Given a `nonce`, an `amount` and a `channel ID`:
 ```shell
-   $> npm run sign -- -c <channelId> -n <nonce> -a <amount>
+npm run sign -- -c <channelId> -n <nonce> -a <amount>
 ```
 Will return a message signed by the user specified with the seed phrase in the `.test-env` file.
 
 **Claim and close a channel**
 Given a `channel ID` a `payload` (or signed message) and an `amount` to claim, running:
 ```shell
-   $> npm run tx3-claim-and-close -- -c <channelId> -p <payload> -a <amount>
+npm run tx3-claim-and-close -- -c <channelId> -p <payload> -a <amount>
 ```
 Will return a CBOR that claims and closes the channel.
 
 **Claim and continue a channel**
 Given a `channel ID` a `payload` (or signed message) and an `amount` to claim, running:
 ```shell
-   $> npm run tx3-claim -- -c <channelId> -p <payload> -a <amount>
+npm run tx3-claim -- -c <channelId> -p <payload> -a <amount>
 ```
 Will return a CBOR that claims and closes the channel.
 
 **Close a channel**
 Given a `channel ID` from a channel, to close said channel, try:
 ```shell
-   $> npm run tx3-close -- -c <channelId>
+npm run tx3-close -- -c <channelId>
 ```
