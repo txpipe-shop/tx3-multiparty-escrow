@@ -1,7 +1,7 @@
 import { NetworkId } from "@blaze-cardano/core";
 import { U5C } from "@utxorpc/blaze-provider";
 import { config } from "../../config.ts";
-import { claimChannel } from "../builders/claim.ts";
+import { claimChannel } from "../builders/claimAndClose.ts";
 
 const provider = new U5C({
   url: "http://localhost:50051",
