@@ -1,4 +1,4 @@
-import { Address, AssetId, NetworkId } from "@blaze-cardano/core";
+import { Address, AssetId } from "@blaze-cardano/core";
 import { U5C } from "@utxorpc/blaze-provider";
 import { config } from "../../config.ts";
 import { SingularityChannelMint } from "../blueprint.ts";
@@ -6,12 +6,8 @@ import { protocol } from "../gen/typescript/protocol.ts";
 import { bech32ToPubKeyHash } from "../utils/string.ts";
 import { toPreviewBlockSlot } from "../utils/time.ts";
 
-const provider = new U5C({
-  url: "http://localhost:50051",
-  network: NetworkId.Testnet,
-});
-
 export const openChannel = async (
+  provider: U5C,
   sender: string,
   receiver: string,
   signerPubKey: string,
@@ -38,6 +34,11 @@ export const openChannel = async (
   if (finalUtxos.length === 0)
     throw new Error("No suitable UTXO found for opening a channel");
 
+  const [collateralUtxo] = utxos.filter((u) => {
+    const value = u.toCore()[1].value;
+    return value.coins && value.coins <= 5_000_000n;
+  });
+
   const utxo = finalUtxos[0];
   let hex_index = utxo.toCore()[0].index.toString(16);
   if (hex_index.length % 2 !== 0) hex_index = "0" + hex_index;
@@ -58,6 +59,9 @@ export const openChannel = async (
     tokenname: Buffer.from(bech32ToPubKeyHash(sender), "hex"),
     since: toPreviewBlockSlot(Date.now() - 1000 * 60 * 5),
     until: toPreviewBlockSlot(Date.now() + 1000 * 60 * 5),
+    collateralref:
+      collateralUtxo.toCore()[0].txId + "#" + collateralUtxo.toCore()[0].index,
+    validatorref: config.ref_script.txHash + "#0",
   });
 
   return { openCbor: tx, channelId: channelId.toString("hex") };
