@@ -6,7 +6,7 @@ import {
   type TxEnvelope,
 } from "tx3-sdk/trp";
 
-export const DEFAULT_TRP_ENDPOINT = "http://localhost:3000/trp";
+export const DEFAULT_TRP_ENDPOINT = "http://localhost:8000/trp";
 
 export const DEFAULT_HEADERS = {};
 
