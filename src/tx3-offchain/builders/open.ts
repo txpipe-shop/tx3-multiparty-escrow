@@ -30,16 +30,14 @@ export const openChannel = async (
   if (hex_index.length % 2 !== 0) hex_index = "0" + hex_index;
 
   const channelId = Buffer.from(utxo.toCore()[0].txId + hex_index, "hex");
-  const mintingPolicy = new SingularityChannelMint().Script.hash();
+  const script = new SingularityChannelMint().Script;
+  const mintingPolicy = script.hash();
 
   const collateralUtxo = await getCollateralUtxo(utxos);
 
   const { tx } = await protocol.openTx({
     sender: Address.fromBech32(sender).toBytes(),
-    script: addressFromValidator(
-      provider.network,
-      new SingularityChannelMint().Script,
-    ).toBytes(),
+    script: addressFromValidator(provider.network, script).toBytes(),
     receiverinput: Buffer.from(bech32ToPubKeyHash(receiver), "hex"),
     signerpubkey: Buffer.from(signerPubKey, "hex"),
     initialdeposit: initialDeposit,

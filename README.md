@@ -166,6 +166,7 @@ cd ..
 5. Complete the CONFIG_FILE  with:
 ```js
 {
+   ...
    // sender's address
    "sender": "addr_test1...",
    // receiver's address
@@ -206,7 +207,7 @@ Here's what the `init` command looks like:
 
 **Note**: Keep this terminal and don't close it.
 
-10. Generate the proto tx. Create a new terminal and run from the `tx3-multiparty-escrow` folder:
+10. Generate the proto tx. Open a new terminal and run from the `tx3-multiparty-escrow` folder:
 ```shell
 cd src/tx3-offchain
 cargo run --manifest-path "../../../trix/Cargo.toml" --quiet --bin trix -- bindgen
@@ -216,18 +217,12 @@ cd ..
 #### Operations
 
 **Open a channel**
-To open a channel, try inside the `src` folder:
+Given an initial amount of `AGIX` to deposit, a `groupID`, to open a channel, try inside the `src` folder:
 ```shell
-npm run tx3-open
+npm run tx3-open -- -a <initialDeposit> -g <groupId> [-s <sender>] [-r <receiver>] [-spk <signerPubKey>] [-e <expirationDate>]
 ```
 
-This will return a CBOR and a channelID. The CBOR specifies a transaction that opens a channel with:
-- An initial fund of 5 `AGIX`
-- Group ID `group1`
-- Expiration date in one day from now
-- Sender, signer and receiver as specified on the CONFIG_JSON file
-
-It is possible to change this operation in the file `src/tx3-offchain/test/open.ts`
+This will return a CBOR and a channelID. A default expiration date to one day from now will be set, but you can change that adding the `-e <expirationDate>` with the expiration date in POSIX time.
 
 **Update a channel**
 Given a `channel ID` an `amount` and an `expiration date`, you can obtain a CBOR to update a channel by running:

@@ -29,9 +29,9 @@ const configFileSchema = z.object({
   ref_script: z.object({
     txHash: z.string(),
   }),
-  sender: z.string(),
-  receiver: z.string(),
-  signer_pub_key: z.string(),
+  sender: z.optional(z.string()),
+  receiver: z.optional(z.string()),
+  signer_pub_key: z.optional(z.string()),
 });
 const config = configFileSchema.parse(configFile);
 

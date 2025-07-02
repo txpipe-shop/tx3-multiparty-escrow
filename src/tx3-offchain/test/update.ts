@@ -6,6 +6,7 @@ import { updateChannel } from "../builders/update.ts";
 
 const args = process.argv.slice(2);
 let channelId, amount, expirationDate;
+let sender = config.sender;
 
 for (let i = 0; i < args.length; i++) {
   switch (args[i]) {
@@ -30,21 +31,26 @@ for (let i = 0; i < args.length; i++) {
       expirationDate = Date.now() + 7 * 24 * 60 * 60 * 1000; // one week from now
       i++;
       break;
+    case "-s":
+    case "--sender":
+      sender = args[i + 1];
+      i++;
+      break;
   }
 }
 
 assert(
   channelId !== undefined &&
     expirationDate !== undefined &&
-    amount !== undefined,
-  "USAGE: npm run tx3-update -- -c <channelId> [-a <amount>] [-e <expirationDate>] or \n npm run update -- -c <channelId> -d",
+    amount !== undefined &&
+    sender !== undefined,
+  "USAGE: npm run tx3-update -- -c <channelId> [-a <amount>] [-e <expirationDate>] [-d] [-s <sender>]",
 );
 
 const provider = new U5C({
   url: "http://localhost:50051",
   network: NetworkId.Testnet,
 });
-const sender = config.sender;
 
 const { updateCbor } = await updateChannel(
   provider,

@@ -1,4 +1,4 @@
-import { Address } from "@blaze-cardano/core";
+import { Address, addressFromValidator } from "@blaze-cardano/core";
 import { U5C } from "@utxorpc/blaze-provider";
 import { config } from "../../config.ts";
 import { SingularityChannelMint } from "../blueprint.ts";
@@ -16,7 +16,8 @@ export const closeChannel = async (
   sender: string,
   channelId: string,
 ) => {
-  const scriptHash = new SingularityChannelMint().Script.hash();
+  const script = new SingularityChannelMint().Script;
+  const scriptHash = script.hash();
 
   const channelUtxo = await getChannelUtxo(provider, sender, channelId);
 
@@ -28,6 +29,7 @@ export const closeChannel = async (
     channelutxo: UtxoToRef(channelUtxo),
     sender: Address.fromBech32(sender).toBytes(),
     policyid: Buffer.from(scriptHash, "hex"),
+    script: addressFromValidator(provider.network, script).toBytes(),
     tokenname: Buffer.from(bech32ToPubKeyHash(sender), "hex"),
     since: toPreviewBlockSlot(Date.now() - 1000 * 60),
     until: toPreviewBlockSlot(Date.now() + 1000 * 60),
