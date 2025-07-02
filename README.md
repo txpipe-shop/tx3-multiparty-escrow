@@ -222,12 +222,12 @@ Given an initial amount of `AGIX` to deposit, a `groupID`, to open a channel, tr
 npm run tx3-open -- -a <initialDeposit> -g <groupId> [-s <sender>] [-r <receiver>] [-spk <signerPubKey>] [-e <expirationDate>]
 ```
 
-This will return a CBOR and a channelID. A default expiration date to one day from now will be set, but you can change that adding the `-e <expirationDate>` with the expiration date in POSIX time.
+This will return the txHash of said transaction, its CBOR and the corresponding channelID. A default expiration date to one day from now will be set, but you can change that by adding the `-e <expirationDate>` parameter with the expiration date in POSIX time.
 
 **Update a channel**
 Given a `channel ID` an `amount` and an `expiration date`, you can obtain a CBOR to update a channel by running:
 ```shell
-npm run tx3-update -- -c <channelId> -a <amount> -e <expirationDate>
+npm run npm run tx3-update -- -c <channelId> [-a <amount>] [-e <expirationDate>] [-s <sender>]
 ```
 The amount and the expiration date are optional fields, but if none of them is completed an error will arise. By using:
 ```shell
@@ -242,22 +242,15 @@ npm run sign -- -c <channelId> -n <nonce> -a <amount>
 ```
 Will return a message signed by the user specified with the seed phrase in the `.test-env` file.
 
-**Claim and close a channel**
-Given a `channel ID` a `payload` (or signed message) and an `amount` to claim, running:
+**Claim a channel**
+Given a `channel ID` a `payload` (or signed message) and an `amount` to claim, run the following:
 ```shell
-npm run tx3-claim-and-close -- -c <channelId> -p <payload> -a <amount>
+npm run tx3-claim -- -c <channelId> -p <payload> -a <amount> -f <finalize> [-s <sender>] [-r <receiver>]
 ```
-Will return a CBOR that claims and closes the channel.
-
-**Claim and continue a channel**
-Given a `channel ID` a `payload` (or signed message) and an `amount` to claim, running:
-```shell
-npm run tx3-claim -- -c <channelId> -p <payload> -a <amount>
-```
-Will return a CBOR that claims and closes the channel.
+The `-f <finalize>` parameter indicates whether the channel will be closed or not after the claiming action.
 
 **Close a channel**
 Given a `channel ID` from a channel, to close said channel, try:
 ```shell
-npm run tx3-close -- -c <channelId>
+npm run tx3-close -- -c <channelId> [-s <sender>]
 ```
