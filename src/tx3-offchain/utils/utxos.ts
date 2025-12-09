@@ -25,9 +25,11 @@ export const getSuitableUtxos = (
   const retUtxos = utxos
     .filter((u) => {
       const value = u.toCore()[1].value;
+//      console.log(value)
+//      console.log(config.token)
       return (
         value.coins &&
-        value.coins >= 20_000_000n &&
+        value.coins >= 80_000_000n &&
         (value.assets?.get(AssetId(config.token)) ?? 0) >= amount
       );
     })

@@ -43,13 +43,13 @@ export const claimChannel = async (
 
   const utxos = await provider.getUnspentOutputs(Address.fromBech32(receiver));
   const collateralUtxo = await getCollateralUtxo(utxos);
+  console.log(config.ref_script.txHash + "#0");
   let tx;
   if (finalize) {
     tx = (
       await protocol.claimTx({
         amountinput: amount,
         channelutxo: UtxoToRef(channelUtxo),
-        script: scriptAddress,
         sender: Address.fromBech32(sender).toBytes(),
         receiver: Address.fromBech32(receiver).toBytes(),
         signatureinput: Buffer.from(signature, "hex"),
@@ -70,8 +70,6 @@ export const claimChannel = async (
         script: scriptAddress,
         receiver: Address.fromBech32(receiver).toBytes(),
         signatureinput: Buffer.from(signature, "hex"),
-        policyid: Buffer.from(scriptHash, "hex"),
-        tokenname: Buffer.from(bech32ToPubKeyHash(sender), "hex"),
         stakingaddress: Address.fromBech32(scriptRewardAddress).toBytes(),
         since: toPreviewBlockSlot(Date.now() - 1000 * 60 * 3),
         until: toPreviewBlockSlot(Date.now() + 1000 * 60 * 60 * 1),

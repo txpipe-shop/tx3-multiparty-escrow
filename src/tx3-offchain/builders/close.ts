@@ -29,7 +29,6 @@ export const closeChannel = async (
     channelutxo: UtxoToRef(channelUtxo),
     sender: Address.fromBech32(sender).toBytes(),
     policyid: Buffer.from(scriptHash, "hex"),
-    script: addressFromValidator(provider.network, script).toBytes(),
     tokenname: Buffer.from(bech32ToPubKeyHash(sender), "hex"),
     since: toPreviewBlockSlot(Date.now() - 1000 * 60),
     until: toPreviewBlockSlot(Date.now() + 1000 * 60),

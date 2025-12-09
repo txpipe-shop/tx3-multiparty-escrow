@@ -45,8 +45,7 @@ tx open(
     }
 
     input source {
-        from: Sender,
-        ref: inputRef,
+      ref: inputRef,
     }
 
     mint {
@@ -80,6 +79,9 @@ tx open(
         until_slot: until,
         since_slot: since,
     }
+    signers{
+        Sender,
+    }
 }
 
 tx close(
@@ -96,7 +98,6 @@ tx close(
     }
 
     input target {
-        from: Script,
         ref: channelUtxo,
         redeemer: Action::Close {},
     }
@@ -141,14 +142,12 @@ tx update(
     }
 
     input current {
-        from: Script,
         ref: channelUtxo,
         redeemer: Action::Update {},
         datum_is: ChannelInfo,
     }
 
     input source {
-        from: User,
         ref: inputRef,
     }
 
@@ -200,7 +199,6 @@ tx claim(
     }
 
     input current {
-        from: Script,
         ref: channelUtxo,
         redeemer: Action::Claim {
             amount: amountInput,
@@ -239,7 +237,7 @@ tx claim(
         ref: collateralRef,
     }
 
-    cardano::withdraw {
+    cardano::withdrawal {
         from: StakingAddress,
         amount: 0,
         redeemer: (),
@@ -266,7 +264,6 @@ tx claimAndContinue(
     }
 
     input current {
-        from: Script,
         ref: channelUtxo,
         redeemer: Action::Claim {
             amount: amountInput,
@@ -308,7 +305,7 @@ tx claimAndContinue(
         ref: collateralRef,
     }
 
-    cardano::withdraw {
+    cardano::withdrawal {
         from: StakingAddress,
         amount: 0,
         redeemer: (),

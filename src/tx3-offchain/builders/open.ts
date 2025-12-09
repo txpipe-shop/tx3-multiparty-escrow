@@ -21,6 +21,9 @@ export const openChannel = async (
   expirationDate: number,
 ) => {
   const utxos = await provider.getUnspentOutputs(Address.fromBech32(sender));
+//  console.log(Address.fromBech32("addr_test1qz6fcx7lay9czf838z4m0ppkyzzgspp9kz5uwede3ry4fmxmkhwgrz8c7pyr8dmqvcmf7sa2dagvvtfmw5585w847jgqwrhsv8").toBytes())
+//  console.dir(utxos[2].output().amount().multiasset(), {depth:null})
+//  console.dir(utxos[2].input(), {depth:null})
   const finalUtxos = getSuitableUtxos(utxos, initialDeposit);
   if (finalUtxos.length === 0)
     throw new Error("No suitable UTXO found for opening a channel");
@@ -33,6 +36,7 @@ export const openChannel = async (
   const script = new SingularityChannelMint().Script;
   const mintingPolicy = script.hash();
 
+  console.log(UtxoToRef(utxo));
   const collateralUtxo = await getCollateralUtxo(utxos);
 
   const { tx } = await protocol.openTx({

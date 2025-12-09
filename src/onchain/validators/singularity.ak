@@ -10,6 +10,7 @@ use cardano/assets.{
   PolicyId, flatten, from_asset, lovelace_of, quantity_of, restricted_to, tokens,
   zero,
 }
+use cardano/certificate.{Certificate}
 use cardano/transaction.{
   InlineDatum, Input, Output, OutputReference, Spend, Transaction, Withdraw,
   find_input,
@@ -188,8 +189,12 @@ validator channel {
           (self_policy_burn == from_asset(own_policy, sender_pkh, -1))?,
           // Signed by the sender
           any(extra_signatories, fn(signatory) { signatory == sender_pkh })?,
-          // Channel is expired
-          is_entirely_after(validity_range, i_expiration_date)?,
+          // Channel is expired or channel doesn't have any AGIX
+          is_entirely_after(validity_range, i_expiration_date)? || quantity_of(
+            in_value,
+            config.agix_policy,
+            config.agix_hexa,
+          ) == 0,
         }
       }
     }
@@ -217,6 +222,10 @@ validator channel {
       payment_outputs,
       own_policy_mints,
     )
+  }
+
+  publish(redeemer: Data, certificate: Certificate, self: Transaction) {
+    True
   }
 
   else(_) {

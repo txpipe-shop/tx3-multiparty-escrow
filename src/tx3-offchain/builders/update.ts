@@ -61,8 +61,8 @@ export const updateChannel = async (
     extenddate: extendExpiration ?? datumExpirationDate,
     inputref: UtxoToRef(utxo),
     user: Address.fromBech32(user).toBytes(),
-    since: toPreviewBlockSlot(Date.now() - 1000 * 60),
-    until: toPreviewBlockSlot(Date.now() + 1000 * 60),
+    since: toPreviewBlockSlot(Date.now() - 1000 * 60 * 5),
+    until: toPreviewBlockSlot(Date.now() + 1000 * 60 * 5),
     collateralref: UtxoToRef(collateralUtxo),
     validatorref: config.ref_script.txHash + "#0",
   });
