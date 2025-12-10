@@ -1,6 +1,6 @@
 # Submitting transactions built with tx3
-Dolos in version: 16926bdca5d657643ce2ba3f1f2112f92a7261f8 (v0.32.0)
-Trix in version: e7bca06c51bf5607731f56ef8ba14df61aa91381
+Dolos in version: 16926bdca5d657643ce2ba3f1f2112f92a7261f8 (v0.32.0)  
+Trix in version: e7bca06c51bf5607731f56ef8ba14df61aa91381  
 tx3 in version: 4ee75495d57096610c142e4dd5e1d7de8f174790
 
 ## Changes in Dolos local version:
