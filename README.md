@@ -142,24 +142,24 @@ git clone git@github.com:txpipe-shop/tx3-multiparty-escrow.git
 ```sh
 git clone git@github.com:tx3-lang/tx3.git
 cd tx3
-git checkout fe4795ec2e649200300f787e56a3e446b82458df
-git apply ../tx3-multiparty-escrow/tx3-setup-utils/tx3.diff
+git checkout 4ee75495d57096610c142e4dd5e1d7de8f174790
+git apply ../tx3-multiparty-escrow/tx3-setup-utils/tx3-changes.patch
 cd ..
 ```
 3. Set up [trix](https://github.com/tx3-lang/trix):
 ```sh
 git clone git@github.com:tx3-lang/trix.git
 cd trix
-git checkout v0.10.0
-git apply ../tx3-multiparty-escrow/tx3-setup-utils/trix.diff
+git checkout e7bca06c51bf5607731f56ef8ba14df61aa91381
+git apply ../tx3-multiparty-escrow/tx3-setup-utils/trix-changes.patch
 cd ..
 ```
 4. Set up [dolos](https://github.com/txpipe/dolos):
 ```sh
 git clone git@github.com:txpipe/dolos.git
 cd dolos
-git checkout 6b18701e08644679458bf9686ea28de356601fcb
-git apply ../tx3-multiparty-escrow/tx3-setup-utils/dolos.diff
+git checkout 16926bdca5d657643ce2ba3f1f2112f92a7261f8
+git apply ../tx3-multiparty-escrow/tx3-setup-utils/dolos-changes.patch
 cd ..
 ```
 
