@@ -1,0 +1,80 @@
+diff --git a/Cargo.lock b/Cargo.lock
+index a79a610..d4ac69e 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -3458,9 +3458,7 @@ checksum = "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
+ 
+ [[package]]
+ name = "tx3-lang"
+-version = "0.11.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "6b9d050963aff1d574bfc4635d01b01e09df2401633ccbf83c24797de5f426b9"
++version = "0.11.4"
+ dependencies = [
+  "bincode",
+  "hex",
+diff --git a/Cargo.toml b/Cargo.toml
+index 9b52127..718e1b5 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -7,8 +7,8 @@ repository = "https://github.com/tx3-lang/trix"
+ homepage = "https://github.com/tx3-lang/trix"
+ 
+ [dependencies]
+-tx3-lang = "0.11.0"
+-# tx3-lang = { path = "../tx3/crates/tx3-lang" }
++#tx3-lang = "0.11.0"
++tx3-lang = { path = "../tx3/crates/tx3-lang" }
+ # tx3-lang = { git = "https://github.com/tx3-lang/tx3.git" }
+ 
+ clap = { version = "4.5.36", features = ["derive"] }
+diff --git a/src/commands/bindgen.rs b/src/commands/bindgen.rs
+index 87eac04..1e38f73 100644
+--- a/src/commands/bindgen.rs
++++ b/src/commands/bindgen.rs
+@@ -3,7 +3,9 @@ use std::{collections::HashMap, path::PathBuf};
+ 
+ use crate::config::{BindingsTemplateConfig, Config, KnownChain, TrpConfig};
+ use clap::Args as ClapArgs;
++use futures::future::Map;
+ use miette::IntoDiagnostic;
++use octocrab::params::repos::Type;
+ use serde::{Serialize, Serializer};
+ use tx3_lang::Protocol;
+ 
+@@ -74,6 +76,7 @@ fn get_type_for_language(type_: &tx3_lang::ir::Type, language: &str) -> String {
+             tx3_lang::ir::Type::AnyAsset => "string".to_string(),
+             tx3_lang::ir::Type::Utxo => "any".to_string(),
+             tx3_lang::ir::Type::Undefined => "any".to_string(),
++            tx3_lang::ir::Type::Map => "any".to_string(),
+         },
+         "python" => match &type_ {
+             tx3_lang::ir::Type::Int => "int".to_string(),
+@@ -87,6 +90,7 @@ fn get_type_for_language(type_: &tx3_lang::ir::Type, language: &str) -> String {
+             tx3_lang::ir::Type::AnyAsset => "str".to_string(),
+             tx3_lang::ir::Type::Undefined => "Any".to_string(),
+             tx3_lang::ir::Type::Utxo => "Any".to_string(),
++            tx3_lang::ir::Type::Map => "any".to_string(),
+         },
+         "go" => match &type_ {
+             tx3_lang::ir::Type::Int => "int64".to_string(),
+@@ -100,6 +104,7 @@ fn get_type_for_language(type_: &tx3_lang::ir::Type, language: &str) -> String {
+             tx3_lang::ir::Type::AnyAsset => "string".to_string(),
+             tx3_lang::ir::Type::Utxo => "interface{}".to_string(),
+             tx3_lang::ir::Type::Undefined => "interface{}".to_string(),
++            tx3_lang::ir::Type::Map => "any".to_string(),
+         },
+         _ => "ArgValue".to_string(), // Default fallback
+     }
+diff --git a/src/commands/build.rs b/src/commands/build.rs
+index a1f74cc..57f5591 100644
+--- a/src/commands/build.rs
++++ b/src/commands/build.rs
+@@ -179,6 +179,7 @@ impl Display for Tx3Type {
+             ir::Type::Utxo => write!(f, "utxo"),
+             ir::Type::List => write!(f, "list"),
+             ir::Type::Custom(name) => write!(f, "custom({})", name),
++            ir::Type::Map => write!(f, "Map"),
+         }
+     }
+ }

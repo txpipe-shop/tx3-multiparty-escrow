@@ -1,0 +1,93 @@
+diff --git a/Cargo.lock b/Cargo.lock
+index 219f947..7025332 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -5063,8 +5063,6 @@ checksum = "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
+ [[package]]
+ name = "tx3-cardano"
+ version = "0.11.4"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "ca5f14e3e1b68b1bff81d58c891604a3087f34be70c2a2ad58a8605b6f15ed82"
+ dependencies = [
+  "hex",
+  "pallas 1.0.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+@@ -5078,8 +5076,6 @@ dependencies = [
+ [[package]]
+ name = "tx3-lang"
+ version = "0.11.4"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "7607218726810f53079b50a63ff4b5e25a8ccf53a82a80d7b6cc1815feec7a65"
+ dependencies = [
+  "bincode 2.0.1",
+  "hex",
+@@ -5094,8 +5090,6 @@ dependencies = [
+ [[package]]
+ name = "tx3-resolver"
+ version = "0.11.4"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "654a0598f575d665145dc711443082683d66a0fc8a4673e68dbc1f314d87d028"
+ dependencies = [
+  "hex",
+  "thiserror 2.0.12",
+@@ -5106,8 +5100,6 @@ dependencies = [
+ [[package]]
+ name = "tx3-sdk"
+ version = "0.8.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "8e249299616f099372b45ff1605900671697547bd6691ca154f0aa36dc665cbc"
+ dependencies = [
+  "base64 0.22.1",
+  "bech32 0.11.0",
+diff --git a/crates/trp/Cargo.toml b/crates/trp/Cargo.toml
+index bf5b468..835e580 100644
+--- a/crates/trp/Cargo.toml
++++ b/crates/trp/Cargo.toml
+@@ -24,20 +24,20 @@ jsonrpsee = { version = "0.24.9", features = ["server"] }
+ opentelemetry = "0.30.0"
+ opentelemetry_sdk = "0.30.0"
+ 
+-tx3-lang = "0.11.4"
+-tx3-cardano = "0.11.4"
+-tx3-resolver = "0.11.4"
++#tx3-lang = "0.11.4"
++#tx3-cardano = "0.11.4"
++#tx3-resolver = "0.11.4"
+ 
+-# tx3-lang = { path = "../../../../tx3-lang/tx3/crates/tx3-lang" }
+-# tx3-cardano = { path = "../../../../tx3-lang/tx3/crates/tx3-cardano" }
+-# tx3-resolver = { path = "../../../../tx3-lang/tx3/crates/tx3-resolver" }
++tx3-lang = { path = "../../../tx3/crates/tx3-lang" }
++tx3-cardano = { path = "../../../tx3/crates/tx3-cardano" }
++tx3-resolver = { path = "../../../tx3/crates/tx3-resolver" }
+ 
+ # tx3-lang = { git = "https://github.com/tx3-lang/tx3.git" }
+ # tx3-cardano = { git = "https://github.com/tx3-lang/tx3.git" }
+ # tx3-resolver = { git = "https://github.com/tx3-lang/tx3.git" }
+ 
+-tx3-sdk = { version = "^0" }
+-# tx3-sdk = { path = "../../../../tx3-lang/rust-sdk/sdk" }
++#tx3-sdk = { version = "^0" }
++ tx3-sdk = { path = "../../../rust-sdk/sdk" }
+ # tx3-sdk = { git = "https://github.com/tx3-lang/rust-sdk.git" }
+ 
+ [dev-dependencies]
+diff --git a/crates/trp/src/compiler.rs b/crates/trp/src/compiler.rs
+index aaed6fb..09f7785 100644
+--- a/crates/trp/src/compiler.rs
++++ b/crates/trp/src/compiler.rs
+@@ -4,6 +4,7 @@ use pallas::ledger::validate::utils::{ConwayProtParams, MultiEraProtocolParamete
+ 
+ use dolos_cardano::pparams;
+ use dolos_core::{Domain, Genesis, StateStore as _};
++use tx3_cardano::ChainPoint;
+ 
+ use crate::{Config, Error};
+ 
+@@ -101,6 +102,7 @@ pub fn load_compiler<D: Domain>(
+         tx3_cardano::Config {
+             extra_fees: config.extra_fees,
+         },
++        ChainPoint{hash:vec![], slot:0},
+     );
+ 
+     Ok(compiler)

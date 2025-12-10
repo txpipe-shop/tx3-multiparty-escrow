@@ -1,0 +1,53 @@
+diff --git a/crates/tx3-cardano/src/compile/mod.rs b/crates/tx3-cardano/src/compile/mod.rs
+index 72edb08..6884174 100644
+--- a/crates/tx3-cardano/src/compile/mod.rs
++++ b/crates/tx3-cardano/src/compile/mod.rs
+@@ -1,14 +1,12 @@
+ use std::collections::{BTreeMap, HashSet};
+ 
+ use pallas::{
+-    codec::{minicbor, utils::{KeepRaw, MaybeIndefArray, NonEmptySet}},
+-    ledger::{
++    codec::{minicbor, utils::{KeepRaw, MaybeIndefArray, NonEmptySet}}, crypto::key, ledger::{
+         primitives::{
+-            conway::{self as primitives, Redeemers},
+-            PlutusScript, TransactionInput,
++            PlutusScript, TransactionInput, conway::{self as primitives, Redeemers}
+         },
+         traverse::ComputeHash,
+-    },
++    }
+ };
+ 
+ use super::*;
+@@ -381,7 +379,7 @@ pub fn compile_withdrawals(
+     let withdrawals: BTreeMap<_, _> = tx
+         .adhoc
+         .iter()
+-        .filter(|x| x.name.as_str() == "withdrawal")
++        .filter(|x| x.name.as_str() == "withdraw")
+         .map(|adhoc| compile_withdrawal_directive(adhoc, network))
+         .collect::<Result<_, _>>()?;
+ 
+@@ -697,6 +695,8 @@ fn withdrawal_redeemer_index(
+ 
+     keys.sort();
+     keys.dedup();
++    dbg!(&adhoc.data);
++    dbg!(&keys);
+ 
+     let credential = adhoc
+         .data
+diff --git a/crates/tx3-lang/src/cardano.rs b/crates/tx3-lang/src/cardano.rs
+index 77cd586..6fd4bfa 100644
+--- a/crates/tx3-lang/src/cardano.rs
++++ b/crates/tx3-lang/src/cardano.rs
+@@ -167,7 +167,7 @@ impl IntoLower for WithdrawalBlock {
+             .unwrap_or(ir::Expression::None);
+ 
+         Ok(ir::AdHocDirective {
+-            name: "withdrawal".to_string(),
++            name: "withdraw".to_string(),
+             data: std::collections::HashMap::from([
+                 ("credential".to_string(), credential),
+                 ("amount".to_string(), amount),
